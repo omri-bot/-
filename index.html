@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Manager - דו"ח אבחון וייעול</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#5e549d',
+                            secondary: '#4ab3e5',
+                            dark: '#2d2752',
+                            light: '#f4f3fb'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; }
+        .page-container {
+            min-height: 297mm; background: white; margin: 0 auto 3rem auto;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1); padding: 4rem;
+            position: relative; overflow: hidden; max-width: 64rem;
+            display: flex; flex-direction: column;
+        }
+        .table-row-hover:hover { background-color: #f4f3fb; }
+        @media print {
+            .page-container { box-shadow: none; margin: 0; padding: 2rem; min-height: auto; page-break-after: always; }
+            body { background-color: white; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #5e549d; border-radius: 4px; }
+    </style>
+</head>
+<body class="py-12 px-4">
+<div class="max-w-5xl mx-auto space-y-12">
+
+    <!-- PAGE 1: COVER -->
+    <div class="page-container bg-brand-dark border-b-8 border-brand-secondary justify-center text-center text-white relative">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-brand-primary rounded-bl-full opacity-30"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary rounded-tr-full opacity-20"></div>
+        <div class="relative z-10 flex flex-col items-center">
+            <div class="bg-white p-8 rounded-3xl mb-16 inline-block shadow-2xl">
+                <img src="PRO MANAGER LOGO.webp" alt="Pro Manager" class="h-28 mx-auto drop-shadow-xl" onerror="this.outerHTML='<div class=&quot;text-5xl font-black text-brand-primary&quot;>PRO<span class=&quot;text-brand-secondary&quot;>MANAGER</span></div>'" />
+            </div>
+            <h4 class="text-brand-secondary font-bold tracking-widest text-xl mb-4 uppercase">Confidential Report</h4>
+            <h1 class="text-6xl font-black leading-tight mb-8">דו"ח אבחון וייעול<br/>אסטרטגי מורחב</h1>
+            <div class="w-24 h-2 bg-brand-secondary mx-auto mb-12 rounded-full"></div>
+            <div class="bg-black/30 p-8 rounded-2xl backdrop-blur-md border border-brand-primary/50 max-w-lg w-full shadow-2xl">
+                <div class="grid grid-cols-2 gap-8 text-right">
+                    <div>
+                        <p class="text-brand-secondary text-sm mb-1 uppercase tracking-wider">הוכן עבור חברת</p>
+                        <p class="text-white text-2xl font-bold">חסוי בע"מ</p>
+                    </div>
+                    <div>
+                        <p class="text-brand-secondary text-sm mb-1 uppercase tracking-wider">תאריך הפקה</p>
+                        <p class="text-white text-2xl font-bold">10 מאי, 2026</p>
+                    </div>
+                    <div class="col-span-2 pt-4 border-t border-white/10">
+                        <p class="text-brand-secondary text-sm mb-1 uppercase tracking-wider">הוכן על ידי</p>
+                        <p class="text-white text-xl font-medium">מנהל שיווק ראשי - Pro Manager</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: EXECUTIVE SUMMARY -->
+    <div class="page-container">
+        <div class="flex items-center border-b-4 border-brand-primary pb-4 mb-8">
+            <div class="bg-brand-light p-3 rounded-xl ml-4"><i data-lucide="target" class="text-brand-primary w-8 h-8"></i></div>
+            <h2 class="text-3xl font-bold text-slate-900">תקציר מנהלים - מפת ביצועים</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
+            <div>
+                <h3 class="text-2xl font-bold text-brand-primary mb-4">תמונת מצב נוכחית</h3>
+                <p class="text-slate-600 text-lg leading-relaxed mb-6">מערך השיווק של החברה מייצר תנועה ולידים בצורה סבירה, אך <strong class="text-red-500 bg-red-50 px-1">קיים נתק מוחלט בינו לבין מחלקת המכירות</strong>. אנשי המכירות לא משתמשים כראוי במערכת ה-CRM, תהליך הפולואפ לוקה בחסר, ויש פער עצום בין ההבטחות של הקמפיינים לבין שיחת המכירה בפועל. מצב זה מוביל לשחיקת רווחיות משמעותית (ROI) ואיבוד עסקאות חמות.</p>
+                <div class="bg-brand-light border-r-4 border-brand-primary p-6 rounded-l-lg">
+                    <h4 class="font-bold text-brand-dark mb-2 text-xl">ציון משוקלל: 2.4 / 5.0</h4>
+                    <p class="text-brand-primary font-medium">המערכת פועלת בניצולת של 48% מהפוטנציאל שלה. תיקון הנתק בין המחלקות יכול להכפיל את שורת הרווח ללא הגדלת תקציב השיווק.</p>
+                </div>
+            </div>
+            <div class="relative h-80"><canvas id="radarChart"></canvas></div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-auto">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
+                <h3 class="text-lg font-semibold text-slate-500 mb-2">אסטרטגיה</h3>
+                <div class="text-brand-primary text-5xl font-black">2.8<span class="text-xl text-slate-300">/5</span></div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
+                <h3 class="text-lg font-semibold text-slate-500 mb-2">קמפיינים</h3>
+                <div class="text-brand-secondary text-5xl font-black">3.1<span class="text-xl text-slate-300">/5</span></div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
+                <h3 class="text-lg font-semibold text-slate-500 mb-2">CRM</h3>
+                <div class="text-red-500 text-5xl font-black">2.3<span class="text-xl text-slate-300">/5</span></div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
+                <h3 class="text-lg font-semibold text-slate-500 mb-2">סנכרון</h3>
+                <div class="text-red-500 text-5xl font-black">1.6<span class="text-xl text-slate-300">/5</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: FUNNEL -->
+    <div class="page-container">
+        <div class="flex items-center border-b-4 border-brand-primary pb-4 mb-8">
+            <div class="bg-brand-light p-3 rounded-xl ml-4"><i data-lucide="refresh-cw" class="text-brand-primary w-8 h-8"></i></div>
+            <h2 class="text-3xl font-bold text-slate-900">צוואר הבקבוק המרכזי: CRM ומשפך מכירות</h2>
+        </div>
+        <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
+            <div class="bg-red-50 text-red-600 p-5 rounded-full mb-6 shadow-inner"><i data-lucide="alert-octagon" class="w-12 h-12"></i></div>
+            <h3 class="text-3xl font-black text-brand-dark mb-4">הנתק בין השיווק לשטח</h3>
+            <p class="text-xl text-slate-600">ה-CRM קיים טכנית, אך השימוש בו על ידי המכירות חלקי מאוד. אין מעבר של נתוני UTM, אין אוטומציות פולואפ, וזמני התגובה ארוכים מדי. המשמעות: כסף שנשפך בקמפיינים לא מומר למכירות.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white border-t-4 border-t-orange-500 rounded-xl p-6 shadow-lg">
+                <div class="text-orange-500 font-bold text-4xl mb-2">3 שעות</div>
+                <h4 class="font-bold text-slate-800 mb-2">זמן תגובה ממוצע (SLA)</h4>
+                <p class="text-slate-600 text-sm">לידים מתקררים. חובה להוריד את זמן התגובה לאל מתחת ל-15 דקות מרגע ההשארה.</p>
+            </div>
+            <div class="bg-white border-t-4 border-t-red-500 rounded-xl p-6 shadow-lg">
+                <div class="text-red-500 font-bold text-4xl mb-2">0%</div>
+                <h4 class="font-bold text-slate-800 mb-2">אוטומציות פולואפ למתלבטים</h4>
+                <p class="text-slate-600 text-sm">לקוח שלא עונה מקבל התעלמות. חובה להקים מסע לקוח בוואטסאפ ללידים מתקררים.</p>
+            </div>
+            <div class="bg-white border-t-4 border-t-red-700 rounded-xl p-6 shadow-lg">
+                <div class="text-red-700 font-bold text-4xl mb-2">חסר</div>
+                <h4 class="font-bold text-slate-800 mb-2">שיוך ליד לקמפיין (UTM)</h4>
+                <p class="text-slate-600 text-sm">מנהל השיווק עיוור. הוא לא יודע איזו מודעה הביאה את המכירה. חובה לתקן אינטגרציה.</p>
+            </div>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-8 text-center mt-8">ניתוח דליפות במשפך המכירה (Funnel Drop-off)</h3>
+        <div class="relative w-full mb-8" style="height: 300px;"><canvas id="areaChart"></canvas></div>
+    </div>
+
+    <!-- PAGE 4: PLAN -->
+    <div class="page-container">
+        <div class="flex items-center border-b-4 border-brand-primary pb-4 mb-8">
+            <div class="bg-brand-light p-3 rounded-xl ml-4"><i data-lucide="briefcase" class="text-brand-primary w-8 h-8"></i></div>
+            <h2 class="text-3xl font-bold text-slate-900">סנכרון ותוכנית פעולה - 90 ימים</h2>
+        </div>
+        <div class="bg-brand-dark text-white rounded-2xl p-8 mb-12 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-32 h-32 bg-brand-primary rounded-br-full opacity-50"></div>
+            <h3 class="text-2xl font-black text-brand-secondary mb-6 relative z-10">מסקנת העל - Pro Manager</h3>
+            <p class="text-xl leading-relaxed relative z-10">שיווק שלא נמדד בשורת הרווח של המכירות - הוא רק רעש רקע. כדי לתקן את המצב, אנו עוצרים את המרדף אחרי "כמות לידים", ועוברים למודל עבודה של <strong class="text-brand-secondary">"הכנסה מבוססת יעדים" (RevOps)</strong>.</p>
+        </div>
+        <h3 class="text-2xl font-bold text-brand-primary mb-6 border-b border-brand-light pb-2">תכנית אופרטיבית מיידית (שלב 1):</h3>
+        <div class="space-y-6">
+            <div class="flex bg-white border border-slate-100 hover:border-brand-primary transition rounded-xl p-6 shadow-sm">
+                <div class="bg-brand-primary text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-full ml-6 shrink-0 shadow-md">1</div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">מיסוד ישיבת סנכרון (Feedback Loop)</h4>
+                    <p class="text-slate-600">קביעת ישיבת חובה שבועית (15 דק') בין מנהל השיווק לנציגי המכירות. חובה להעביר התנגדויות מהשטח חזרה לסוכנות כדי לשנות את הקופירייטינג במודעות בזמן אמת.</p>
+                </div>
+            </div>
+            <div class="flex bg-white border border-slate-100 hover:border-brand-primary transition rounded-xl p-6 shadow-sm">
+                <div class="bg-brand-primary text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-full ml-6 shrink-0 shadow-md">2</div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">תיקון כשל ה-CRM ונתוני המקור (UTM)</h4>
+                    <p class="text-slate-600">הטמעה טכנית דחופה להעברת נתוני קמפיין ישירות ל-Pipedrive. מנהל השיווק יתחיל למדוד החזר השקעה (ROI) לפי קמפיין ספציפי, ויסגור ברזים למודעות שמביאות לידים זולים שלא נסגרים.</p>
+                </div>
+            </div>
+            <div class="flex bg-white border border-slate-100 hover:border-brand-primary transition rounded-xl p-6 shadow-sm">
+                <div class="bg-brand-primary text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-full ml-6 shrink-0 shadow-md">3</div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900 mb-2">בניית מערך פולואפ ו-Playbook מכירות</h4>
+                    <p class="text-slate-600">כתיבת ספר מכירות ארגוני הכולל תסריט אבחון, בנק טיפול בהתנגדויות, והקמת אוטומציה של 4 הודעות וואטסאפ ללקוחות מתלבטים לטובת חימום הדרגתי.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 5 -->
+    <div class="page-container bg-slate-50">
+        <div class="text-center mb-10">
+            <h2 class="text-4xl font-black text-brand-dark mb-4 uppercase tracking-tight">נספח מקצועי מורחב</h2>
+            <div class="w-16 h-2 bg-brand-secondary mx-auto mb-4 rounded-full"></div>
+            <p class="text-xl text-slate-600 font-bold">אבחון עומק של 99 פרמטרים במערך השיווק והמכירות</p>
+            <p class="text-sm text-slate-500 mt-2">סולם ציונים: 1 (קריטי/חסר) עד 5 (מצוין/תקין)</p>
+        </div>
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="users" class="ml-2"></i> 1. אסטרטגיה שיווקית ומסרים (1-13)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">1</td><td class="p-3 font-medium text-slate-700">קיום הגדרה מדויקת ומתועדת של קהל היעד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז MQL רלוונטי</td><td class="p-3 text-slate-600">הקהל מוגדר כללית מדי, יש לפרק למיקרו-סגמנטים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">2</td><td class="p-3 font-medium text-slate-700">הגדרת הצעת ערך מרכזית ברורה ומוחשית.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">שיעור המרה בדף בית</td><td class="p-3 text-slate-600">ברורה מבחינה טכנית, אך חסר תרגום ל-ROI ללקוח.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">3</td><td class="p-3 font-medium text-slate-700">קיום בידול תחרותי אמיתי (מעבר לסיסמאות).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Win Rate מול מתחרים</td><td class="p-3 text-slate-600">נשענים על "שירות ויחס", נדרש בידול מבוסס תוצאה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">4</td><td class="p-3 font-medium text-slate-700">בהירות המסרים המרכזיים בקמפיינים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">CTR מודעות</td><td class="p-3 text-slate-600">מסרים טכניים, חסרה פניה לרגש ולתועלת הסופית.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">5</td><td class="p-3 font-medium text-slate-700">התייחסות ישירה לכאבי הלקוח בשיווק.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">זמן שהייה בדף הנחיתה</td><td class="p-3 text-slate-600">מדברים בעיקר על עצמנו ("אנחנו") במקום על הבעיה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">6</td><td class="p-3 font-medium text-slate-700">הגדרת פרסונות ממוקדות לטובת דיוק קמפיינים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">CPL פר סגמנט</td><td class="p-3 text-slate-600">מודעה גנרית אחת רצה לכל סוגי הקהלים יחד.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">7</td><td class="p-3 font-medium text-slate-700">מיפוי שוטף של מתחרים והבנת מיצוב החברה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">דוח מתחרים רבעוני</td><td class="p-3 text-slate-600">לא קיים. החברה פועלת בוואקום מוחלט משיווק המתחרים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">8</td><td class="p-3 font-medium text-slate-700">קיום אסטרטגיה וטקטיקה שיווקית שיטתית וברורה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">עמידה ביעדי חודש (Pacing)</td><td class="p-3 text-slate-600">השיווק ריאקטיבי, פועל לפי גחמות ללא גאנט סדור.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">9</td><td class="p-3 font-medium text-slate-700">וידוא שהקמפיינים עובדים לפי האסטרטגיה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">QA שיווקי חודשי</td><td class="p-3 text-slate-600">סטייה בין רצון ההנהלה למה שהסוכנות מעלה בפועל.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">10</td><td class="p-3 font-medium text-slate-700">התאמה מלאה בין המסרים לקהל היעד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז לידים פסולים</td><td class="p-3 text-slate-600">מושכים הרבה קהל לא רלוונטי בגלל הבטחות יתר.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">11</td><td class="p-3 font-medium text-slate-700">העדר פער ציפיות בין השיווק לשיחת המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">אחוז Drop-off בשיחה</td><td class="p-3 text-slate-600">פער קריטי. מודעה מבטיחה זול, מכירות מסבירים פרימיום.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">12</td><td class="p-3 font-medium text-slate-700">קיום נכסים (ברושורים/PDF) תומכי מכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">שימוש בחומרי עזר ע"י צוות</td><td class="p-3 text-slate-600">קיים חומר ישן לא מעודכן. חסר One Pager דיגיטלי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">13</td><td class="p-3 font-medium text-slate-700">שילוב הוכחות חברתיות ואמון בנכסים השיווקיים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">צפיות בעדויות באתר</td><td class="p-3 text-slate-600">נקודת חוזקה. יש המלצות וידאו מצוינות שמשולבות נהדר.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="zap" class="ml-2"></i> 2. ניהול קמפיינים ומדידת ביצועים (14-28)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">14</td><td class="p-3 font-medium text-slate-700">זיהוי ומדידה של מקורות התנועה המרכזיים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">דוח מקורות מ-GA4</td><td class="p-3 text-slate-600">יש הבנה טובה של הטראפיק שמגיע מגוגל ופייסבוק.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">15</td><td class="p-3 font-medium text-slate-700">מעקב רציף אחר עלות לליד (CPL) בכל קמפיין.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">CPL יומי/שבועי</td><td class="p-3 text-slate-600">מנוהל היטב בצד של סוכנות הפרסום.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">16</td><td class="p-3 font-medium text-slate-700">מעקב שוטף אחר יחסי המרה (Conversion Rate).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">CR% מדף נחיתה</td><td class="p-3 text-slate-600">אין A/B Testing מוסדר. משאירים את הקיים ללא שיפור.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">17</td><td class="p-3 font-medium text-slate-700">סיווג נתוני הלידים לפי איכות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">SQL Rate</td><td class="p-3 text-slate-600">ליד הוא ליד. אין תעדוף ללידים "חמים" או "איכותיים".</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">18</td><td class="p-3 font-medium text-slate-700">ניתוח ביצועים של דפי הנחיתה המובילים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">Bounce Rate</td><td class="p-3 text-slate-600">שולחים חלק מהתנועה הממומנת לדף הבית - טעות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">19</td><td class="p-3 font-medium text-slate-700">זיהוי ברור של הקמפיינים שמייצרים הכנסה בפועל.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">ROI / ROAS קמפיין</td><td class="p-3 text-slate-600">השיווק מודד רק כמות פניות, לא כסף בקופה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">20</td><td class="p-3 font-medium text-slate-700">זיהוי קמפיינים שמייצרים "רעש" אך לא מכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Cost Per Order (CPO)</td><td class="p-3 text-slate-600">קמפיין פייסבוק מביא לידים ב-40 ש"ח אך אחוז הסגירה אפסי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">21</td><td class="p-3 font-medium text-slate-700">בקרה על תקציבים מבוזבזים ואיתור צווארי בקבוק.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">ניצול תקציב (Burn Rate)</td><td class="p-3 text-slate-600">נדרשת הסתה מהירה של תקציבים מהרשת החברתית לגוגל.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">22</td><td class="p-3 font-medium text-slate-700">קבלת החלטות מבוססות נתונים על עצירת קמפיינים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">תדירות שינויים בקמפיין</td><td class="p-3 text-slate-600">ההחלטות מתקבלות פעם בחודש, לאט מדי לעולם הדיגיטל.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">23</td><td class="p-3 font-medium text-slate-700">הגדלת תקציבים בערוצים המציגים ROI חיובי.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">אחוז Scale שבועי</td><td class="p-3 text-slate-600">מבוצע בצורה טובה ברשת החיפוש לאחר זיהוי מילים ממירות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">24</td><td class="p-3 font-medium text-slate-700">תקינות חיבורי המדידה (GA4 ופיקסלים).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">Event Tracking</td><td class="p-3 text-slate-600">כל אירועי ההמרה מוגדרים ותקינים טכנית.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">25</td><td class="p-3 font-medium text-slate-700">מדידת נפח ואיכות לידים מערוצים אורגניים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">אחוז לידים אורגניים</td><td class="p-3 text-slate-600">אין הפרדה ב-CRM בין ליד ממומן לאורגני.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">26</td><td class="p-3 font-medium text-slate-700">ניתוח הכנסות משיתופי פעולה (Partners).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">כמות עסקאות שותפים</td><td class="p-3 text-slate-600">לא קיים מערך תגמול לשיתופי פעולה עסקיים. פספוס ענק.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">27</td><td class="p-3 font-medium text-slate-700">הגדרת יעדים (KPI) למדידת הצלחה של כנסים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">CPL מכנסים</td><td class="p-3 text-slate-600">הולכים לכנסים אבל לא מודדים כמה עסקאות נסגרו כתוצאה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">28</td><td class="p-3 font-medium text-slate-700">הכנת חומר שיווקי התומך בפעילות כנסים ושטח.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">כמות סריקות קוד QR</td><td class="p-3 text-slate-600">יש רול-אפים, חסר קטלוג דיגיטלי מתקדם לסריקה.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGE 6 -->
+    <div class="page-container bg-slate-50">
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="refresh-cw" class="ml-2"></i> 3. ניהול CRM ואוטומציות (29-43)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">29</td><td class="p-3 font-medium text-slate-700">קיום מערכת CRM פעילה המרכזת את כלל הפעילות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">% לידים מוזנים למערכת</td><td class="p-3 text-slate-600">המערכת קיימת ומתפקדת טכנית בצורה מלאה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">30</td><td class="p-3 font-medium text-slate-700">רמת השימוש השוטפת של אנשי המכירות במערכת.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">פעולות עדכון ליום</td><td class="p-3 text-slate-600">שימוש חלקי כפנקס. חסר עדכון סטטוסים בזמן אמת.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">31</td><td class="p-3 font-medium text-slate-700">קיום סטטוסים ברורים התואמים משפך מכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">זמן ממוצע בסטטוס</td><td class="p-3 text-slate-600">הסטטוסים כלליים ("בטיפול"). חסר פירוק לתת-שלבים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">32</td><td class="p-3 font-medium text-slate-700">תיעוד אוטומטי ואמין של מקור הליד (UTM).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז לידים מזוהי UTM</td><td class="p-3 text-slate-600">כשל חמור: אין מעבר נתונים. לא יודעים מאיזו מודעה בא הלקוח.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">33</td><td class="p-3 font-medium text-slate-700">הקפדה על תיעוד סיכומי שיחות בכרטיס לקוח.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תווים בכרטיס לקוח</td><td class="p-3 text-slate-600">כרטיסים נשארים ריקים. פוגע ביכולת לבצע פולואפ.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">34</td><td class="p-3 font-medium text-slate-700">ניהול שיטתי של משימות פולואפ לכל ליד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">משימות פתוחות באחור</td><td class="p-3 text-slate-600">נציגים מסתמכים על זיכרון. לידים מתקררים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">35</td><td class="p-3 font-medium text-slate-700">זיהוי שלבי ניהול שבהם לידים "נופלים בין הכיסאות".</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Drop-off Rate בין שלבים</td><td class="p-3 text-slate-600">נפילה חדה בין "הצעה נשלחה" לסגירה ללא פולואפ נכון.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">36</td><td class="p-3 font-medium text-slate-700">קיום דוחות שוטפים למעקב אחרי פעילות ה-CRM.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">כניסות מנהלים ל-Dashboard</td><td class="p-3 text-slate-600">יש דוחות, אך ההנהלה מנתחת אותם פעם בחודש.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">37</td><td class="p-3 font-medium text-slate-700">אוטומציה לשליחת הודעת תגובה ראשונה לליד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">זמן ל-SMS ראשון</td><td class="p-3 text-slate-600">תקין. נשלחת הודעת וואטסאפ אוטומטית מיד.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">38</td><td class="p-3 font-medium text-slate-700">סדרת פולואפ אוטומטית ללידים מתלבטים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז פתיחת פולואפ</td><td class="p-3 text-slate-600">לא קיימת. חובה להקים Nurturing Campaign.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">39</td><td class="p-3 font-medium text-slate-700">אוטומציות לתזכורות ואישורי הגעה לפגישות מכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">אחוז Show-up</td><td class="p-3 text-slate-600">עובד טוב ומונע אי-הגעות ברגע האחרון.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">40</td><td class="p-3 font-medium text-slate-700">תקינות חיבור הוואטסאפ למערכות השיווק והמכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">שיחות שתועדו ל-CRM</td><td class="p-3 text-slate-600">חלק מהנציגים משתמשים בוואטסאפ אישי, ללא גיבוי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">41</td><td class="p-3 font-medium text-slate-700">מדידה וקיצור של זמני התגובה הראשוניים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Time to First Call</td><td class="p-3 text-slate-600">ממוצע של 3 שעות הוא קטסטרופלי ליחסי המרה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">42</td><td class="p-3 font-medium text-slate-700">תהליך אוטומטי מוגדר להמשך טיפול לאחר סיום שיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">שימוש בתבניות מוכנות</td><td class="p-3 text-slate-600">הנציג מקליד כל הודעת סיכום ידנית, מבזבז זמן עבודה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">43</td><td class="p-3 font-medium text-slate-700">זיהוי וטיפול בנקודות נטישה באוטומציה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז Unsubscribe</td><td class="p-3 text-slate-600">אין מעקב אחרי מי שחוסם את הוואטסאפ או הדיוור.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="arrow-down-right" class="ml-2"></i> 4. אסטרטגיית מכירה ותהליכי עבודה (44-55)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">44</td><td class="p-3 font-medium text-slate-700">הגדרת אפיון מדויק ללקוח האידיאלי בעיני צוות המכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז אישור כ-SQL</td><td class="p-3 text-slate-600">הצוות מבין תיאורטית, אך חסר מסמך סינון מחייב.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">45</td><td class="p-3 font-medium text-slate-700">קביעה אסטרטגית של סדר הצגת המוצרים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Average Order Value</td><td class="p-3 text-slate-600">מציעים ישר פרימיום, הלקוח נבהל. יש לבנות Down-sell.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">46</td><td class="p-3 font-medium text-slate-700">קיום "מוצר כניסה" להורדת חסמי רכישה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">המרות למוצר התחלתי</td><td class="p-3 text-slate-600">חסר לחלוטין. חייבים ליצור Tripwire לבניית אמון.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">47</td><td class="p-3 font-medium text-slate-700">בניית הצעה מרכזית ממוקדת וברורה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">מהירות סגירת עסקה</td><td class="p-3 text-slate-600">מבנה מוצר הדגל ברור והלקוח מבין מה הוא מקבל.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">48</td><td class="p-3 font-medium text-slate-700">הבנה ותכנון של שלבי הבשלת הלקוח עד סגירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">זמן ממוצע לסגירה</td><td class="p-3 text-slate-600">לוחצים מדי בשיחה 1. נדרש תהליך טיפוח (Nurturing) מובנה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">49</td><td class="p-3 font-medium text-slate-700">מיפוי תהליך המכירה מרגע כניסת הליד לחתימה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">תאימות תהליך/מעשי</td><td class="p-3 text-slate-600">קיים מסמך ישן. יש לרענן ולשרטט מחדש.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">50</td><td class="p-3 font-medium text-slate-700">קביעת זמני יעד ליצירת קשר ראשוני.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז עמידה ביעד תגובה</td><td class="p-3 text-slate-600">יש יעד תיאורטי (שעה), בפועל לא אוכפים או מודדים אותו.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">51</td><td class="p-3 font-medium text-slate-700">שאלות חובה לאבחון וסינון לפני התקדמות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">כמות פגישות סרק</td><td class="p-3 text-slate-600">מעלים כל אחד לפגישה. יש להגדיר שאלות "BANT" מחייבות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">52</td><td class="p-3 font-medium text-slate-700">הגדרה ברורה באילו תנאים ולמי שולחים הצעה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">יחס המרה להצעה</td><td class="p-3 text-slate-600">שולחים כדי "להיפטר" מלקוח חופר. בזבוז זמן נציג.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">53</td><td class="p-3 font-medium text-slate-700">מיסוד תהליך קבוע לטיפול בלקוחות אבודים (Lost).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז Win-Back</td><td class="p-3 text-slate-600">שום טיפול. חובה להכניס לקמפיין דיוור רבעוני.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">54</td><td class="p-3 font-medium text-slate-700">חלוקת אחריות ברורה לכל שלב בתהליך המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">תקינות העברת טיפול</td><td class="p-3 text-slate-600">החלוקה בין SDR (מתאם) ל-Closer (סוגר) עובדת היטב.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">55</td><td class="p-3 font-medium text-slate-700">הגדרת "משימה הבאה" כשלב חובה בסיום מגע.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">לידים יתומים ב-CRM</td><td class="p-3 text-slate-600">נציגים סוגרים כרטיסים ללא תאריך המשך. מייצר חורים.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGE 7 -->
+    <div class="page-container bg-slate-50">
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="phone-call" class="ml-2"></i> 5. פיצ' מכירה, ניהול שיחות והצעות מחיר (56-72)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">56</td><td class="p-3 font-medium text-slate-700">קיום מבנה מוגדר וחזק לפתיחת שיחת המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אורך שיחה ממוצע</td><td class="p-3 text-slate-600">נופלים לשיחת חולין ארוכה מדי. לקצר פתיח ולשלוט במסגרת.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">57</td><td class="p-3 font-medium text-slate-700">הצגה מדויקת של החברה והערך שלה בפיצ'.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">ציון האזנה (QA)</td><td class="p-3 text-slate-600">מבוצע טוב. פיצ' המעלית קצר ומעביר סמכות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">58</td><td class="p-3 font-medium text-slate-700">שימוש בשאלות אבחון לאיתור כאב הלקוח.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">כמות מידע שנאסף</td><td class="p-3 text-slate-600">שואלים שאלות טכניות במקום על השלכות הבעיה העסקית.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">59</td><td class="p-3 font-medium text-slate-700">טיפול בכאב הלקוח כחלק מובנה בשיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">התנגדות "לא רלוונטי"</td><td class="p-3 text-slate-600">מדלגים על הכאב ומציעים פתרון מהר מדי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">60</td><td class="p-3 font-medium text-slate-700">שילוב מסר בידול למניעת השוואת מחירים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">סגירות ללא הנחה</td><td class="p-3 text-slate-600">נגררים מהר לשיח הנחות. להדגיש ביטחון על פני מחיר.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">61</td><td class="p-3 font-medium text-slate-700">שימוש במשפטי סגירה ברורים המניעים לפעולה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">ניסיונות סגירה בשיחה</td><td class="p-3 text-slate-600">מהססים לבקש אשראי. לחזק ברוטינות Role-Play.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">62</td><td class="p-3 font-medium text-slate-700">שמירת שליטת הנציג בשיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">התפרצויות הלקוח</td><td class="p-3 text-slate-600">לקוחות חזקים מנווטים את השיחה. לנווט חזרה בעזרת שאלות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">63</td><td class="p-3 font-medium text-slate-700">הקשבה פעילה (לקוח מדבר יותר מנציג).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">יחס דיבור (Talk Ratio)</td><td class="p-3 text-slate-600">נציגים מדברים 70% מהזמן. חובה להפוך ליחס 30/70.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">64</td><td class="p-3 font-medium text-slate-700">בנק תשובות מובנה להתנגדויות נפוצות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז פתרון התנגדויות</td><td class="p-3 text-slate-600">לא קיים (Playbook). כל נציג ממציא תשובות על המקום.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">65</td><td class="p-3 font-medium text-slate-700">זיהוי ותיקון טעויות חוזרות בשיחות (משוב).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תדירות משוב שבועי</td><td class="p-3 text-slate-600">אין מספיק האזנות מצד המנהל. נדרשת רוטינה קבועה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">66</td><td class="p-3 font-medium text-slate-700">פתיח אישי מותאם בהצעת מחיר.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">אחוז פתיחת הצעות</td><td class="p-3 text-slate-600">מצוין. נפתח בנימה אישית וידידותית שמזכירה את הפגישה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">67</td><td class="p-3 font-medium text-slate-700">שיקוף מלא של הבנת הצורך בהצעה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">התאמה לצורך לקוח</td><td class="p-3 text-slate-600">לעיתים שולחים הצעה גנרית ולא מותאמת אישית ללקוח הספציפי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">68</td><td class="p-3 font-medium text-slate-700">הצגה ברורה של הפתרון ומה מקבלים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">שאלות הבהרה מלקוח</td><td class="p-3 text-slate-600">ההצעה מפורטת מבחינה טכנית והתוצרים (Deliverables) ברורים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">69</td><td class="p-3 font-medium text-slate-700">תרגום טכני לתועלת וערך עסקי בהצעה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">זמן לאישור הצעות</td><td class="p-3 text-slate-600">מדברים יותר מדי במונחים טכניים ופחות על התוצאה והרווח הצפוי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">70</td><td class="p-3 font-medium text-slate-700">הצגת מחיר ותנאי תשלום בצקיפות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">תלונות הבנת מחיר</td><td class="p-3 text-slate-600">מעולה, אין הפתעות במע"מ או בתנאי תשלום (שוטף+).</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">71</td><td class="p-3 font-medium text-slate-700">שילוב אלמנט דחיפות להגבלת תוקף.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">הצעות שפג תוקפן</td><td class="p-3 text-slate-600">כתוב "תקף ל-7 ימים" אך לא נאכף בפועל, לקוח חותם מתי שנוח לו.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">72</td><td class="p-3 font-medium text-slate-700">הנעה ברורה לפעולה וסיום לשלב הבא.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">חתימות דיגיטליות</td><td class="p-3 text-slate-600">יש כפתור חתימה מהירה שמקצר את התהליך.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGE 8 -->
+    <div class="page-container bg-slate-50">
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="clock" class="ml-2"></i> 6. ניהול פולואפ ופגישות מכירה (73-83)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">73</td><td class="p-3 font-medium text-slate-700">לוחות זמנים מחייבים לביצוע פולואפ.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">פולואפים בפיגור</td><td class="p-3 text-slate-600">אין נהלים, הנציגים מתקשרים מתי שמתפנה להם זמן.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">74</td><td class="p-3 font-medium text-slate-700">הגדרת אחריות בפולואפ לדרג מנהלים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">כפילויות פנייה</td><td class="p-3 text-slate-600">מנהל לא נכנס לפולואפ עסקאות גדולות מספיק מוקדם (Manager Touch).</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">75</td><td class="p-3 font-medium text-slate-700">מדידת כמות הנגיעות (Touches) לסגירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">ממוצע פעולות לעסקה</td><td class="p-3 text-slate-600">מוותרים מהר מדי. בעסקת B2B נדרשות 7-10 נגיעות ויש רק 2-3.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">76</td><td class="p-3 font-medium text-slate-700">תסריט שיחה מובנה לשלבי פולואפ שונים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">המרות פולואפ</td><td class="p-3 text-slate-600">שואלים רק "נו, החלטתם?" במקום לספק ערך מוסף ללקוח.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">77</td><td class="p-3 font-medium text-slate-700">תיעוד שוטף של כל נגיעת פולואפ ב-CRM.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תיעודי היסטוריה</td><td class="p-3 text-slate-600">התיעוד דל והנציג נשמע לא מעודכן מול הלקוח.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">78</td><td class="p-3 font-medium text-slate-700">התאמת הנוסח לשלב הלקוח במסע.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">שימוש בהודעות מותאמות</td><td class="p-3 text-slate-600">שולחים הודעות העתק-הדבק זהות לכל סוגי הסטטוסים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">79</td><td class="p-3 font-medium text-slate-700">נוהל סדור ללקוחות מתעלמים (רוחות רפאים).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז החייאה</td><td class="p-3 text-slate-600">יש הודעת פרידה סבירה שעובדת ומייצרת "תגובת אשמה".</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">80</td><td class="p-3 font-medium text-slate-700">סדרת פולואפ מספקת ערך והוכחות (Case Studies).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">שימוש בסיפורי לקוח</td><td class="p-3 text-slate-600">הלקוח מקבל נדנוד ללא חומר מרגיע או משכנע מגוף שלישי.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">81</td><td class="p-3 font-medium text-slate-700">מנגנון החייאה עתידית ללקוחות שהתקררו.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">עסקאות אחרי חודשיים</td><td class="p-3 text-slate-600">ליד בן שבועיים נחשב מת ומועבר לארכיון ללא דיוור.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">82</td><td class="p-3 font-medium text-slate-700">בניית פתיחת פגישה ויצירת אמון פרונטלי.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">יחס סגירה פגישות/טלפון</td><td class="p-3 text-slate-600">חזקים מאוד ביצירת Rapport וקרבה בפגישות פיזיות/זום.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">83</td><td class="p-3 font-medium text-slate-700">הצגת פתרון וטיפול בהתנגדויות בפגישה עצמה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">התנגדויות בפגישה</td><td class="p-3 text-slate-600">עונים טוב אך נותנים ללקוח "לחשוב על זה" במקום לסגור במקום.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="briefcase" class="ml-2"></i> 7. סנכרון שיווק ומכירות (Feedback Loop) (84-99)</h3>
+        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
+            <table class="w-full text-right border-collapse">
+                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
+                <tbody class="text-sm">
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">84</td><td class="p-3 font-medium text-slate-700">שיווק מכין לקוח מבחינת ציפיות לשיחת המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">הבנת תהליך ע"י ליד</td><td class="p-3 text-slate-600">לקוחות מגיעים ללא הבנה של טווחי מחיר או אורך תהליך.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">85</td><td class="p-3 font-medium text-slate-700">חזרתיות על מסרי הקמפיין בשיחת הפתיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">עקביות מסר</td><td class="p-3 text-slate-600">נציגים לא יודעים איזה קמפיין באוויר, המסר לא מהדהד.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">86</td><td class="p-3 font-medium text-slate-700">זיהוי מקור הליד לפני השיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">UTM נוכח</td><td class="p-3 text-slate-600">הנציג מגשש "מאיפה הגעת אלינו?" מראה חוסר מקצועיות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">87</td><td class="p-3 font-medium text-slate-700">זמינות תוכן תומך מכירה לפולואפ.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">שימוש בתוכן קיים</td><td class="p-3 text-slate-600">יש תוכן באתר אך הצוות לא משתמש בו לשליחה ככלי עזר.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">88</td><td class="p-3 font-medium text-slate-700">יכולת קישור בין מקור הליד לתוצאה סופית.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Closed Won ROI</td><td class="p-3 text-slate-600">מודדים עלות לליד אך לא עוקבים איזה קמפיין הביא עסקה סגורה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">89</td><td class="p-3 font-medium text-slate-700">מנגנון פידבק ממכירות לשיווק (למידה חוזרת).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">תדירות עדכון יזומה</td><td class="p-3 text-slate-600">מחלקות עובדות בוואקום. אין העברת פידבק מסודרת לסוכנות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">90</td><td class="p-3 font-medium text-slate-700">זיהוי פערים בין הבטחת המודעה לנאמר במכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תלונות ציפיות</td><td class="p-3 text-slate-600">שיווק צועק "חינם", מכירות אומר "עולה כסף". נדרש סנכרון דחוף.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">91</td><td class="p-3 font-medium text-slate-700">מניעת פער ציפיות דף נחיתה לעומת הצעה סופית.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">נטישה בהגשת ההצעה</td><td class="p-3 text-slate-600">סביר. הלקוח לרוב מבין את המוצר אך מופתע מתוספות מחיר.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">92</td><td class="p-3 font-medium text-slate-700">ניתוח אחוז לידים רלוונטיים (Quality Rate).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">ניתוח חודשי לליד</td><td class="p-3 text-slate-600">לא מבוצע. יש לבצע חיתוך שבועי לטיוב קמפיינים.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">93</td><td class="p-3 font-medium text-slate-700">מיפוי התנגדויות לטובת שינוי מסרי השיווק.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">תכני שיווק מבוססי שטח</td><td class="p-3 text-slate-600">שיווק מנחש מה כואב ללקוח, אין שימוש בשיחות אמיתיות.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">94</td><td class="p-3 font-medium text-slate-700">זיהוי וטיפול בלידים פסולים מסינון שגוי.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">אחוז Disqualified</td><td class="p-3 text-slate-600">יש להוסיף שדה חובה "סיבת פסילה" ב-CRM להפקת דוח.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">95</td><td class="p-3 font-medium text-slate-700">דוחות רווחיות (ROI) לפי קמפיין מתוך ה-CRM.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">End-to-End ROI</td><td class="p-3 text-slate-600">ה-GA4 לא מחובר להכנסות שב-CRM. חסרה אינטגרציה.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">96</td><td class="p-3 font-medium text-slate-700">פגישת סנכרון שבועית קבועה בין שיווק למכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">ישיבות משותפות</td><td class="p-3 text-slate-600">מעולם לא התקיימה ישיבה משותפת. פעולה לקביעה מיידית.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">97</td><td class="p-3 font-medium text-slate-700">בניית דף מסרים אחיד המשמש את שתי המחלקות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">Playbook ארגוני</td><td class="p-3 text-slate-600">כל מחלקה מספרת סיפור אחר על החברה והמוצר.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">98</td><td class="p-3 font-medium text-slate-700">עדכון קופירייטינג על בסיס משפטים מוצלחים משיחות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">שינויי קופי בעקבות שטח</td><td class="p-3 text-slate-600">הסוכנות כותבת מודעות מהמשרד בלי להקשיב ללקוחות בטלפון.</td></tr>
+                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">99</td><td class="p-3 font-medium text-slate-700">הגדרת ובקרת KPI לשיפור איכות הפניות (CPO).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">CPL לעומת CPO</td><td class="p-3 text-slate-600">מודדים מחיר לליד במקום למדוד מחיר עלות סגירת לקוח משלם.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+    Chart.defaults.font.family = "'Heebo', sans-serif";
+    Chart.defaults.color = '#64748b';
+    const brandPrimary = '#5e549d';
+    const brandPrimaryLight = 'rgba(94, 84, 157, 0.4)';
+    const brandSecondary = '#4ab3e5';
+    const brandSecondaryLight = 'rgba(74, 179, 229, 0.2)';
+    const ctxRadar = document.getElementById('radarChart').getContext('2d');
+    new Chart(ctxRadar, {
+        type: 'radar',
+        data: {
+            labels: ['אסטרטגיה ומסרים', 'קמפיינים ומדידה', 'CRM ואוטומציות', 'אסטרטגיית מכירה', "פיצ' והצעות", 'פולואפ ופגישות', 'סנכרון שיווק-מכירות'],
+            datasets: [{ label: 'ציון נוכחי (מתוך 5)', data: [2.8, 3.1, 2.3, 2.4, 3.0, 2.0, 1.6], backgroundColor: brandPrimaryLight, borderColor: brandPrimary, borderWidth: 3, pointBackgroundColor: brandPrimary, pointHoverRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 }, pointLabels: { font: { size: 13, weight: 'bold' }, color: '#2d2752' } } } }
+    });
+    const ctxArea = document.getElementById('areaChart').getContext('2d');
+    new Chart(ctxArea, {
+        type: 'line',
+        data: {
+            labels: ['חשיפות', 'קליקים', 'לידים נכנסים', 'לידים SQL', 'פגישות', 'הצעות מחיר', 'עסקאות סגורות'],
+            datasets: [{ label: 'נפח תנועה (Drop-off)', data: [100000, 4500, 320, 110, 45, 38, 8], fill: true, backgroundColor: brandSecondaryLight, borderColor: brandSecondary, borderWidth: 3, tension: 0.4, pointBackgroundColor: brandPrimary, pointRadius: 5 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: brandPrimary, titleFont: { size: 14 }, bodyFont: { size: 14, weight: 'bold' } } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+    });
+</script>
+</body>
+</html>
