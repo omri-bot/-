@@ -1,866 +1,1425 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>מערכת ניהול לקוחות – ניתוח רווחיות מסעדות</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מערכת ניהול לקוחות – ניתוח רווחיות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
 <style>
-*{box-sizing:border-box;}
-body{font-family:'Heebo',sans-serif;background:#f0f2f5;margin:0;}
-.live-input{border:2px solid #e2e8f0;border-radius:8px;padding:6px 10px;font-family:'Heebo',sans-serif;font-size:14px;width:100%;transition:border-color .15s;background:white;direction:ltr;text-align:left;}
-.live-input:focus{outline:none;border-color:#5e549d;box-shadow:0 0 0 3px rgba(94,84,157,.15);}
-.live-input.rtl{direction:rtl;text-align:right;}
-.kpi-strip{background:linear-gradient(135deg,#2d2752 0%,#5e549d 60%,#4ab3e5 100%);position:sticky;top:0;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,.2);}
-.kpi-item{border-left:1px solid rgba(255,255,255,.15);padding:10px 16px;flex-shrink:0;}
-.kpi-item:first-child{border-left:none;}
-.kpi-val{font-size:18px;font-weight:900;line-height:1;}
-.kpi-lbl{font-size:10px;opacity:.7;margin-top:2px;}
-.card{background:white;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);}
-.tab{cursor:pointer;padding:8px 15px;border-radius:10px;transition:all .15s;font-weight:600;font-size:13px;white-space:nowrap;}
-.tab.active{background:#5e549d;color:white;}
-.tab:not(.active):hover{background:#f0edff;color:#5e549d;}
-.section{display:none;}.section.active{display:block;}
-.dt{border-collapse:collapse;width:100%;font-size:13px;}
-.dt th{background:#f8f6ff;color:#5e549d;font-weight:700;padding:9px 10px;text-align:right;border-bottom:2px solid #ede9ff;white-space:nowrap;}
-.dt td{padding:7px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
-.dt tr:hover td{background:#faf8ff;}
-.bp{background:#dcfce7;color:#166534;border-radius:8px;padding:3px 10px;font-weight:700;font-size:12px;}
-.bl{background:#fee2e2;color:#991b1b;border-radius:8px;padding:3px 10px;font-weight:700;font-size:12px;}
-.bn{background:#fef9c3;color:#854d0e;border-radius:8px;padding:3px 10px;font-weight:700;font-size:12px;}
-input[type=range]{accent-color:#5e549d;width:100%;cursor:pointer;}
-.alert{border-right:4px solid;padding:9px 13px;border-radius:8px;font-size:13px;margin-bottom:7px;}
-.ai{border-color:#3b82f6;background:#eff6ff;color:#1e40af;}
-.aw{border-color:#f59e0b;background:#fffbeb;color:#92400e;}
-.as{border-color:#10b981;background:#ecfdf5;color:#065f46;}
-.ad{border-color:#ef4444;background:#fef2f2;color:#991b1b;}
-.rr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;}
-.rr:last-child{border-bottom:none;}
-.ch-card{border:2px solid;border-radius:12px;padding:12px;}
-.screen{display:none;}.screen.active{display:block;}
-/* Client card */
-.client-card{background:white;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.07);padding:20px;cursor:pointer;transition:transform .2s,box-shadow .2s;border:2px solid transparent;}
-.client-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.12);border-color:#5e549d;}
-/* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;}
-.modal-bg.hidden{display:none;}
-.modal{background:white;border-radius:20px;padding:32px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
-.progress{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;}
-.progress-bar{height:100%;border-radius:4px;transition:width .4s;}
+  * { font-family: 'Heebo', sans-serif; }
+  body { background: #f3f4f8; }
+  .gradient-header { background: linear-gradient(135deg, #5e549d 0%, #4ab3e5 100%); }
+  .fc-green { color: #16a34a; font-weight: 600; }
+  .fc-blue { color: #2563eb; font-weight: 600; }
+  .fc-orange { color: #ea580c; font-weight: 600; }
+  .fc-red { color: #dc2626; font-weight: 600; }
+  .tab-btn { cursor:pointer; padding:8px 16px; border-radius:8px 8px 0 0; font-weight:600; font-size:14px; transition:all 0.2s; white-space:nowrap; }
+  .tab-btn.active { background:#5e549d; color:#fff; }
+  .tab-btn:not(.active) { background:#e5e7eb; color:#374151; }
+  .tab-btn:not(.active):hover { background:#d1d5db; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+  .kpi-strip { background: #1e1b4b; color:#fff; padding:12px 16px; position:sticky; top:0; z-index:50; }
+  .kpi-item { text-align:center; }
+  .kpi-label { font-size:11px; opacity:0.7; }
+  .kpi-val { font-size:16px; font-weight:700; }
+  .profit-positive { color:#4ade80; }
+  .profit-negative { color:#f87171; }
+  .profit-neutral { color:#fbbf24; }
+  input[type=range] { accent-color: #5e549d; }
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center; }
+  .modal-box { background:#fff;border-radius:16px;padding:24px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#f3f4f8; padding:8px 6px; font-size:12px; font-weight:600; color:#374151; text-align:right; border-bottom:2px solid #e5e7eb; }
+  td { padding:6px 4px; font-size:13px; border-bottom:1px solid #e5e7eb; }
+  td input, td select { width:100%; border:1px solid #d1d5db; border-radius:4px; padding:4px 6px; font-size:12px; font-family:'Heebo',sans-serif; }
+  td input:focus, td select:focus { outline:2px solid #5e549d; }
+  .btn-purple { background:#5e549d; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-family:'Heebo',sans-serif; font-weight:600; cursor:pointer; transition:opacity 0.2s; }
+  .btn-purple:hover { opacity:0.85; }
+  .btn-red { background:#dc2626; color:#fff; border:none; border-radius:8px; padding:4px 10px; font-family:'Heebo',sans-serif; font-weight:600; cursor:pointer; font-size:12px; }
+  .btn-red:hover { background:#b91c1c; }
+  .btn-gray { background:#e5e7eb; color:#374151; border:none; border-radius:8px; padding:8px 16px; font-family:'Heebo',sans-serif; font-weight:600; cursor:pointer; }
+  .btn-gray:hover { background:#d1d5db; }
+  .input-field { border:1px solid #d1d5db; border-radius:8px; padding:8px 12px; font-family:'Heebo',sans-serif; width:100%; font-size:14px; }
+  .input-field:focus { outline:2px solid #5e549d; border-color:#5e549d; }
+  .card { background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.08); padding:16px; }
+  .status-badge-profit { background:#dcfce7; color:#16a34a; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+  .status-badge-loss { background:#fee2e2; color:#dc2626; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+  .status-badge-unknown { background:#f3f4f6; color:#6b7280; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+  .channel-card { border-radius:12px; padding:16px; }
+  .ch-rest { background:#eff6ff; border:2px solid #93c5fd; }
+  .ch-wolt { background:#f0fdf4; border:2px solid #86efac; }
+  .ch-tbis { background:#fff7ed; border:2px solid #fdba74; }
+  .ch-cib { background:#fdf4ff; border:2px solid #e879f9; }
+  .scenario-row:hover { background:#f9fafb; }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-thumb { background:#c4b5fd; border-radius:3px; }
 </style>
 </head>
 <body>
 
-<!-- ============ SCREEN 1: CLIENT LIST ============ -->
-<div id="screen-list" class="screen active">
-  <!-- Header -->
-  <div style="background:linear-gradient(135deg,#2d2752,#5e549d,#4ab3e5)" class="text-white py-5 px-6 shadow-lg">
+<!-- SCREEN 1: Client List -->
+<div id="screen-list">
+  <header class="gradient-header text-white px-6 py-5 shadow-lg">
     <div class="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-3">
       <div>
-        <h1 class="text-2xl font-black">🍽 מערכת ניהול לקוחות – ניתוח רווחיות מסעדות</h1>
-        <p class="text-blue-100 text-sm mt-1">נהל את התוכניות הכספיות של כל הלקוחות שלך במקום אחד</p>
+        <h1 class="text-2xl font-bold">מערכת ניהול לקוחות – ניתוח רווחיות</h1>
+        <p class="text-blue-200 text-sm mt-1">ניהול ומעקב רווחיות לעסקי מזון ומסעדות</p>
       </div>
-      <button onclick="openAddModal()" class="bg-white text-purple-700 font-black px-6 py-3 rounded-xl text-base hover:bg-purple-50 transition shadow-lg">+ לקוח חדש</button>
+      <button onclick="openAddModal()" class="bg-white text-purple-700 font-bold px-5 py-2 rounded-xl shadow hover:bg-purple-50 transition text-lg">+ לקוח חדש</button>
+    </div>
+  </header>
+
+  <!-- Summary Bar -->
+  <div id="summary-bar" class="bg-white border-b border-gray-200 px-6 py-3">
+    <div class="max-w-6xl mx-auto flex gap-6 flex-wrap">
+      <span class="text-sm text-gray-600">סה"כ לקוחות: <strong id="sum-total">0</strong></span>
+      <span class="text-sm text-gray-600">רווחיים: <strong id="sum-profit" class="text-green-600">0</strong></span>
+      <span class="text-sm text-gray-600">בהפסד: <strong id="sum-loss" class="text-red-600">0</strong></span>
+      <span class="text-sm text-gray-600">רווח חודשי כולל: <strong id="sum-monthly" class="text-purple-700">₪0</strong></span>
     </div>
   </div>
 
-  <div class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Summary bar -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div class="card p-4 text-center"><div class="text-3xl font-black text-purple-700" id="sum-total">0</div><div class="text-xs text-gray-500 mt-1">סה"כ לקוחות</div></div>
-      <div class="card p-4 text-center"><div class="text-3xl font-black text-green-600" id="sum-profit">0</div><div class="text-xs text-gray-500 mt-1">לקוחות רווחיים ✅</div></div>
-      <div class="card p-4 text-center"><div class="text-3xl font-black text-red-500" id="sum-loss">0</div><div class="text-xs text-gray-500 mt-1">לקוחות בהפסד ❌</div></div>
-      <div class="card p-4 text-center"><div class="text-3xl font-black text-blue-600" id="sum-monthly">₪0</div><div class="text-xs text-gray-500 mt-1">סה"כ רווח חודשי</div></div>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div id="clients-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+    <div id="empty-state" class="text-center py-20 hidden">
+      <div class="text-6xl mb-4">🍽️</div>
+      <p class="text-gray-500 text-lg">אין לקוחות עדיין</p>
+      <p class="text-gray-400 text-sm mt-1">לחץ על "+ לקוח חדש" כדי להתחיל</p>
     </div>
+  </main>
+</div>
 
-    <!-- Search -->
-    <div class="mb-5">
-      <input type="text" id="search-input" placeholder="🔍 חפש לקוח..." class="live-input rtl text-base" style="max-width:340px" oninput="renderClientList()"/>
+<!-- Add Client Modal -->
+<div id="modal-add" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="flex justify-between items-center mb-5">
+      <h2 class="text-xl font-bold text-gray-800">הוספת לקוח חדש</h2>
+      <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
     </div>
-
-    <!-- Client grid -->
-    <div id="client-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-
-    <!-- Empty state -->
-    <div id="empty-state" class="hidden text-center py-20">
-      <div class="text-6xl mb-4">🍽</div>
-      <div class="text-xl font-bold text-gray-400">אין לקוחות עדיין</div>
-      <div class="text-gray-400 mt-2">לחץ "+ לקוח חדש" כדי להתחיל</div>
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm font-semibold text-gray-700 block mb-1">שם לקוח <span class="text-red-500">*</span></label>
+        <input id="f-name" type="text" class="input-field" placeholder="שם המסעדה / העסק">
+      </div>
+      <div>
+        <label class="text-sm font-semibold text-gray-700 block mb-1">סוג עסק</label>
+        <select id="f-type" class="input-field">
+          <option value="מסעדה">מסעדה</option>
+          <option value="קפה">קפה</option>
+          <option value="פיצה">פיצה</option>
+          <option value="פלאפל">פלאפל</option>
+          <option value="אחר">אחר</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-semibold text-gray-700 block mb-1">טלפון</label>
+          <input id="f-phone" type="tel" class="input-field" placeholder="050-0000000">
+        </div>
+        <div>
+          <label class="text-sm font-semibold text-gray-700 block mb-1">אימייל</label>
+          <input id="f-email" type="email" class="input-field" placeholder="mail@example.com">
+        </div>
+      </div>
+      <div>
+        <label class="text-sm font-semibold text-gray-700 block mb-1">כתובת</label>
+        <input id="f-address" type="text" class="input-field" placeholder="רחוב ועיר">
+      </div>
+      <div>
+        <label class="text-sm font-semibold text-gray-700 block mb-1">הערות</label>
+        <textarea id="f-notes" class="input-field" rows="2" placeholder="הערות נוספות..."></textarea>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="saveNewClient()" class="btn-purple flex-1 text-base py-2">שמור ופתח תוכנית</button>
+      <button onclick="closeAddModal()" class="btn-gray flex-1 text-base py-2">ביטול</button>
     </div>
   </div>
 </div>
 
-<!-- ============ SCREEN 2: CLIENT PLAN ============ -->
-<div id="screen-plan" class="screen">
-  <!-- Sticky KPI strip -->
+<!-- SCREEN 2: Client Plan -->
+<div id="screen-plan" class="hidden min-h-screen">
+  <!-- Plan Header -->
+  <header class="gradient-header text-white px-4 py-3 shadow-lg">
+    <div class="max-w-7xl mx-auto flex items-center gap-4 flex-wrap">
+      <button onclick="goBack()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-1.5 rounded-lg font-semibold transition text-sm">← חזור לרשימה</button>
+      <div>
+        <h2 id="plan-title" class="text-xl font-bold"></h2>
+        <p id="plan-subtitle" class="text-blue-200 text-xs"></p>
+      </div>
+    </div>
+  </header>
+
+  <!-- KPI Strip -->
   <div class="kpi-strip">
-    <div class="flex items-center overflow-x-auto">
-      <button onclick="backToList()" class="text-white px-4 py-3 hover:bg-white/20 transition flex-shrink-0 font-bold text-sm">← רשימה</button>
-      <div class="kpi-item text-white"><div class="kpi-lbl" id="plan-client-name">לקוח</div><div class="kpi-val text-yellow-300" id="plan-client-type">—</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">עלויות קבועות</div><div class="kpi-val" id="k-fixed">₪0</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">מחזור יומי יעד</div><div class="kpi-val text-blue-300" id="k-daily">₪0</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">נקודת איזון/יום</div><div class="kpi-val text-yellow-300" id="k-be">₪0</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">הכנסה/חודש</div><div class="kpi-val text-cyan-300" id="k-rev">₪0</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">רווח/הפסד</div><div class="kpi-val" id="k-profit">₪0</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">מרווח</div><div class="kpi-val" id="k-margin">0%</div></div>
-      <div class="kpi-item text-white"><div class="kpi-lbl">סטטוס</div><div class="kpi-val" id="k-status">—</div></div>
+    <div class="max-w-7xl mx-auto overflow-x-auto">
+      <div class="flex gap-4 min-w-max">
+        <div class="kpi-item"><div class="kpi-label">עלויות קבועות</div><div class="kpi-val" id="kpi-fixed">₪0</div></div>
+        <div class="w-px bg-white opacity-20"></div>
+        <div class="kpi-item"><div class="kpi-label">מחזור יומי יעד</div><div class="kpi-val" id="kpi-daily">₪0</div></div>
+        <div class="w-px bg-white opacity-20"></div>
+        <div class="kpi-item"><div class="kpi-label">נקודת איזון</div><div class="kpi-val" id="kpi-be">₪0</div></div>
+        <div class="w-px bg-white opacity-20"></div>
+        <div class="kpi-item"><div class="kpi-label">הכנסה חודשית</div><div class="kpi-val" id="kpi-rev">₪0</div></div>
+        <div class="w-px bg-white opacity-20"></div>
+        <div class="kpi-item"><div class="kpi-label">רווח/הפסד</div><div class="kpi-val" id="kpi-profit">₪0</div></div>
+        <div class="w-px bg-white opacity-20"></div>
+        <div class="kpi-item"><div class="kpi-label">מרווח%</div><div class="kpi-val" id="kpi-margin">0%</div></div>
+        <div class="w-px bg-white opacity-20"></div>
+        <div class="kpi-item"><div class="kpi-label">סטטוס</div><div class="kpi-val" id="kpi-status">–</div></div>
+      </div>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 py-5">
-    <!-- Tabs -->
-    <div class="card p-3 mb-5 flex flex-wrap gap-2">
-      <div class="tab active" onclick="showTab('dashboard',this)">🏠 דשבורד</div>
-      <div class="tab" onclick="showTab('costs',this)">💰 עלויות תפעול</div>
-      <div class="tab" onclick="showTab('staff',this)">👥 כוח אדם</div>
-      <div class="tab" onclick="showTab('suppliers',this)">📦 ספקים</div>
-      <div class="tab" onclick="showTab('products',this)">🍽 מוצרים</div>
-      <div class="tab" onclick="showTab('simulator',this)">📈 סימולטור</div>
-      <div class="tab" onclick="showTab('channels',this)">🛍 ערוצי מכירה</div>
+  <!-- Tabs -->
+  <div class="bg-white border-b border-gray-200 px-4 overflow-x-auto">
+    <div class="max-w-7xl mx-auto flex gap-1 pt-2 min-w-max" id="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('dashboard')">דשבורד</button>
+      <button class="tab-btn" onclick="switchTab('costs')">עלויות תפעול</button>
+      <button class="tab-btn" onclick="switchTab('staff')">כוח אדם</button>
+      <button class="tab-btn" onclick="switchTab('suppliers')">ספקים</button>
+      <button class="tab-btn" onclick="switchTab('products')">מוצרים</button>
+      <button class="tab-btn" onclick="switchTab('simulator')">סימולטור</button>
+      <button class="tab-btn" onclick="switchTab('channels')">ערוצי מכירה</button>
     </div>
+  </div>
 
-    <!-- DASHBOARD -->
-    <div id="tab-dashboard" class="section active">
-      <div class="card p-4 mb-5">
-        <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">⚡ שנה כאן — הכל מתעדכן מיד</div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div><label class="text-xs font-bold text-gray-500 block mb-1">🎯 מחזור יומי יעד (₪)</label><input type="number" id="g-daily" value="10000" min="0" step="500" class="live-input text-lg font-black text-blue-600" oninput="onG()"/></div>
-          <div><label class="text-xs font-bold text-gray-500 block mb-1">📅 ימי פעילות/חודש</label><input type="number" id="g-days" value="30" min="1" max="31" class="live-input text-lg font-black text-blue-600" oninput="onG()"/></div>
-          <div><label class="text-xs font-bold text-gray-500 block mb-1">🛒 F.C. ממוצע %</label><input type="number" id="g-fc" value="36.5" step="0.5" class="live-input text-lg font-black text-orange-600" oninput="onG()"/></div>
-          <div><label class="text-xs font-bold text-gray-500 block mb-1">📊 עמלות פלטפורמה %</label><input type="number" id="g-comm" value="9.375" step="0.1" class="live-input text-lg font-black text-purple-600" oninput="onG()"/></div>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-        <div class="card p-5"><h2 class="text-base font-bold text-purple-700 mb-3">📍 נקודת איזון</h2><div id="be-panel"></div></div>
-        <div class="card p-5"><h2 class="text-base font-bold text-purple-700 mb-3">⚠️ התראות חיות</h2><div id="alerts-panel"></div></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-        <div class="card p-4"><h2 class="text-sm font-bold text-purple-700 mb-2">💰 פירוט עלויות</h2><canvas id="c-pie"></canvas></div>
-        <div class="card p-4"><h2 class="text-sm font-bold text-purple-700 mb-2">🛍 ערוצי מכירה</h2><canvas id="c-ch"></canvas></div>
-        <div class="card p-4"><h2 class="text-sm font-bold text-purple-700 mb-2">📊 הכנסה vs הוצאות</h2><canvas id="c-rv"></canvas></div>
-      </div>
-      <div class="card p-5"><h2 class="text-base font-bold text-purple-700 mb-3">📋 תרחישי רווחיות</h2>
-        <div class="overflow-x-auto"><table class="dt"><thead><tr><th>מחזור יומי</th><th>הכנסה/חודש</th><th>עלות גלם</th><th>עמלות</th><th>קבועות</th><th>רווח/הפסד</th><th>מרווח</th><th>סטטוס</th></tr></thead><tbody id="sc-body"></tbody></table></div>
-      </div>
-    </div>
+  <div class="max-w-7xl mx-auto px-4 py-4">
 
-    <!-- COSTS -->
-    <div id="tab-costs" class="section">
-      <div class="card p-5 mb-5">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-purple-700">💰 עלויות תפעול – הוצאות קבועות</h2>
-          <button onclick="addCost()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    <!-- TAB: Dashboard -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <div class="card">
+          <label class="text-xs font-semibold text-gray-500 block mb-1">מחזור יומי יעד (₪)</label>
+          <input type="number" id="d-daily" class="input-field text-lg font-bold" placeholder="10000" oninput="syncSim();recalcAll()">
         </div>
-        <div id="costs-editor"></div>
-        <div class="mt-4 p-4 bg-purple-50 rounded-xl flex justify-between items-center">
-          <span class="font-bold text-gray-600">סה"כ עלויות תפעול / חודש</span>
-          <span class="text-2xl font-black text-purple-700" id="op-total">₪0</span>
+        <div class="card">
+          <label class="text-xs font-semibold text-gray-500 block mb-1">ימי פעילות/חודש</label>
+          <input type="number" id="d-days" class="input-field text-lg font-bold" placeholder="30" min="1" max="31" oninput="syncSim();recalcAll()">
+        </div>
+        <div class="card">
+          <label class="text-xs font-semibold text-gray-500 block mb-1">F.C. ממוצע%</label>
+          <input type="number" id="d-fc" class="input-field text-lg font-bold" placeholder="36.5" step="0.1" oninput="syncSim();recalcAll()">
+        </div>
+        <div class="card">
+          <label class="text-xs font-semibold text-gray-500 block mb-1">עמלות פלטפורמה%</label>
+          <input type="number" id="d-comm" class="input-field text-lg font-bold" placeholder="9.375" step="0.1" oninput="syncSim();recalcAll()">
         </div>
       </div>
-      <div class="card p-5"><h2 class="text-sm font-bold text-purple-700 mb-3">📊 לפי קטגוריה</h2><canvas id="c-cats" height="200"></canvas></div>
-    </div>
 
-    <!-- STAFF -->
-    <div id="tab-staff" class="section">
-      <div class="card p-5">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-purple-700">👥 מצבת כוח אדם</h2>
-          <button onclick="addStaff()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+      <!-- Break-even panel + alerts -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+        <div class="card lg:col-span-1">
+          <h3 class="font-bold text-gray-700 mb-3 text-sm">נקודת איזון</h3>
+          <div class="space-y-2">
+            <div class="flex justify-between"><span class="text-xs text-gray-500">נקודת איזון יומית</span><span class="font-bold text-purple-700" id="be-daily">₪0</span></div>
+            <div class="flex justify-between"><span class="text-xs text-gray-500">נקודת איזון חודשית</span><span class="font-bold text-purple-700" id="be-monthly">₪0</span></div>
+            <div class="flex justify-between"><span class="text-xs text-gray-500">פער מנקודת איזון</span><span class="font-bold" id="be-gap">₪0</span></div>
+            <div class="mt-3">
+              <div class="flex justify-between text-xs text-gray-500 mb-1"><span>התקדמות</span><span id="be-pct">0%</span></div>
+              <div class="bg-gray-200 rounded-full h-3"><div id="be-bar" class="bg-purple-500 h-3 rounded-full transition-all" style="width:0%"></div></div>
+            </div>
+          </div>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-purple-50 rounded-xl mb-4">
-          <div><div class="text-xs text-gray-500 mb-1">ביטוח לאומי %</div><input type="number" value="3.55" step="0.01" class="live-input text-sm" id="r-ins" oninput="recalc()"/></div>
-          <div><div class="text-xs text-gray-500 mb-1">פנסיה מעביד %</div><input type="number" value="6.5" step="0.01" class="live-input text-sm" id="r-pen" oninput="recalc()"/></div>
-          <div><div class="text-xs text-gray-500 mb-1">פיצויים %</div><input type="number" value="8.33" step="0.01" class="live-input text-sm" id="r-sev" oninput="recalc()"/></div>
-          <div><div class="text-xs text-gray-500 mb-1">חופשה %</div><input type="number" value="4" step="0.01" class="live-input text-sm" id="r-vac" oninput="recalc()"/></div>
-          <div><div class="text-xs text-gray-500 mb-1">מחלה %</div><input type="number" value="1.5" step="0.01" class="live-input text-sm" id="r-sick" oninput="recalc()"/></div>
+        <div class="card lg:col-span-2">
+          <h3 class="font-bold text-gray-700 mb-3 text-sm">התראות חיות</h3>
+          <div id="alerts-panel" class="space-y-2 text-sm"></div>
         </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+        <div class="card">
+          <h3 class="font-bold text-gray-700 mb-2 text-sm">פילוח עלויות</h3>
+          <canvas id="chart-cost-pie" height="200"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="font-bold text-gray-700 mb-2 text-sm">ערוצי מכירה</h3>
+          <canvas id="chart-channels-donut" height="200"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="font-bold text-gray-700 mb-2 text-sm">הכנסות מול הוצאות</h3>
+          <canvas id="chart-rev-costs" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="card">
+        <h3 class="font-bold text-gray-700 mb-3 text-sm">טבלת תרחישים</h3>
         <div class="overflow-x-auto">
-          <table class="dt">
-            <thead><tr><th>תפקיד</th><th>כמות</th><th>שעות/יום</th><th>ימים/שבוע</th><th>שעות/חודש</th><th>עלות שעה ₪</th><th>ברוטו/חודש</th><th>מעביד</th><th>כולל מעביד</th><th></th></tr></thead>
-            <tbody id="staff-body"></tbody>
-            <tfoot><tr style="background:#f8f6ff;font-weight:700;color:#5e549d"><td colspan="6">סה"כ</td><td id="sf-g">₪0</td><td id="sf-e">₪0</td><td id="sf-t">₪0</td><td></td></tr></tfoot>
+          <table id="scenarios-table">
+            <thead>
+              <tr>
+                <th>תרחיש</th><th>מחזור יומי</th><th>מחזור חודשי</th><th>עלות חומרים</th><th>עמלות</th><th>עלויות קבועות</th><th>רווח/הפסד</th><th>מרווח%</th>
+              </tr>
+            </thead>
+            <tbody id="scenarios-body"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- SUPPLIERS -->
-    <div id="tab-suppliers" class="section">
-      <div class="card p-5">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-purple-700">📦 ניהול ספקים וחומרי גלם</h2>
-          <button onclick="addSupplier()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    <!-- TAB: Operating Costs -->
+    <div id="tab-costs" class="tab-content">
+      <div class="card mb-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-gray-700">עלויות תפעול חודשיות</h3>
+          <div class="flex gap-2 items-center">
+            <span class="text-sm text-gray-500">סה"כ: <strong class="text-purple-700 text-base" id="costs-total">₪0</strong></span>
+            <button onclick="addCostRow()" class="btn-purple text-sm py-1.5 px-3">+ הוסף עלות</button>
+          </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="dt"><thead><tr><th>פריט</th><th>ספק</th><th>קטגוריה</th><th>מחירון ₪</th><th>מחיר קניה ₪</th><th>תאריך</th><th>שינוי</th><th>הערות</th><th></th></tr></thead><tbody id="supp-body"></tbody></table>
+          <table id="costs-table">
+            <thead>
+              <tr><th>קטגוריה</th><th>פריט</th><th>סכום חודשי (₪)</th><th>הערות</th><th></th></tr>
+            </thead>
+            <tbody id="costs-body"></tbody>
+          </table>
         </div>
+      </div>
+      <div class="card">
+        <h3 class="font-bold text-gray-700 mb-2 text-sm">עלויות לפי קטגוריה</h3>
+        <canvas id="chart-costs-bar" height="180"></canvas>
       </div>
     </div>
 
-    <!-- PRODUCTS -->
-    <div id="tab-products" class="section">
-      <div class="card p-5 mb-5">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-purple-700">🍽 מוצרים – ניתוח F.C. לפי ערוץ</h2>
-          <button onclick="addProduct()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    <!-- TAB: Staff -->
+    <div id="tab-staff" class="tab-content">
+      <div class="card mb-4">
+        <h3 class="font-bold text-gray-700 mb-3">שיעורי מעסיק</h3>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div><label class="text-xs text-gray-500">ביטוח לאומי%</label><input type="number" id="er-ins" class="input-field text-sm" step="0.01" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">פנסיה%</label><input type="number" id="er-pen" class="input-field text-sm" step="0.01" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">פיצויים%</label><input type="number" id="er-sev" class="input-field text-sm" step="0.01" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">חופשה%</label><input type="number" id="er-vac" class="input-field text-sm" step="0.01" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">מחלה%</label><input type="number" id="er-sick" class="input-field text-sm" step="0.01" oninput="recalcAll()"></div>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-gray-50 rounded-xl mb-4">
-          <div><div class="text-xs font-bold text-green-700 mb-1">Wolt עמלה %</div><input type="number" value="26.5" step="0.1" class="live-input text-sm" id="p-wolt" oninput="renderProducts()"/></div>
-          <div><div class="text-xs font-bold text-orange-700 mb-1">10Bis עמלה %</div><input type="number" value="20" step="0.1" class="live-input text-sm" id="p-10bis" oninput="renderProducts()"/></div>
-          <div><div class="text-xs font-bold text-pink-700 mb-1">Cibus עמלה %</div><input type="number" value="15" step="0.1" class="live-input text-sm" id="p-cibus" oninput="renderProducts()"/></div>
-          <div><div class="text-xs font-bold text-gray-700 mb-1">מע"מ %</div><input type="number" value="18" step="0.1" class="live-input text-sm" id="p-vat" oninput="renderProducts()"/></div>
+      </div>
+      <div class="card">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-gray-700">טבלת עובדים</h3>
+          <div class="flex gap-2 items-center">
+            <span class="text-sm text-gray-500">סה"כ: <strong class="text-purple-700 text-base" id="staff-total">₪0</strong></span>
+            <button onclick="addStaffRow()" class="btn-purple text-sm py-1.5 px-3">+ הוסף עובד</button>
+          </div>
         </div>
         <div class="overflow-x-auto">
-          <table class="dt"><thead><tr><th>מוצר</th><th>קטגוריה</th><th>עלות גלם</th><th>מחיר מסעדה</th><th>F.C. מסעדה</th><th>מחיר Wolt</th><th>F.C. Wolt</th><th>מחיר 10Bis</th><th>F.C. 10Bis</th><th>מחיר Cibus</th><th>F.C. Cibus</th><th></th></tr></thead><tbody id="prod-body"></tbody></table>
+          <table id="staff-table">
+            <thead>
+              <tr>
+                <th>תפקיד</th><th>כמות</th><th>שעות/יום</th><th>ימים/שבוע</th><th>שעות/חודש</th><th>תעריף לשעה</th><th>ברוטו/חודש</th><th>עלות מעסיק</th><th>סה"כ</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="staff-body"></tbody>
+          </table>
         </div>
-      </div>
-      <div class="card p-5"><h2 class="text-sm font-bold text-purple-700 mb-3">📊 F.C. לפי מוצר</h2><canvas id="c-pfc" height="200"></canvas></div>
-    </div>
-
-    <!-- SIMULATOR -->
-    <div id="tab-simulator" class="section">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-        <div class="card p-5">
-          <h2 class="text-xl font-bold text-purple-700 mb-4">⚙️ שנה פרמטרים — מתעדכן חי</h2>
-          <div class="mb-4">
-            <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">מחזור יומי (₪)</label><span class="font-black text-blue-600 text-sm" id="sd-d">₪10,000</span></div>
-            <input type="range" id="sr-daily" min="1000" max="50000" step="500" value="10000" oninput="ss('sn-daily',this.value);ss('g-daily',this.value);$('sd-d').textContent=fmt(+this.value);recalc()"/>
-            <input type="number" value="10000" class="live-input text-sm mt-1" id="sn-daily" oninput="ss('sr-daily',this.value);ss('g-daily',this.value);recalc()"/>
-          </div>
-          <div class="mb-4">
-            <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">ימי פעילות/חודש</label><span class="font-black text-blue-600 text-sm" id="sd-days">30</span></div>
-            <input type="range" id="sr-days" min="15" max="31" step="1" value="30" oninput="ss('sn-days',this.value);ss('g-days',this.value);$('sd-days').textContent=this.value;recalc()"/>
-            <input type="number" value="30" class="live-input text-sm mt-1" id="sn-days" oninput="ss('sr-days',this.value);ss('g-days',this.value);recalc()"/>
-          </div>
-          <div class="mb-4">
-            <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">F.C. ממוצע %</label><span class="font-black text-orange-600 text-sm" id="sd-fc">36.5%</span></div>
-            <input type="range" id="sr-fc" min="10" max="70" step="0.5" value="36.5" oninput="ss('sn-fc',this.value);ss('g-fc',this.value);$('sd-fc').textContent=this.value+'%';recalc()"/>
-            <input type="number" value="36.5" step="0.5" class="live-input text-sm mt-1" id="sn-fc" oninput="ss('sr-fc',this.value);ss('g-fc',this.value);recalc()"/>
-          </div>
-          <div class="mb-4">
-            <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">עמלות %</label><span class="font-black text-purple-600 text-sm" id="sd-comm">9.4%</span></div>
-            <input type="range" id="sr-comm" min="0" max="35" step="0.5" value="9.375" oninput="ss('sn-comm',this.value);ss('g-comm',this.value);$('sd-comm').textContent=(+this.value).toFixed(1)+'%';recalc()"/>
-            <input type="number" value="9.375" step="0.1" class="live-input text-sm mt-1" id="sn-comm" oninput="ss('sr-comm',this.value);ss('g-comm',this.value);recalc()"/>
-          </div>
-        </div>
-        <div class="card p-5"><h2 class="text-xl font-bold text-purple-700 mb-4">📊 תוצאות חיות</h2><div id="sim-res"></div></div>
-      </div>
-      <div class="card p-5 mb-5"><h2 class="text-base font-bold text-purple-700 mb-3">📈 עקומת רווחיות</h2><canvas id="c-curve" height="200"></canvas></div>
-      <div class="card p-5">
-        <h2 class="text-base font-bold text-purple-700 mb-3">📋 טבלת תרחישים מלאה</h2>
-        <div class="overflow-x-auto"><table class="dt"><thead><tr><th>מחזור יומי</th><th>הכנסה</th><th>עלות גלם</th><th>עמלות</th><th>קבועות</th><th>רווח/הפסד</th><th>מרווח</th><th>סטטוס</th></tr></thead><tbody id="sim-sc"></tbody></table></div>
+        <div class="mt-3 text-left text-sm text-gray-500">* שעות/חודש = שעות/יום × ימים/שבוע × 4.33</div>
       </div>
     </div>
 
-    <!-- CHANNELS -->
-    <div id="tab-channels" class="section">
-      <div class="card p-5 mb-5">
-        <h2 class="text-xl font-bold text-purple-700 mb-4">🛍 ערוצי מכירה</h2>
-        <div id="ch-warn" class="alert aw hidden mb-3">⚠️ סה"כ = <span id="ch-sum">0</span>% (חייב להיות 100%)</div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="ch-card" style="border-color:#bfdbfe">
-            <div class="font-bold text-blue-700 mb-3">🏠 מסעדה</div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="60" class="live-input text-sm" id="ch-rp" oninput="recalc()"/></div>
-            <div><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="35.4" step="0.1" class="live-input text-sm" id="ch-rf" oninput="recalc()"/></div>
+    <!-- TAB: Suppliers -->
+    <div id="tab-suppliers" class="tab-content">
+      <div class="card">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-gray-700">רשימת ספקים</h3>
+          <button onclick="addSupplierRow()" class="btn-purple text-sm py-1.5 px-3">+ הוסף ספק</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table id="suppliers-table">
+            <thead>
+              <tr><th>פריט</th><th>ספק</th><th>קטגוריה</th><th>מחיר רשימה</th><th>מחיר רכישה</th><th>תאריך</th><th>שינוי</th><th>הערות</th><th></th></tr>
+            </thead>
+            <tbody id="suppliers-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Products -->
+    <div id="tab-products" class="tab-content">
+      <div class="card mb-4">
+        <h3 class="font-bold text-gray-700 mb-3">עמלות ערוצים ומע"מ</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div><label class="text-xs text-gray-500">Wolt%</label><input type="number" id="pc-wolt" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">10Bis%</label><input type="number" id="pc-tbis" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">Cibus%</label><input type="number" id="pc-cib" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+          <div><label class="text-xs text-gray-500">מע"מ%</label><input type="number" id="pc-vat" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-gray-700">טבלת מוצרים</h3>
+          <button onclick="addProductRow()" class="btn-purple text-sm py-1.5 px-3">+ הוסף מוצר</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table id="products-table">
+            <thead>
+              <tr>
+                <th>שם מוצר</th><th>קטגוריה</th><th>עלות חומרים</th><th>מחיר מסעדה</th><th>F.C.%</th>
+                <th>מחיר Wolt</th><th>F.C.%</th><th>מחיר 10Bis</th><th>F.C.%</th><th>מחיר Cibus</th><th>F.C.%</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="products-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="font-bold text-gray-700 mb-2 text-sm">השוואת F.C. לפי מוצר וערוץ</h3>
+        <canvas id="chart-products-bar" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- TAB: Simulator -->
+    <div id="tab-simulator" class="tab-content">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="card space-y-4">
+          <h3 class="font-bold text-gray-700">פרמטרים</h3>
+          <div>
+            <div class="flex justify-between text-sm mb-1"><span>מחזור יומי</span><span class="font-bold text-purple-700" id="sim-daily-lbl">₪10,000</span></div>
+            <input type="range" id="sim-daily" min="1000" max="50000" step="500" class="w-full" oninput="syncFromSim('daily');recalcAll()">
+            <input type="number" id="sim-daily-n" class="input-field text-sm mt-1" oninput="syncFromSimN('daily');recalcAll()">
           </div>
-          <div class="ch-card" style="border-color:#bbf7d0">
-            <div class="font-bold text-green-700 mb-3">🟢 Wolt</div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="25" class="live-input text-sm" id="ch-wp" oninput="recalc()"/></div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. %</div><input type="number" value="60.77" step="0.1" class="live-input text-sm" id="ch-wf" oninput="recalc()"/></div>
-            <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="26.5" step="0.1" class="live-input text-sm" id="ch-wc" oninput="recalc()"/></div>
+          <div>
+            <div class="flex justify-between text-sm mb-1"><span>ימי פעילות</span><span class="font-bold text-purple-700" id="sim-days-lbl">30</span></div>
+            <input type="range" id="sim-days" min="15" max="31" step="1" class="w-full" oninput="syncFromSim('days');recalcAll()">
+            <input type="number" id="sim-days-n" class="input-field text-sm mt-1" oninput="syncFromSimN('days');recalcAll()">
           </div>
-          <div class="ch-card" style="border-color:#fed7aa">
-            <div class="font-bold text-orange-700 mb-3">🟠 10Bis</div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="10" class="live-input text-sm" id="ch-tp" oninput="recalc()"/></div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. %</div><input type="number" value="0" step="0.1" class="live-input text-sm" id="ch-tf" oninput="recalc()"/></div>
-            <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="20" step="0.1" class="live-input text-sm" id="ch-tc" oninput="recalc()"/></div>
+          <div>
+            <div class="flex justify-between text-sm mb-1"><span>F.C. ממוצע%</span><span class="font-bold text-purple-700" id="sim-fc-lbl">36.5%</span></div>
+            <input type="range" id="sim-fc" min="10" max="70" step="0.5" class="w-full" oninput="syncFromSim('fc');recalcAll()">
+            <input type="number" id="sim-fc-n" class="input-field text-sm mt-1" step="0.1" oninput="syncFromSimN('fc');recalcAll()">
           </div>
-          <div class="ch-card" style="border-color:#fbcfe8">
-            <div class="font-bold text-pink-700 mb-3">🟣 Cibus</div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="5" class="live-input text-sm" id="ch-cp" oninput="recalc()"/></div>
-            <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. %</div><input type="number" value="0" step="0.1" class="live-input text-sm" id="ch-cf" oninput="recalc()"/></div>
-            <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="15" step="0.1" class="live-input text-sm" id="ch-cc" oninput="recalc()"/></div>
+          <div>
+            <div class="flex justify-between text-sm mb-1"><span>עמלות%</span><span class="font-bold text-purple-700" id="sim-comm-lbl">9.375%</span></div>
+            <input type="range" id="sim-comm" min="0" max="35" step="0.5" class="w-full" oninput="syncFromSim('comm');recalcAll()">
+            <input type="number" id="sim-comm-n" class="input-field text-sm mt-1" step="0.1" oninput="syncFromSimN('comm');recalcAll()">
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="font-bold text-gray-700 mb-4">תוצאות חיות</h3>
+          <div class="space-y-2">
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm">הכנסה חודשית</span><span class="font-bold" id="sim-res-rev">₪0</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm">עלות חומרים (F.C.)</span><span class="font-bold text-orange-600" id="sim-res-fc">₪0</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm">עמלות פלטפורמה</span><span class="font-bold text-orange-600" id="sim-res-comm">₪0</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm">עלויות קבועות</span><span class="font-bold text-red-600" id="sim-res-fixed">₪0</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm">סה"כ הוצאות</span><span class="font-bold text-red-600" id="sim-res-total">₪0</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm font-bold">רווח/הפסד</span><span class="font-bold text-xl" id="sim-res-profit">₪0</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-gray-600 text-sm">מרווח%</span><span class="font-bold" id="sim-res-margin">0%</span></div>
+            <div class="flex justify-between"><span class="text-gray-600 text-sm">פער מנקודת איזון</span><span class="font-bold" id="sim-res-be-gap">₪0</span></div>
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="card p-5"><h2 class="text-sm font-bold text-purple-700 mb-3">📊 התפלגות</h2><canvas id="c-dist" height="250"></canvas></div>
-        <div class="card p-5"><h2 class="text-sm font-bold text-purple-700 mb-4">📋 תרומה לפי ערוץ</h2><div id="ch-contrib"></div></div>
+      <div class="card mb-4">
+        <h3 class="font-bold text-gray-700 mb-2 text-sm">עקומת רווח</h3>
+        <canvas id="chart-profit-curve" height="180"></canvas>
+      </div>
+      <div class="card">
+        <h3 class="font-bold text-gray-700 mb-3 text-sm">טבלת תרחישים</h3>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr><th>תרחיש</th><th>מחזור יומי</th><th>מחזור חודשי</th><th>עלות F.C.</th><th>עמלות</th><th>עלויות קבועות</th><th>רווח/הפסד</th><th>מרווח%</th></tr>
+            </thead>
+            <tbody id="sim-scenarios-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ============ MODAL: ADD/EDIT CLIENT ============ -->
-<div id="modal-bg" class="modal-bg hidden" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-black text-purple-700" id="modal-title">➕ לקוח חדש</h2>
-      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+    <!-- TAB: Channels -->
+    <div id="tab-channels" class="tab-content">
+      <div id="channels-warning" class="hidden bg-red-50 border border-red-300 text-red-700 rounded-xl p-3 mb-4 text-sm font-semibold">
+        ⚠️ סך האחוזים של כל הערוצים אינו שווה 100% – נא לתקן
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+        <!-- Rest -->
+        <div class="channel-card ch-rest">
+          <div class="font-bold text-blue-700 mb-3">🍽️ מסעדה</div>
+          <div class="space-y-2">
+            <div><label class="text-xs text-gray-500">% מהמכירות</label><input type="number" id="ch-rest-pct" class="input-field text-sm" step="1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">F.C. ממוצע%</label><input type="number" id="ch-rest-fc" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">עמלה%</label><div class="input-field text-sm bg-gray-100">0</div></div>
+          </div>
+          <div class="mt-3 text-xs text-gray-500">תרומה: <strong id="ch-rest-contrib" class="text-blue-700">₪0</strong></div>
+        </div>
+        <!-- Wolt -->
+        <div class="channel-card ch-wolt">
+          <div class="font-bold text-green-700 mb-3">🟢 Wolt</div>
+          <div class="space-y-2">
+            <div><label class="text-xs text-gray-500">% מהמכירות</label><input type="number" id="ch-wolt-pct" class="input-field text-sm" step="1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">F.C. ממוצע%</label><input type="number" id="ch-wolt-fc" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">עמלה%</label><input type="number" id="ch-wolt-comm" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+          </div>
+          <div class="mt-3 text-xs text-gray-500">תרומה: <strong id="ch-wolt-contrib" class="text-green-700">₪0</strong></div>
+        </div>
+        <!-- 10Bis -->
+        <div class="channel-card ch-tbis">
+          <div class="font-bold text-orange-700 mb-3">🟠 10Bis</div>
+          <div class="space-y-2">
+            <div><label class="text-xs text-gray-500">% מהמכירות</label><input type="number" id="ch-tbis-pct" class="input-field text-sm" step="1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">F.C. ממוצע%</label><input type="number" id="ch-tbis-fc" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">עמלה%</label><input type="number" id="ch-tbis-comm" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+          </div>
+          <div class="mt-3 text-xs text-gray-500">תרומה: <strong id="ch-tbis-contrib" class="text-orange-700">₪0</strong></div>
+        </div>
+        <!-- Cibus -->
+        <div class="channel-card ch-cib">
+          <div class="font-bold text-pink-700 mb-3">🟣 Cibus</div>
+          <div class="space-y-2">
+            <div><label class="text-xs text-gray-500">% מהמכירות</label><input type="number" id="ch-cib-pct" class="input-field text-sm" step="1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">F.C. ממוצע%</label><input type="number" id="ch-cib-fc" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+            <div><label class="text-xs text-gray-500">עמלה%</label><input type="number" id="ch-cib-comm" class="input-field text-sm" step="0.1" oninput="recalcAll()"></div>
+          </div>
+          <div class="mt-3 text-xs text-gray-500">תרומה: <strong id="ch-cib-contrib" class="text-pink-700">₪0</strong></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card">
+          <h3 class="font-bold text-gray-700 mb-2 text-sm">פיזור לפי ערוץ</h3>
+          <canvas id="chart-channels-bar" height="200"></canvas>
+        </div>
+        <div class="card">
+          <h3 class="font-bold text-gray-700 mb-3 text-sm">ניתוח תרומה לפי ערוץ</h3>
+          <div id="channel-analysis" class="space-y-2 text-sm"></div>
+        </div>
+      </div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <div class="md:col-span-2">
-        <label class="text-sm font-bold text-gray-600 block mb-1">שם הלקוח / שם העסק *</label>
-        <input type="text" id="m-name" class="live-input rtl text-base" placeholder="לדוגמה: מסעדת הגינה" />
-      </div>
-      <div>
-        <label class="text-sm font-bold text-gray-600 block mb-1">סוג עסק</label>
-        <select id="m-type" class="live-input rtl">
-          <option>מסעדה</option><option>קפה / בית קפה</option><option>פיצריה</option>
-          <option>פלאפל / שווארמה</option><option>סושי</option><option>המבורגר</option>
-          <option>קייטרינג</option><option>מאפייה</option><option>ברביקיו / גריל</option><option>אחר</option>
-        </select>
-      </div>
-      <div>
-        <label class="text-sm font-bold text-gray-600 block mb-1">טלפון</label>
-        <input type="tel" id="m-phone" class="live-input" placeholder="050-0000000" />
-      </div>
-      <div>
-        <label class="text-sm font-bold text-gray-600 block mb-1">אימייל</label>
-        <input type="email" id="m-email" class="live-input" placeholder="email@example.com" />
-      </div>
-      <div>
-        <label class="text-sm font-bold text-gray-600 block mb-1">כתובת</label>
-        <input type="text" id="m-address" class="live-input rtl" placeholder="כתובת העסק" />
-      </div>
-      <div class="md:col-span-2">
-        <label class="text-sm font-bold text-gray-600 block mb-1">הערות</label>
-        <textarea id="m-notes" class="live-input rtl" rows="2" placeholder="הערות נוספות..."></textarea>
-      </div>
-    </div>
-    <input type="hidden" id="m-edit-id" value=""/>
-    <div id="m-err" class="text-red-500 text-sm mb-3 hidden">נא למלא שם לקוח</div>
-    <div class="flex gap-3 justify-end">
-      <button onclick="closeModal()" class="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold">ביטול</button>
-      <button onclick="saveClient()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-bold">שמור ופתח תוכנית</button>
-    </div>
-  </div>
-</div>
+
+  </div><!-- end plan content -->
+</div><!-- end screen-plan -->
 
 <script>
-// ============================================================
-// STORAGE
-// ============================================================
-const STORE = 'resto_crm_v1';
+// ─── State ───────────────────────────────────────────────
+const STORAGE_KEY = 'resto_crm_v1';
 let clients = [];
-let currentId = null;
-let D = null; // active plan data
+let currentClientId = null;
 let saveTimer = null;
+let charts = {};
+let activeTab = 'dashboard';
 
-function loadStorage() {
-  try { clients = JSON.parse(localStorage.getItem(STORE)) || []; } catch { clients = []; }
-}
-function saveStorage() {
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    if (currentId && D) {
-      const c = clients.find(x => x.id === currentId);
-      if (c) { c.plan = exportPlan(); }
-    }
-    localStorage.setItem(STORE, JSON.stringify(clients));
-  }, 400);
-}
-
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-
+// ─── Default data builders ───────────────────────────────
 function defaultPlan() {
   return {
-    daily:10000, days:30, fc:36.5, comm:9.375,
-    empRates:{ins:3.55,pen:6.5,sev:8.33,vac:4,sick:1.5},
-    ch:{rp:60,rf:35.4,wp:25,wf:60.77,wc:26.5,tp:10,tf:0,tc:20,cp:5,cf:0,cc:15},
-    prodComm:{wolt:26.5,tenBis:20,cibus:15,vat:18},
-    costs:[
-      {cat:'🏠 שכירות ונכס',name:'שכירות חודשית',v:0},
-      {cat:'🏠 שכירות ונכס',name:'ארנונה',v:0},
-      {cat:'🏠 שכירות ונכס',name:'ביטוח מבנה',v:0},
-      {cat:'⚡ חשבונות שוטפים',name:'חשמל',v:0},
-      {cat:'⚡ חשבונות שוטפים',name:'מים',v:0},
-      {cat:'⚡ חשבונות שוטפים',name:'גז',v:0},
-      {cat:'⚡ חשבונות שוטפים',name:'אינטרנט',v:0},
-      {cat:'🔧 ציוד ואחזקה',name:'אחזקת ציוד',v:0},
-      {cat:'🔧 ציוד ואחזקה',name:'הדברה',v:0},
-      {cat:'🔧 ציוד ואחזקה',name:'ניקיון',v:0},
-      {cat:'📣 שיווק ופרסום',name:'פרסום ממומן',v:0},
-      {cat:'📣 שיווק ופרסום',name:'ניהול רשתות',v:0},
-      {cat:'📋 ביטוחים',name:'רישיון עסק',v:0},
-      {cat:'📋 ביטוחים',name:'ביטוח אחריות',v:0},
-      {cat:'💻 טכנולוגיה',name:'קופה רושמת',v:0},
-      {cat:'💼 מקצועיים',name:'חשבונאי',v:0},
-    ],
-    staff:[
-      {role:'מנהל מסעדה',cnt:1,hd:10,dw:6,hr:55},
-      {role:'אחראי משמרת',cnt:0,hd:8,dw:6,hr:45},
-      {role:'טבח',cnt:0,hd:8,dw:6,hr:40},
-      {role:'מלצר',cnt:0,hd:8,dw:5,hr:35},
-    ],
-    suppliers:[],
-    products:[],
+    daily: 10000,
+    days: 30,
+    fc: 36.5,
+    comm: 9.375,
+    empRates: { ins: 3.55, pen: 6.5, sev: 8.33, vac: 4, sick: 1.5 },
+    channels: {
+      restPct: 60, restFc: 35.4,
+      woltPct: 25, woltFc: 60.77, woltComm: 26.5,
+      tbisPct: 10, tbisFc: 0, tbisComm: 20,
+      cibPct: 5, cibFc: 0, cibComm: 15
+    },
+    prodComm: { wolt: 26.5, tenBis: 20, cibus: 15, vat: 18 },
+    costs: defaultCosts(),
+    staff: defaultStaff(),
+    suppliers: [],
+    products: []
   };
 }
 
-// ============================================================
-// UTILS
-// ============================================================
-const $ = id => document.getElementById(id);
-const N = id => parseFloat($(id)?.value)||0;
-const ss = (id,v) => { if($(id)) $(id).value=v; };
-const fmt = (n,d=0) => '₪'+Number(n||0).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
-const pct = (n,d=1) => Number(n||0).toFixed(d)+'%';
-const txt = (id,v) => { if($(id)) $(id).textContent=v; };
+function defaultCosts() {
+  return [
+    { cat: 'שכירות ונכס', item: 'שכירות חודשית', amount: 0, notes: '' },
+    { cat: 'שכירות ונכס', item: 'ארנונה', amount: 0, notes: '' },
+    { cat: 'שכירות ונכס', item: 'ביטוח מבנה', amount: 0, notes: '' },
+    { cat: 'חשבונות שוטפים', item: 'חשמל', amount: 0, notes: '' },
+    { cat: 'חשבונות שוטפים', item: 'מים', amount: 0, notes: '' },
+    { cat: 'חשבונות שוטפים', item: 'גז', amount: 0, notes: '' },
+    { cat: 'חשבונות שוטפים', item: 'אינטרנט', amount: 0, notes: '' },
+    { cat: 'חשבונות שוטפים', item: 'טלפון', amount: 0, notes: '' },
+    { cat: 'ציוד ואחזקה', item: 'אחזקת ציוד', amount: 0, notes: '' },
+    { cat: 'ציוד ואחזקה', item: 'הדברה', amount: 0, notes: '' },
+    { cat: 'ציוד ואחזקה', item: 'ניקיון', amount: 0, notes: '' },
+    { cat: 'שיווק ופרסום', item: 'פרסום ממומן', amount: 0, notes: '' },
+    { cat: 'שיווק ופרסום', item: 'ניהול רשתות', amount: 0, notes: '' },
+    { cat: 'שיווק ופרסום', item: 'עיצוב', amount: 0, notes: '' },
+    { cat: 'ביטוחים ורישיונות', item: 'רישיון עסק', amount: 0, notes: '' },
+    { cat: 'ביטוחים ורישיונות', item: 'ביטוח אחריות', amount: 0, notes: '' },
+    { cat: 'ביטוחים ורישיונות', item: 'כשרות', amount: 0, notes: '' },
+    { cat: 'טכנולוגיה', item: 'קופה רושמת', amount: 0, notes: '' },
+    { cat: 'טכנולוגיה', item: 'תוכנות', amount: 0, notes: '' },
+    { cat: 'שירותים מקצועיים', item: 'חשבונאי', amount: 0, notes: '' },
+    { cat: 'שירותים מקצועיים', item: 'עו"ד', amount: 0, notes: '' },
+  ];
+}
 
-// ============================================================
-// CLIENT LIST
-// ============================================================
+function defaultStaff() {
+  return [
+    { role: 'מנהל', cnt: 1, hd: 10, dw: 6, hr: 55 },
+    { role: 'אחראי משמרת', cnt: 0, hd: 8, dw: 6, hr: 45 },
+    { role: 'טבח', cnt: 0, hd: 8, dw: 6, hr: 40 },
+    { role: 'מלצר', cnt: 0, hd: 8, dw: 5, hr: 35 },
+  ];
+}
+
+// ─── Storage ─────────────────────────────────────────────
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) clients = JSON.parse(raw);
+  } catch(e) { clients = []; }
+}
+
+function saveData() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clients));
+  }, 500);
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+// ─── Screen navigation ────────────────────────────────────
+function showList() {
+  document.getElementById('screen-list').classList.remove('hidden');
+  document.getElementById('screen-plan').classList.add('hidden');
+  currentClientId = null;
+  renderClientList();
+}
+
+function showPlan(id) {
+  const client = clients.find(c => c.id === id);
+  if (!client) return;
+  currentClientId = id;
+  document.getElementById('screen-list').classList.add('hidden');
+  document.getElementById('screen-plan').classList.remove('hidden');
+  document.getElementById('plan-title').textContent = client.name;
+  document.getElementById('plan-subtitle').textContent = client.type + (client.phone ? ' | ' + client.phone : '');
+  loadPlanInputs(client.plan);
+  switchTab('dashboard');
+  recalcAll();
+}
+
+function goBack() {
+  readPlanInputs();
+  saveData();
+  showList();
+}
+
+// ─── Add Modal ───────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-phone').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-address').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('modal-add').classList.remove('hidden');
+  document.getElementById('f-name').focus();
+}
+
+function closeAddModal() {
+  document.getElementById('modal-add').classList.add('hidden');
+}
+
+function saveNewClient() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { document.getElementById('f-name').focus(); document.getElementById('f-name').style.borderColor='red'; return; }
+  document.getElementById('f-name').style.borderColor='';
+  const client = {
+    id: uid(),
+    name,
+    type: document.getElementById('f-type').value,
+    phone: document.getElementById('f-phone').value,
+    email: document.getElementById('f-email').value,
+    address: document.getElementById('f-address').value,
+    notes: document.getElementById('f-notes').value,
+    createdAt: new Date().toISOString(),
+    plan: defaultPlan()
+  };
+  clients.push(client);
+  saveData();
+  closeAddModal();
+  showPlan(client.id);
+}
+
+// ─── Client List Render ──────────────────────────────────
 function renderClientList() {
-  const q = ($('search-input')?.value||'').toLowerCase();
-  const filtered = clients.filter(c => c.name.toLowerCase().includes(q) || c.type.toLowerCase().includes(q));
-  const grid = $('client-grid');
-  const empty = $('empty-state');
-
-  if (!filtered.length) {
-    grid.innerHTML=''; empty.classList.remove('hidden');
-    updateSummary(); return;
+  const grid = document.getElementById('clients-grid');
+  const empty = document.getElementById('empty-state');
+  grid.innerHTML = '';
+  if (clients.length === 0) {
+    empty.classList.remove('hidden');
+    updateSummary();
+    return;
   }
   empty.classList.add('hidden');
-
-  grid.innerHTML = filtered.map(c => {
-    const p = c.plan;
-    const {profit} = quickCalc(p);
-    const statusBadge = !p.daily ? '<span class="bn">⚪ לא הוגדר</span>'
-      : profit > 0 ? '<span class="bp">✅ רווחי</span>'
-      : '<span class="bl">❌ הפסד</span>';
-    const {daily: beDaily} = quickBE(p);
-    const profitColor = profit > 0 ? 'text-green-600' : profit < 0 ? 'text-red-500' : 'text-gray-400';
-    const typeEmoji = {מסעדה:'🍽',קפה:'☕',פיצריה:'🍕',פלאפל:'🥙',סושי:'🍱',המבורגר:'🍔',קייטרינג:'🍴',מאפייה:'🥐',ברביקיו:'🔥',אחר:'🏪'};
-    const em = Object.entries(typeEmoji).find(([k])=>c.type.startsWith(k))?.[1]||'🏪';
-    return `<div class="client-card" onclick="openClient('${c.id}')">
-      <div class="flex justify-between items-start mb-3">
+  clients.forEach(c => {
+    const calc = calcProfit(c.plan);
+    const profit = calc.profit;
+    let badge = '', statusClass = '';
+    if (profit === 0 && calc.revenue === 0) {
+      badge = '⚪ לא הוגדר'; statusClass = 'status-badge-unknown';
+    } else if (profit > 0) {
+      badge = '✅ רווחי'; statusClass = 'status-badge-profit';
+    } else {
+      badge = '❌ הפסד'; statusClass = 'status-badge-loss';
+    }
+    const el = document.createElement('div');
+    el.className = 'card rounded-2xl shadow flex flex-col gap-3';
+    el.innerHTML = `
+      <div class="flex justify-between items-start">
         <div>
-          <div class="text-lg font-black text-gray-800">${em} ${c.name}</div>
-          <div class="text-xs text-gray-400 mt-0.5">${c.type}</div>
+          <div class="font-bold text-gray-800 text-base">${esc(c.name)}</div>
+          <div class="text-xs text-gray-500">${esc(c.type)}</div>
         </div>
-        ${statusBadge}
+        <span class="${statusClass}">${badge}</span>
       </div>
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <div class="bg-gray-50 rounded-lg p-2"><div class="text-xs text-gray-400">מחזור יומי</div><div class="font-bold text-sm">${fmt(p.daily)}</div></div>
-        <div class="bg-gray-50 rounded-lg p-2"><div class="text-xs text-gray-400">נ. איזון יומי</div><div class="font-bold text-sm text-orange-600">${fmt(beDaily)}</div></div>
-      </div>
-      <div class="flex justify-between items-center">
-        <div><div class="text-xs text-gray-400">רווח / הפסד חודשי</div><div class="font-black text-lg ${profitColor}">${fmt(profit)}</div></div>
-        <div class="flex gap-2">
-          <button onclick="event.stopPropagation();editClient('${c.id}')" class="text-gray-400 hover:text-purple-600 text-sm px-2 py-1 rounded-lg hover:bg-purple-50">✏️</button>
-          <button onclick="event.stopPropagation();deleteClient('${c.id}')" class="text-gray-400 hover:text-red-500 text-sm px-2 py-1 rounded-lg hover:bg-red-50">🗑</button>
-          <button onclick="event.stopPropagation();openClient('${c.id}')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-2 rounded-lg font-bold">פתח תוכנית ←</button>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-gray-50 rounded-lg p-2">
+          <div class="text-xs text-gray-400">רווח חודשי</div>
+          <div class="font-bold text-sm ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-2">
+          <div class="text-xs text-gray-400">יעד יומי</div>
+          <div class="font-bold text-sm text-purple-700">${fmt(c.plan.daily)}</div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-2">
+          <div class="text-xs text-gray-400">איזון יומי</div>
+          <div class="font-bold text-sm text-blue-600">${fmt(calc.beDaily)}</div>
         </div>
       </div>
-      ${c.phone||c.email ? `<div class="mt-2 text-xs text-gray-400">${c.phone||''} ${c.email?'· '+c.email:''}</div>` : ''}
-      <div class="text-xs text-gray-300 mt-1">${new Date(c.createdAt).toLocaleDateString('he-IL')}</div>
-    </div>`;
-  }).join('');
-
+      <div class="text-xs text-gray-400">נוצר: ${new Date(c.createdAt).toLocaleDateString('he-IL')}</div>
+      <div class="flex gap-2 mt-1">
+        <button onclick="showPlan('${c.id}')" class="btn-purple flex-1 text-sm py-1.5">פתח תוכנית</button>
+        <button onclick="deleteClient('${c.id}')" class="btn-red py-1.5 px-3">🗑</button>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
   updateSummary();
 }
 
 function updateSummary() {
-  const profits = clients.map(c => quickCalc(c.plan).profit);
-  txt('sum-total', clients.length);
-  txt('sum-profit', profits.filter(p=>p>0).length);
-  txt('sum-loss', profits.filter(p=>p<0).length);
-  txt('sum-monthly', fmt(profits.reduce((s,p)=>s+p,0)));
+  let profitable = 0, loss = 0, totalProfit = 0;
+  clients.forEach(c => {
+    const calc = calcProfit(c.plan);
+    if (calc.profit > 0) profitable++;
+    else if (calc.profit < 0) loss++;
+    totalProfit += calc.profit;
+  });
+  document.getElementById('sum-total').textContent = clients.length;
+  document.getElementById('sum-profit').textContent = profitable;
+  document.getElementById('sum-loss').textContent = loss;
+  document.getElementById('sum-monthly').textContent = fmt(totalProfit);
 }
 
-function quickCalc(p) {
-  const fc=(p.fc||36.5)/100, cm=(p.comm||9.375)/100;
-  const rev=(p.daily||0)*(p.days||30);
-  const fixed=quickFixed(p);
-  const total=rev*fc+rev*cm+fixed;
-  return {rev, profit:rev-total};
-}
-function quickFixed(p) {
-  const opCosts=(p.costs||[]).reduce((s,c)=>s+(parseFloat(c.v)||0),0);
-  const ep=((p.empRates?.ins||3.55)+(p.empRates?.pen||6.5)+(p.empRates?.sev||8.33)+(p.empRates?.vac||4)+(p.empRates?.sick||1.5))/100;
-  const staffCost=(p.staff||[]).reduce((s,st)=>{
-    const n=st.cnt||0; if(!n) return s;
-    const g=(st.hd||0)*(st.dw||0)*4.33*(st.hr||0)*n;
-    return s+g+g*ep;
-  },0);
-  return opCosts+staffCost;
-}
-function quickBE(p) {
-  const fc=(p.fc||36.5)/100, cm=(p.comm||9.375)/100;
-  const denom=Math.max(0.0001,1-fc-cm);
-  const mo=quickFixed(p)/denom;
-  return {mo, daily:mo/Math.max(1,p.days||30)};
-}
-
-// ============================================================
-// MODAL
-// ============================================================
-function openAddModal() {
-  $('m-name').value=''; $('m-type').value='מסעדה';
-  $('m-phone').value=''; $('m-email').value='';
-  $('m-address').value=''; $('m-notes').value='';
-  $('m-edit-id').value='';
-  $('m-err').classList.add('hidden');
-  $('modal-title').textContent='➕ לקוח חדש';
-  $('modal-bg').classList.remove('hidden');
-  setTimeout(()=>$('m-name').focus(),100);
-}
-function editClient(id) {
-  const c=clients.find(x=>x.id===id); if(!c) return;
-  $('m-name').value=c.name; $('m-type').value=c.type;
-  $('m-phone').value=c.phone||''; $('m-email').value=c.email||'';
-  $('m-address').value=c.address||''; $('m-notes').value=c.notes||'';
-  $('m-edit-id').value=id;
-  $('m-err').classList.add('hidden');
-  $('modal-title').textContent='✏️ עריכת לקוח';
-  $('modal-bg').classList.remove('hidden');
-}
-function closeModal() { $('modal-bg').classList.add('hidden'); }
-function saveClient() {
-  const name=($('m-name').value||'').trim();
-  if(!name){$('m-err').classList.remove('hidden');return;}
-  const editId=$('m-edit-id').value;
-  if(editId) {
-    const c=clients.find(x=>x.id===editId);
-    if(c){c.name=name;c.type=$('m-type').value;c.phone=$('m-phone').value;c.email=$('m-email').value;c.address=$('m-address').value;c.notes=$('m-notes').value;}
-    saveStorage(); closeModal(); renderClientList(); return;
-  }
-  const c={id:uid(),name,type:$('m-type').value,phone:$('m-phone').value,email:$('m-email').value,address:$('m-address').value,notes:$('m-notes').value,createdAt:new Date().toISOString(),plan:defaultPlan()};
-  clients.push(c); saveStorage(); closeModal(); openClient(c.id);
-}
 function deleteClient(id) {
-  if(!confirm('למחוק את הלקוח? הפעולה לא ניתנת לשחזור.')) return;
-  clients=clients.filter(x=>x.id!==id); saveStorage(); renderClientList();
+  if (!confirm('למחוק לקוח זה?')) return;
+  clients = clients.filter(c => c.id !== id);
+  saveData();
+  renderClientList();
 }
 
-// ============================================================
-// OPEN CLIENT PLAN
-// ============================================================
-function openClient(id) {
-  const c=clients.find(x=>x.id===id); if(!c) return;
-  currentId=id; D=JSON.parse(JSON.stringify(c.plan));
-  txt('plan-client-name',c.name); txt('plan-client-type',c.type);
-  $('screen-list').classList.remove('active');
-  $('screen-plan').classList.add('active');
-  importPlan(D);
-  renderCostsEditor(); renderStaffTable(); renderSuppliersTable(); renderProducts();
-  // reset to dashboard tab
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  $('tab-dashboard').classList.add('active');
-  document.querySelectorAll('.tab')[0].classList.add('active');
-  recalc();
-}
-function backToList() {
-  savePlanToClient();
-  $('screen-plan').classList.remove('active');
-  $('screen-list').classList.add('active');
-  currentId=null; D=null; renderClientList();
-}
-function savePlanToClient() {
-  if(!currentId) return;
-  const c=clients.find(x=>x.id===currentId);
-  if(c){c.plan=exportPlan(); saveStorage();}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ============================================================
-// PLAN IMPORT / EXPORT
-// ============================================================
-function importPlan(p) {
-  ss('g-daily',p.daily||10000); ss('g-days',p.days||30);
-  ss('g-fc',p.fc||36.5); ss('g-comm',p.comm||9.375);
-  ss('r-ins',p.empRates?.ins||3.55); ss('r-pen',p.empRates?.pen||6.5);
-  ss('r-sev',p.empRates?.sev||8.33); ss('r-vac',p.empRates?.vac||4); ss('r-sick',p.empRates?.sick||1.5);
-  const ch=p.ch||{};
-  ss('ch-rp',ch.rp??60); ss('ch-rf',ch.rf??35.4);
-  ss('ch-wp',ch.wp??25); ss('ch-wf',ch.wf??60.77); ss('ch-wc',ch.wc??26.5);
-  ss('ch-tp',ch.tp??10); ss('ch-tf',ch.tf??0); ss('ch-tc',ch.tc??20);
-  ss('ch-cp',ch.cp??5); ss('ch-cf',ch.cf??0); ss('ch-cc',ch.cc??15);
-  const pc=p.prodComm||{};
-  ss('p-wolt',pc.wolt||26.5); ss('p-10bis',pc.tenBis||20); ss('p-cibus',pc.cibus||15); ss('p-vat',pc.vat||18);
-  // sync sliders
-  ss('sr-daily',p.daily||10000); ss('sn-daily',p.daily||10000);
-  ss('sr-days',p.days||30); ss('sn-days',p.days||30);
-  ss('sr-fc',p.fc||36.5); ss('sn-fc',p.fc||36.5);
-  ss('sr-comm',p.comm||9.375); ss('sn-comm',p.comm||9.375);
-}
-function exportPlan() {
-  return {
-    daily:N('g-daily'), days:N('g-days'), fc:N('g-fc'), comm:N('g-comm'),
-    empRates:{ins:N('r-ins'),pen:N('r-pen'),sev:N('r-sev'),vac:N('r-vac'),sick:N('r-sick')},
-    ch:{rp:N('ch-rp'),rf:N('ch-rf'),wp:N('ch-wp'),wf:N('ch-wf'),wc:N('ch-wc'),tp:N('ch-tp'),tf:N('ch-tf'),tc:N('ch-tc'),cp:N('ch-cp'),cf:N('ch-cf'),cc:N('ch-cc')},
-    prodComm:{wolt:N('p-wolt'),tenBis:N('p-10bis'),cibus:N('p-cibus'),vat:N('p-vat')},
-    costs:D?.costs||[], staff:D?.staff||[], suppliers:D?.suppliers||[], products:D?.products||[],
-  };
+// ─── Calculations ─────────────────────────────────────────
+function calcProfit(plan) {
+  const daily = +plan.daily || 0;
+  const days = +plan.days || 30;
+  const fc = +plan.fc || 0;
+  const comm = +plan.comm || 0;
+  const revenue = daily * days;
+  const rawCost = revenue * fc / 100;
+  const commCost = revenue * comm / 100;
+  const staffTotal = calcStaffTotal(plan);
+  const fixedTotal = calcCostsTotal(plan) + staffTotal;
+  const totalExp = rawCost + commCost + fixedTotal;
+  const profit = revenue - totalExp;
+  const margin = revenue > 0 ? profit / revenue * 100 : 0;
+  const varPct = (fc + comm) / 100;
+  const beMonthly = varPct < 1 ? fixedTotal / (1 - varPct) : 0;
+  const beDaily = days > 0 ? beMonthly / days : 0;
+  return { daily, days, fc, comm, revenue, rawCost, commCost, fixedTotal, totalExp, profit, margin, beMonthly, beDaily };
 }
 
-// ============================================================
-// CALCULATIONS
-// ============================================================
-const gD=()=>N('g-daily')||10000;
-const gDays=()=>N('g-days')||30;
-const gFC=()=>(N('g-fc')||36.5)/100;
-const gCm=()=>(N('g-comm')||9.375)/100;
-function empRate(){return(N('r-ins')+N('r-pen')+N('r-sev')+N('r-vac')+N('r-sick'))/100;}
-function calcStaff(){
-  const ep=empRate(); let gross=0,emp=0,cnt=0;
-  (D?.staff||[]).forEach(s=>{const n=s.cnt||0;if(!n)return;const g=(s.hd||0)*(s.dw||0)*4.33*(s.hr||0)*n;gross+=g;emp+=g*ep;cnt+=n;});
-  return{gross,emp,total:gross+emp,cnt};
+function calcCostsTotal(plan) {
+  return (plan.costs || []).reduce((s, c) => s + (+c.amount || 0), 0);
 }
-function calcOp(){return(D?.costs||[]).reduce((s,c)=>s+(parseFloat(c.v)||0),0);}
-function calcFixed(){return calcOp()+calcStaff().total;}
-function calcM(daily,days){
-  const rev=daily*days,fc=gFC(),cm=gCm(),fixed=calcFixed();
-  const raw=rev*fc,comm=rev*cm,total=raw+comm+fixed,profit=rev-total;
-  return{rev,raw,comm,fixed,total,profit,margin:rev?profit/rev*100:0};
-}
-function calcBE(){const d=Math.max(0.0001,1-gFC()-gCm());const mo=calcFixed()/d;return{mo,daily:mo/Math.max(1,gDays())};}
 
-// ============================================================
-// CHARTS
-// ============================================================
-const CH={};
-function mk(id,cfg){if(CH[id]){CH[id].destroy();}const c=$(id);if(c)CH[id]=new Chart(c.getContext('2d'),cfg);}
-function doCharts(){
-  const op=calcOp(),st=calcStaff().total;
-  mk('c-pie',{type:'doughnut',data:{labels:['עלויות תפעול','עלות שכר'],datasets:[{data:[op,st],backgroundColor:['#5e549d','#4ab3e5'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
-  const pcts=[N('ch-rp'),N('ch-wp'),N('ch-tp'),N('ch-cp')];
-  mk('c-ch',{type:'doughnut',data:{labels:['מסעדה','Wolt','10Bis','Cibus'],datasets:[{data:pcts,backgroundColor:['#3b82f6','#22c55e','#f97316','#ec4899'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
-  const{rev,total}=calcM(gD(),gDays());
-  mk('c-rv',{type:'bar',data:{labels:['הכנסה','הוצאות'],datasets:[{data:[rev,total],backgroundColor:[rev>=total?'#22c55e':'#3b82f6','#ef4444'],borderRadius:10}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-  const pts=[1000,3000,5000,8000,10000,15000,20000,25000,30000,40000,50000];
-  const days=gDays();
-  mk('c-curve',{type:'line',data:{labels:pts.map(p=>fmt(p)),datasets:[{label:'רווח/הפסד',data:pts.map(d=>calcM(d,days).profit),borderColor:'#5e549d',pointBackgroundColor:pts.map(d=>calcM(d,days).profit>=0?'#22c55e':'#ef4444'),fill:true,backgroundColor:'rgba(94,84,157,.08)',tension:0.4,borderWidth:2,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}}},scales:{y:{ticks:{callback:v=>fmt(v)}},x:{ticks:{maxRotation:30}}}}});
-  const cats={};(D?.costs||[]).forEach(c=>{cats[c.cat]=(cats[c.cat]||0)+(parseFloat(c.v)||0);});
-  const cl=Object.keys(cats).filter(k=>cats[k]>0);
-  if(cl.length)mk('c-cats',{type:'bar',data:{labels:cl,datasets:[{label:'₪',data:cl.map(k=>cats[k]),backgroundColor:'#5e549d',borderRadius:6}]},options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>fmt(v)}}}}});
-  if((D?.products||[]).length){
-    const vat=1+N('p-vat')/100,cw=N('p-wolt')/100;
-    mk('c-pfc',{type:'bar',data:{labels:D.products.map(p=>p.name),datasets:[{label:'מסעדה',data:D.products.map(p=>p.rest?p.raw/(p.rest/vat)*100:0),backgroundColor:'#5e549d',borderRadius:4},{label:'Wolt',data:D.products.map(p=>{const n=p.wolt/vat*(1-cw);return n?p.raw/n*100:0;}),backgroundColor:'#22c55e',borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>v.toFixed(0)+'%'}}}}});
+function calcStaffTotal(plan) {
+  const rates = plan.empRates || {};
+  const erPct = ((+rates.ins||0) + (+rates.pen||0) + (+rates.sev||0) + (+rates.vac||0) + (+rates.sick||0)) / 100;
+  return (plan.staff || []).reduce((s, row) => {
+    const hm = (+row.hd||0) * (+row.dw||0) * 4.33;
+    const gross = hm * (+row.hr||0) * (+row.cnt||1);
+    return s + gross * (1 + erPct);
+  }, 0);
+}
+
+// ─── KPI Strip + Recalc ───────────────────────────────────
+function recalcAll() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  readPlanInputs();
+  const plan = client.plan;
+  const calc = calcProfit(plan);
+
+  document.getElementById('kpi-fixed').textContent = fmt(calc.fixedTotal);
+  document.getElementById('kpi-daily').textContent = fmt(calc.daily);
+  document.getElementById('kpi-be').textContent = fmt(calc.beDaily);
+  document.getElementById('kpi-rev').textContent = fmt(calc.revenue);
+
+  const profEl = document.getElementById('kpi-profit');
+  profEl.textContent = fmt(calc.profit);
+  profEl.className = 'kpi-val ' + (calc.profit > 5000 ? 'profit-positive' : calc.profit < -5000 ? 'profit-negative' : 'profit-neutral');
+
+  document.getElementById('kpi-margin').textContent = calc.margin.toFixed(1) + '%';
+
+  const statEl = document.getElementById('kpi-status');
+  if (calc.profit > 5000) { statEl.textContent = '✅ רווחי'; statEl.className = 'kpi-val profit-positive'; }
+  else if (calc.profit < -5000) { statEl.textContent = '❌ הפסד'; statEl.className = 'kpi-val profit-negative'; }
+  else { statEl.textContent = '⚠️ איזון'; statEl.className = 'kpi-val profit-neutral'; }
+
+  if (activeTab === 'dashboard') updateDashboard(plan, calc);
+  if (activeTab === 'costs') updateCostsTab(plan);
+  if (activeTab === 'staff') updateStaffTab(plan);
+  if (activeTab === 'products') updateProductsTab(plan);
+  if (activeTab === 'simulator') updateSimulatorTab(plan, calc);
+  if (activeTab === 'channels') updateChannelsTab(plan, calc);
+
+  saveData();
+}
+
+function updateDashboard(plan, calc) {
+  document.getElementById('be-daily').textContent = fmt(calc.beDaily);
+  document.getElementById('be-monthly').textContent = fmt(calc.beMonthly);
+  const gap = calc.revenue - calc.beMonthly;
+  const gapEl = document.getElementById('be-gap');
+  gapEl.textContent = fmt(gap);
+  gapEl.className = 'font-bold ' + (gap >= 0 ? 'text-green-600' : 'text-red-600');
+  const pct = calc.beMonthly > 0 ? Math.min(100, calc.revenue / calc.beMonthly * 100) : (calc.revenue > 0 ? 100 : 0);
+  document.getElementById('be-pct').textContent = pct.toFixed(0) + '%';
+  document.getElementById('be-bar').style.width = pct + '%';
+  document.getElementById('be-bar').className = 'h-3 rounded-full transition-all ' + (pct >= 100 ? 'bg-green-500' : 'bg-purple-500');
+
+  const alerts = [];
+  if (calc.fc > 45) alerts.push({type:'warn', msg:`F.C. גבוה (${calc.fc}%) – ממוצע מומלץ עד 45%`});
+  if (calc.comm > 15) alerts.push({type:'warn', msg:`עמלות פלטפורמה גבוהות (${calc.comm}%)`});
+  if (calc.profit < 0) alerts.push({type:'danger', msg:`הפסד חודשי: ${fmt(calc.profit)}`});
+  if (calc.beDaily > calc.daily && calc.beDaily > 0) alerts.push({type:'danger', msg:`מחזור יומי (${fmt(calc.daily)}) נמוך מנק' האיזון (${fmt(calc.beDaily)})`});
+  if (calc.margin > 15) alerts.push({type:'success', msg:`מרווח רווח טוב: ${calc.margin.toFixed(1)}%`});
+  const ap = document.getElementById('alerts-panel');
+  if (alerts.length === 0) { ap.innerHTML = '<div class="text-green-600">✅ הכל נראה תקין</div>'; }
+  else {
+    ap.innerHTML = alerts.map(a => {
+      const cls = a.type === 'danger' ? 'text-red-700 bg-red-50 border-red-200' : a.type === 'warn' ? 'text-orange-700 bg-orange-50 border-orange-200' : 'text-green-700 bg-green-50 border-green-200';
+      return `<div class="border rounded-lg p-2 ${cls}">${a.msg}</div>`;
+    }).join('');
   }
-  mk('c-dist',{type:'bar',data:{labels:['מסעדה','Wolt','10Bis','Cibus'],datasets:[{label:'נתח מחזור %',data:[N('ch-rp'),N('ch-wp'),N('ch-tp'),N('ch-cp')],backgroundColor:['#3b82f6','#22c55e','#f97316','#ec4899'],borderRadius:6},{label:'F.C. %',data:[N('ch-rf'),N('ch-wf'),N('ch-tf'),N('ch-cf')],backgroundColor:['#93c5fd','#86efac','#fdba74','#f9a8d4'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+
+  destroyChart('cost-pie');
+  destroyChart('channels-donut');
+  destroyChart('rev-costs');
+
+  const staffTotal = calcStaffTotal(plan);
+  const costsTotal = calcCostsTotal(plan);
+  const pieData = [calc.rawCost, calc.commCost, staffTotal, costsTotal];
+  const pieLabels = ['עלות חומרים', 'עמלות', 'כוח אדם', 'עלויות קבועות'];
+  charts['cost-pie'] = new Chart(document.getElementById('chart-cost-pie'), {
+    type: 'pie',
+    data: { labels: pieLabels, datasets: [{ data: pieData, backgroundColor: ['#f59e0b','#ef4444','#8b5cf6','#3b82f6'] }] },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { family: 'Heebo', size: 11 } } } }, responsive: true }
+  });
+
+  const ch = plan.channels || {};
+  charts['channels-donut'] = new Chart(document.getElementById('chart-channels-donut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['מסעדה', 'Wolt', '10Bis', 'Cibus'],
+      datasets: [{ data: [+ch.restPct||0, +ch.woltPct||0, +ch.tbisPct||0, +ch.cibPct||0], backgroundColor: ['#3b82f6','#22c55e','#f97316','#a855f7'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { family: 'Heebo', size: 11 } } } }, responsive: true }
+  });
+
+  charts['rev-costs'] = new Chart(document.getElementById('chart-rev-costs'), {
+    type: 'bar',
+    data: {
+      labels: ['הכנסות', 'עלות חומרים', 'עמלות', 'כ"א וקבועות'],
+      datasets: [{ data: [calc.revenue, calc.rawCost, calc.commCost, calc.fixedTotal], backgroundColor: ['#22c55e','#f59e0b','#ef4444','#8b5cf6'] }]
+    },
+    options: { plugins: { legend: { display: false } }, responsive: true, scales: { y: { ticks: { callback: v => '₪'+v.toLocaleString() } } } }
+  });
+
+  renderScenarios(plan, calc, 'scenarios-body');
 }
 
-// ============================================================
-// PANELS
-// ============================================================
-function updateKPI(){
-  const{profit,margin}=calcM(gD(),gDays());
-  const{daily:bed}=calcBE();
-  txt('k-fixed',fmt(calcFixed())); txt('k-daily',fmt(gD())); txt('k-be',fmt(bed));
-  txt('k-rev',fmt(gD()*gDays()));
-  const pe=$('k-profit');pe.textContent=fmt(profit);pe.className='kpi-val '+(profit>=0?'text-green-300':'text-red-400');
-  const me=$('k-margin');me.textContent=pct(margin);me.className='kpi-val '+(margin>=0?'text-green-300':'text-red-400');
-  const se=$('k-status');
-  if(profit>5000){se.textContent='✅ רווחי';se.className='kpi-val text-green-300';}
-  else if(profit>=0){se.textContent='〰️ איזון';se.className='kpi-val text-yellow-300';}
-  else{se.textContent='❌ הפסד';se.className='kpi-val text-red-400';}
-}
-function updateBE(){
-  const{profit,rev}=calcM(gD(),gDays());
-  const{mo,daily:bed}=calcBE();
-  const gap=gD()*gDays()-mo;
-  if(!$('be-panel'))return;
-  $('be-panel').innerHTML=`
-    <div class="rr"><span class="text-sm text-gray-500">עלויות קבועות/חודש</span><span class="font-bold">${fmt(calcFixed())}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">F.C. ממוצע</span><span class="font-bold">${pct(gFC()*100)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">עמלות ממוצעות</span><span class="font-bold">${pct(gCm()*100)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">נקודת איזון יומית</span><span class="font-bold text-orange-600 text-lg">${fmt(bed)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">נקודת איזון חודשית</span><span class="font-bold text-orange-600">${fmt(mo)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">מחזור יומי יעד</span><span class="font-bold text-blue-600 text-lg">${fmt(gD())}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">פער מנקודת איזון</span><span class="font-bold text-lg ${gap>=0?'text-green-600':'text-red-600'}">${fmt(gap)}</span></div>
-    <div class="rr" style="border:none"><span class="font-black text-sm">רווח / הפסד חודשי</span><span class="font-black text-xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>`;
-}
-function updateAlerts(){
-  if(!$('alerts-panel'))return;
-  const{profit}=calcM(gD(),gDays());
-  const{daily:bed}=calcBE(); const fixed=calcFixed();
-  let h='';
-  if(profit>0)h+=`<div class="alert as">✅ רווחי – ${fmt(profit)} / חודש</div>`;
-  else h+=`<div class="alert ad">❌ הפסד – ${fmt(profit)} / חודש</div>`;
-  if(gFC()*100>45)h+=`<div class="alert aw">⚠️ F.C. גבוה (${pct(gFC()*100)}) – שקול מחירים / ספקים</div>`;
-  if(gCm()*100>15)h+=`<div class="alert aw">⚠️ עמלות גבוהות (${pct(gCm()*100)}) – אופטימיזציה של ערוצים</div>`;
-  if(fixed>200000)h+=`<div class="alert aw">⚠️ עלויות קבועות גבוהות – ${fmt(fixed)}</div>`;
-  h+=`<div class="alert ai">📍 מינימום יומי לאיזון: ${fmt(bed)}</div>`;
-  h+=`<div class="alert ai">👥 עלות שכר: ${fmt(calcStaff().total)} / חודש</div>`;
-  $('alerts-panel').innerHTML=h;
-}
-function updateScenarios(id){
-  const el=$(id);if(!el)return;
-  const pts=[2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000,40000];
-  el.innerHTML=pts.map(d=>{
-    const{rev,raw,comm,fixed,profit,margin}=calcM(d,gDays());
-    const hi=Math.abs(d-gD())<500;
-    return`<tr ${hi?'style="background:#f5f3ff"':''}>
-      <td class="font-bold ${hi?'text-purple-700':''}">${fmt(d)}${hi?' ◀':''}</td>
-      <td>${fmt(rev)}</td><td class="text-red-400">${fmt(raw)}</td>
-      <td class="text-orange-400">${fmt(comm)}</td><td class="text-gray-400">${fmt(fixed)}</td>
-      <td class="${profit>=0?'text-green-600':'text-red-600'} font-bold">${fmt(profit)}</td>
-      <td class="${margin>=0?'text-green-500':'text-red-500'}">${pct(margin)}</td>
-      <td>${profit>0?'<span class="bp">✅</span>':'<span class="bl">❌</span>'}</td>
+function renderScenarios(plan, calc, tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  const scenarios = [
+    { name: 'פסימי (-30%)', mul: 0.7 },
+    { name: 'פסימי (-15%)', mul: 0.85 },
+    { name: 'נוכחי', mul: 1 },
+    { name: 'אופטימי (+15%)', mul: 1.15 },
+    { name: 'אופטימי (+30%)', mul: 1.3 },
+  ];
+  tbody.innerHTML = scenarios.map(s => {
+    const d = calc.daily * s.mul;
+    const rev = d * calc.days;
+    const fc = rev * calc.fc / 100;
+    const comm = rev * calc.comm / 100;
+    const profit = rev - fc - comm - calc.fixedTotal;
+    const margin = rev > 0 ? profit / rev * 100 : 0;
+    const cls = profit > 0 ? 'text-green-600' : 'text-red-600';
+    const isCurrent = s.mul === 1;
+    return `<tr class="scenario-row ${isCurrent ? 'bg-purple-50 font-semibold' : ''}">
+      <td class="font-semibold">${s.name}</td>
+      <td>${fmt(d)}</td>
+      <td>${fmt(rev)}</td>
+      <td>${fmt(fc)}</td>
+      <td>${fmt(comm)}</td>
+      <td>${fmt(calc.fixedTotal)}</td>
+      <td class="${cls} font-bold">${fmt(profit)}</td>
+      <td class="${cls}">${margin.toFixed(1)}%</td>
     </tr>`;
   }).join('');
 }
-function updateSimRes(){
-  if(!$('sim-res'))return;
-  const{rev,raw,comm,fixed,total,profit,margin}=calcM(gD(),gDays());
-  const{daily:bed}=calcBE();
-  $('sim-res').innerHTML=`
-    <div class="rr"><span class="text-sm text-gray-500">הכנסה חודשית</span><span class="font-bold text-blue-600 text-lg">${fmt(rev)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">עלות גלם (${pct(gFC()*100)})</span><span class="text-red-500">${fmt(raw)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">עמלות (${pct(gCm()*100)})</span><span class="text-orange-500">${fmt(comm)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">עלויות קבועות</span><span class="text-red-600">${fmt(fixed)}</span></div>
-    <div class="rr"><span class="font-bold">סה"כ הוצאות</span><span class="font-bold text-red-700 text-lg">${fmt(total)}</span></div>
-    <div class="rr"><span class="font-black text-sm">רווח / הפסד</span><span class="font-black text-2xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>
-    <div class="rr"><span class="text-sm text-gray-500">מרווח רווח</span><span class="font-bold ${margin>=0?'text-green-600':'text-red-600'}">${pct(margin)}</span></div>
-    <div class="rr" style="border:none"><span class="text-sm text-gray-500">פער מנקודת איזון</span><span class="font-bold ${gD()-bed>=0?'text-green-600':'text-red-600'}">${fmt(gD()-bed)}/יום</span></div>
-    <div class="mt-3 text-center">${profit>5000?'<span class="bp text-sm py-2 px-4">✅ רווחי</span>':profit>=0?'<span class="bn text-sm py-2 px-4">〰️ קרוב לאיזון</span>':'<span class="bl text-sm py-2 px-4">❌ הפסד</span>'}</div>`;
+
+function updateCostsTab(plan) {
+  const body = document.getElementById('costs-body');
+  if (!body) return;
+  const rows = plan.costs || [];
+  body.innerHTML = rows.map((c, i) => `
+    <tr>
+      <td><input type="text" value="${esc(c.cat)}" onchange="updateCost(${i},'cat',this.value);recalcAll()"></td>
+      <td><input type="text" value="${esc(c.item)}" onchange="updateCost(${i},'item',this.value);recalcAll()"></td>
+      <td><input type="number" value="${c.amount||0}" onchange="updateCost(${i},'amount',this.value);recalcAll()"></td>
+      <td><input type="text" value="${esc(c.notes)}" onchange="updateCost(${i},'notes',this.value)"></td>
+      <td><button onclick="removeCostRow(${i})" class="btn-red">✕</button></td>
+    </tr>
+  `).join('');
+
+  const total = calcCostsTotal(plan);
+  document.getElementById('costs-total').textContent = fmt(total);
+
+  const byCat = {};
+  rows.forEach(r => { byCat[r.cat] = (byCat[r.cat]||0) + (+r.amount||0); });
+  destroyChart('costs-bar');
+  charts['costs-bar'] = new Chart(document.getElementById('chart-costs-bar'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(byCat),
+      datasets: [{ data: Object.values(byCat), backgroundColor: '#5e549d' }]
+    },
+    options: { plugins: { legend: { display: false } }, responsive: true, indexAxis: 'y', scales: { x: { ticks: { callback: v => '₪'+v.toLocaleString() } } } }
+  });
 }
-function updateChContrib(){
-  if(!$('ch-contrib'))return;
-  const mo=gD()*gDays();
-  const chs=[{n:'🏠 מסעדה',p:N('ch-rp'),fc:N('ch-rf'),cm:0,cl:'text-blue-700'},{n:'🟢 Wolt',p:N('ch-wp'),fc:N('ch-wf'),cm:N('ch-wc'),cl:'text-green-700'},{n:'🟠 10Bis',p:N('ch-tp'),fc:N('ch-tf'),cm:N('ch-tc'),cl:'text-orange-700'},{n:'🟣 Cibus',p:N('ch-cp'),fc:N('ch-cf'),cm:N('ch-cc'),cl:'text-pink-700'}];
-  const tot=chs.reduce((s,c)=>s+c.p,0);
-  txt('ch-sum',tot.toFixed(1)); $('ch-warn').classList.toggle('hidden',Math.abs(tot-100)<0.5);
-  $('ch-contrib').innerHTML=chs.map(c=>{
-    const rev=mo*c.p/100,contrib=rev-rev*c.fc/100-rev*c.cm/100;
-    return`<div class="mb-3"><div class="flex justify-between mb-1"><span class="font-bold text-sm ${c.cl}">${c.n} <span class="text-gray-400 font-normal">${c.p}%</span></span><span class="text-sm font-bold">${fmt(rev)}</span></div>
-    <div class="progress"><div class="progress-bar bg-purple-400" style="width:${Math.min(100,c.p)}%"></div></div>
-    <div class="flex justify-between text-xs text-gray-400 mt-1"><span>תרומה נטו: <span class="${contrib>=0?'text-green-600':'text-red-600'} font-bold">${fmt(contrib)}</span></span><span>F.C.: ${pct(c.fc)} | עמלה: ${pct(c.cm)}</span></div></div>`;
+
+function updateCost(i, field, val) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  if (field === 'amount') client.plan.costs[i][field] = +val || 0;
+  else client.plan.costs[i][field] = val;
+}
+
+function addCostRow() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.costs.push({ cat: 'אחר', item: '', amount: 0, notes: '' });
+  recalcAll();
+}
+
+function removeCostRow(i) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.costs.splice(i, 1);
+  recalcAll();
+}
+
+function updateStaffTab(plan) {
+  const body = document.getElementById('staff-body');
+  if (!body) return;
+  const rates = plan.empRates || {};
+  const erPct = ((+rates.ins||0) + (+rates.pen||0) + (+rates.sev||0) + (+rates.vac||0) + (+rates.sick||0)) / 100;
+  const rows = plan.staff || [];
+  let grandTotal = 0;
+
+  body.innerHTML = rows.map((r, i) => {
+    const hm = (+r.hd||0) * (+r.dw||0) * 4.33;
+    const gross = hm * (+r.hr||0) * (+r.cnt||1);
+    const erCost = gross * erPct;
+    const total = gross + erCost;
+    grandTotal += total;
+    return `<tr>
+      <td><input type="text" value="${esc(r.role)}" onchange="updateStaff(${i},'role',this.value)"></td>
+      <td><input type="number" value="${r.cnt||0}" min="0" onchange="updateStaff(${i},'cnt',this.value);recalcAll()"></td>
+      <td><input type="number" value="${r.hd||0}" min="0" onchange="updateStaff(${i},'hd',this.value);recalcAll()"></td>
+      <td><input type="number" value="${r.dw||0}" min="0" max="7" onchange="updateStaff(${i},'dw',this.value);recalcAll()"></td>
+      <td class="text-center font-semibold text-gray-600">${hm.toFixed(1)}</td>
+      <td><input type="number" value="${r.hr||0}" min="0" onchange="updateStaff(${i},'hr',this.value);recalcAll()"></td>
+      <td class="font-semibold">${fmt(gross)}</td>
+      <td class="text-orange-600">${fmt(erCost)}</td>
+      <td class="font-bold text-purple-700">${fmt(total)}</td>
+      <td><button onclick="removeStaffRow(${i})" class="btn-red">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  // Totals row
+  if (rows.length > 0) {
+    body.innerHTML += `<tr class="bg-purple-50 font-bold">
+      <td colspan="6" class="text-right text-purple-700">סה"כ</td>
+      <td colspan="3" class="text-purple-700 text-base">${fmt(grandTotal)}</td>
+      <td></td>
+    </tr>`;
+  }
+
+  document.getElementById('staff-total').textContent = fmt(grandTotal);
+}
+
+function updateStaff(i, field, val) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  if (field === 'role') client.plan.staff[i][field] = val;
+  else client.plan.staff[i][field] = +val || 0;
+}
+
+function addStaffRow() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.staff.push({ role: 'עובד', cnt: 1, hd: 8, dw: 5, hr: 35 });
+  recalcAll();
+}
+
+function removeStaffRow(i) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.staff.splice(i, 1);
+  recalcAll();
+}
+
+function updateProductsTab(plan) {
+  const body = document.getElementById('products-body');
+  if (!body) return;
+  const pc = plan.prodComm || {};
+  const woltComm = +pc.wolt || 0;
+  const tbisComm = +pc.tenBis || 0;
+  const cibComm = +pc.cibus || 0;
+  const rows = plan.products || [];
+
+  body.innerHTML = rows.map((p, i) => {
+    const raw = +p.raw || 0;
+    const restP = +p.restP || 0;
+    const woltP = +p.woltP || 0;
+    const tbisP = +p.tbisP || 0;
+    const cibP = +p.cibP || 0;
+    const fcRest = restP > 0 ? raw / restP * 100 : 0;
+    const fcWolt = woltP > 0 ? raw / (woltP * (1 - woltComm/100)) * 100 : 0;
+    const fcTbis = tbisP > 0 ? raw / (tbisP * (1 - tbisComm/100)) * 100 : 0;
+    const fcCib = cibP > 0 ? raw / (cibP * (1 - cibComm/100)) * 100 : 0;
+    return `<tr>
+      <td><input type="text" value="${esc(p.name)}" onchange="updateProduct(${i},'name',this.value)"></td>
+      <td><input type="text" value="${esc(p.cat)}" onchange="updateProduct(${i},'cat',this.value)"></td>
+      <td><input type="number" value="${raw}" onchange="updateProduct(${i},'raw',this.value);recalcAll()"></td>
+      <td><input type="number" value="${restP}" onchange="updateProduct(${i},'restP',this.value);recalcAll()"></td>
+      <td class="${fcColor(fcRest)}">${fcRest.toFixed(1)}%</td>
+      <td><input type="number" value="${woltP}" onchange="updateProduct(${i},'woltP',this.value);recalcAll()"></td>
+      <td class="${fcColor(fcWolt)}">${fcWolt.toFixed(1)}%</td>
+      <td><input type="number" value="${tbisP}" onchange="updateProduct(${i},'tbisP',this.value);recalcAll()"></td>
+      <td class="${fcColor(fcTbis)}">${fcTbis.toFixed(1)}%</td>
+      <td><input type="number" value="${cibP}" onchange="updateProduct(${i},'cibP',this.value);recalcAll()"></td>
+      <td class="${fcColor(fcCib)}">${fcCib.toFixed(1)}%</td>
+      <td><button onclick="removeProductRow(${i})" class="btn-red">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  destroyChart('products-bar');
+  if (rows.length > 0) {
+    const labels = rows.map(p => p.name || 'מוצר');
+    const w = woltComm, t = tbisComm, cb = cibComm;
+    const fcRests = rows.map(p => +p.restP > 0 ? (+p.raw)/(+p.restP)*100 : 0);
+    const fcWolts = rows.map(p => +p.woltP > 0 ? (+p.raw)/(+p.woltP*(1-w/100))*100 : 0);
+    const fcTbiss = rows.map(p => +p.tbisP > 0 ? (+p.raw)/(+p.tbisP*(1-t/100))*100 : 0);
+    const fcCibs = rows.map(p => +p.cibP > 0 ? (+p.raw)/(+p.cibP*(1-cb/100))*100 : 0);
+    charts['products-bar'] = new Chart(document.getElementById('chart-products-bar'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'מסעדה', data: fcRests, backgroundColor: '#3b82f6' },
+          { label: 'Wolt', data: fcWolts, backgroundColor: '#22c55e' },
+          { label: '10Bis', data: fcTbiss, backgroundColor: '#f97316' },
+          { label: 'Cibus', data: fcCibs, backgroundColor: '#a855f7' },
+        ]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { ticks: { callback: v => v+'%' } } } }
+    });
+  }
+}
+
+function updateProduct(i, field, val) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  if (field === 'name' || field === 'cat') client.plan.products[i][field] = val;
+  else client.plan.products[i][field] = +val || 0;
+}
+
+function addProductRow() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.products.push({ name: '', cat: '', raw: 0, restP: 0, woltP: 0, tbisP: 0, cibP: 0 });
+  recalcAll();
+}
+
+function removeProductRow(i) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.products.splice(i, 1);
+  recalcAll();
+}
+
+function updateSimulatorTab(plan, calc) {
+  const daily = +plan.daily || 10000;
+  const days = +plan.days || 30;
+  const fc = +plan.fc || 36.5;
+  const comm = +plan.comm || 9.375;
+
+  setValue('sim-daily', daily); setValue('sim-daily-n', daily);
+  document.getElementById('sim-daily-lbl').textContent = fmt(daily);
+  setValue('sim-days', days); setValue('sim-days-n', days);
+  document.getElementById('sim-days-lbl').textContent = days;
+  setValue('sim-fc', fc); setValue('sim-fc-n', fc);
+  document.getElementById('sim-fc-lbl').textContent = fc+'%';
+  setValue('sim-comm', comm); setValue('sim-comm-n', comm);
+  document.getElementById('sim-comm-lbl').textContent = comm+'%';
+
+  document.getElementById('sim-res-rev').textContent = fmt(calc.revenue);
+  document.getElementById('sim-res-fc').textContent = fmt(calc.rawCost);
+  document.getElementById('sim-res-comm').textContent = fmt(calc.commCost);
+  document.getElementById('sim-res-fixed').textContent = fmt(calc.fixedTotal);
+  document.getElementById('sim-res-total').textContent = fmt(calc.totalExp);
+  const profEl = document.getElementById('sim-res-profit');
+  profEl.textContent = fmt(calc.profit);
+  profEl.className = 'font-bold text-xl ' + (calc.profit >= 0 ? 'text-green-600' : 'text-red-600');
+  document.getElementById('sim-res-margin').textContent = calc.margin.toFixed(1) + '%';
+  const beGap = calc.revenue - calc.beMonthly;
+  const bgEl = document.getElementById('sim-res-be-gap');
+  bgEl.textContent = fmt(beGap);
+  bgEl.className = 'font-bold ' + (beGap >= 0 ? 'text-green-600' : 'text-red-600');
+
+  destroyChart('profit-curve');
+  const pts = [];
+  for (let d = 1000; d <= 50000; d += 1000) {
+    const rev = d * days;
+    const p = rev - (rev * fc / 100) - (rev * comm / 100) - calc.fixedTotal;
+    pts.push({ x: d, y: p });
+  }
+  charts['profit-curve'] = new Chart(document.getElementById('chart-profit-curve'), {
+    type: 'line',
+    data: {
+      labels: pts.map(p => '₪'+p.x.toLocaleString()),
+      datasets: [{
+        label: 'רווח/הפסד',
+        data: pts.map(p => p.y),
+        borderColor: '#5e549d',
+        backgroundColor: 'rgba(94,84,157,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { callback: v => '₪'+Math.round(v).toLocaleString() } },
+        x: { ticks: { maxTicksLimit: 10 } }
+      }
+    }
+  });
+
+  renderScenarios(plan, calc, 'sim-scenarios-body');
+}
+
+function updateChannelsTab(plan, calc) {
+  const ch = plan.channels || {};
+  const totalPct = (+ch.restPct||0) + (+ch.woltPct||0) + (+ch.tbisPct||0) + (+ch.cibPct||0);
+  document.getElementById('channels-warning').classList.toggle('hidden', Math.abs(totalPct - 100) < 0.5);
+
+  const rev = calc.revenue;
+  const computeContrib = (pct, fc, comm) => {
+    const r = rev * pct / 100;
+    return r - r * fc / 100 - r * comm / 100;
+  };
+
+  const restContrib = computeContrib(+ch.restPct||0, +ch.restFc||0, 0);
+  const woltContrib = computeContrib(+ch.woltPct||0, +ch.woltFc||0, +ch.woltComm||0);
+  const tbisContrib = computeContrib(+ch.tbisPct||0, +ch.tbisFc||0, +ch.tbisComm||0);
+  const cibContrib = computeContrib(+ch.cibPct||0, +ch.cibFc||0, +ch.cibComm||0);
+
+  document.getElementById('ch-rest-contrib').textContent = fmt(restContrib);
+  document.getElementById('ch-wolt-contrib').textContent = fmt(woltContrib);
+  document.getElementById('ch-tbis-contrib').textContent = fmt(tbisContrib);
+  document.getElementById('ch-cib-contrib').textContent = fmt(cibContrib);
+
+  destroyChart('channels-bar');
+  charts['channels-bar'] = new Chart(document.getElementById('chart-channels-bar'), {
+    type: 'bar',
+    data: {
+      labels: ['מסעדה', 'Wolt', '10Bis', 'Cibus'],
+      datasets: [
+        { label: '% מכירות', data: [+ch.restPct||0, +ch.woltPct||0, +ch.tbisPct||0, +ch.cibPct||0], backgroundColor: ['#3b82f6','#22c55e','#f97316','#a855f7'] }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { max: 100, ticks: { callback: v => v+'%' } } } }
+  });
+
+  const analysis = document.getElementById('channel-analysis');
+  const channels = [
+    { name: 'מסעדה', pct: +ch.restPct||0, contrib: restContrib, color: 'text-blue-700' },
+    { name: 'Wolt', pct: +ch.woltPct||0, contrib: woltContrib, color: 'text-green-700' },
+    { name: '10Bis', pct: +ch.tbisPct||0, contrib: tbisContrib, color: 'text-orange-700' },
+    { name: 'Cibus', pct: +ch.cibPct||0, contrib: cibContrib, color: 'text-pink-700' },
+  ];
+  const totalContrib = restContrib + woltContrib + tbisContrib + cibContrib;
+  analysis.innerHTML = channels.map(c => `
+    <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+      <span class="${c.color} font-semibold">${c.name} (${c.pct}%)</span>
+      <span class="font-bold ${c.contrib >= 0 ? 'text-green-600' : 'text-red-600'}">${fmt(c.contrib)}</span>
+    </div>
+  `).join('') + `
+    <div class="flex justify-between items-center p-2 bg-purple-50 rounded-lg border border-purple-200 font-bold mt-2">
+      <span class="text-purple-700">סה"כ תרומה</span>
+      <span class="${totalContrib >= 0 ? 'text-green-600' : 'text-red-600'}">${fmt(totalContrib)}</span>
+    </div>
+    <div class="text-xs text-gray-400 mt-1">* לפני ניכוי עלויות קבועות</div>
+  `;
+}
+
+// ─── Suppliers ───────────────────────────────────────────
+function renderSuppliersTab(plan) {
+  const body = document.getElementById('suppliers-body');
+  if (!body) return;
+  const rows = plan.suppliers || [];
+  body.innerHTML = rows.map((r, i) => {
+    const list = +r.list || 0;
+    const purchase = +r.purchase || 0;
+    let change = '–';
+    if (list > 0 && purchase > 0) {
+      if (purchase > list) change = '<span class="text-red-600 text-base">⬆️</span>';
+      else if (purchase < list) change = '<span class="text-green-600 text-base">⬇️</span>';
+      else change = '<span class="text-gray-400">–</span>';
+    }
+    return `<tr>
+      <td><input type="text" value="${esc(r.item)}" onchange="updateSupplier(${i},'item',this.value)"></td>
+      <td><input type="text" value="${esc(r.supplier)}" onchange="updateSupplier(${i},'supplier',this.value)"></td>
+      <td><input type="text" value="${esc(r.cat)}" onchange="updateSupplier(${i},'cat',this.value)"></td>
+      <td><input type="number" value="${list}" onchange="updateSupplier(${i},'list',this.value)"></td>
+      <td><input type="number" value="${purchase}" onchange="updateSupplier(${i},'purchase',this.value)"></td>
+      <td><input type="date" value="${r.date||''}" onchange="updateSupplier(${i},'date',this.value)"></td>
+      <td class="text-center">${change}</td>
+      <td><input type="text" value="${esc(r.notes)}" onchange="updateSupplier(${i},'notes',this.value)"></td>
+      <td><button onclick="removeSupplierRow(${i})" class="btn-red">✕</button></td>
+    </tr>`;
   }).join('');
 }
 
-// ============================================================
-// TABLE RENDERS
-// ============================================================
-function renderCostsEditor(){
-  const cats={};
-  (D?.costs||[]).forEach((c,i)=>{if(!cats[c.cat])cats[c.cat]=[];cats[c.cat].push({...c,i});});
-  let h='';
-  for(const[cat,items]of Object.entries(cats)){
-    h+=`<div class="mb-4"><div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">${cat}</div>`;
-    items.forEach(it=>{h+=`<div class="flex items-center gap-3 py-1 border-b border-gray-50">
-      <span class="flex-1 text-sm text-gray-700">${it.name}</span>
-      <div class="flex items-center gap-1 w-36"><span class="text-xs text-gray-400">₪</span>
-        <input type="number" value="${it.v||0}" min="0" step="100" class="live-input text-sm" oninput="if(D)D.costs[${it.i}].v=parseFloat(this.value)||0;recalc()"/></div>
-      <button onclick="if(D){D.costs.splice(${it.i},1);renderCostsEditor();recalc();}" class="text-red-300 hover:text-red-500 text-xl w-6 leading-none">×</button>
-    </div>`;});
-    h+='</div>';
+function updateSupplier(i, field, val) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  if (field === 'list' || field === 'purchase') client.plan.suppliers[i][field] = +val || 0;
+  else client.plan.suppliers[i][field] = val;
+  renderSuppliersTab(client.plan);
+  saveData();
+}
+
+function addSupplierRow() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.suppliers.push({ item: '', supplier: '', cat: '', list: 0, purchase: 0, date: '', notes: '' });
+  renderSuppliersTab(client.plan);
+  saveData();
+}
+
+function removeSupplierRow(i) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.suppliers.splice(i, 1);
+  renderSuppliersTab(client.plan);
+  saveData();
+}
+
+// ─── Tab switching ────────────────────────────────────────
+function switchTab(name) {
+  activeTab = name;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  const tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.add('active');
+  const tabNames = ['dashboard','costs','staff','suppliers','products','simulator','channels'];
+  const btns = document.querySelectorAll('.tab-btn');
+  const idx = tabNames.indexOf(name);
+  if (idx >= 0 && btns[idx]) btns[idx].classList.add('active');
+
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  if (name === 'suppliers') renderSuppliersTab(client.plan);
+  else recalcAll();
+}
+
+// ─── Plan input load/read ─────────────────────────────────
+function loadPlanInputs(plan) {
+  setValue('d-daily', plan.daily);
+  setValue('d-days', plan.days);
+  setValue('d-fc', plan.fc);
+  setValue('d-comm', plan.comm);
+
+  const r = plan.empRates || {};
+  setValue('er-ins', r.ins); setValue('er-pen', r.pen); setValue('er-sev', r.sev);
+  setValue('er-vac', r.vac); setValue('er-sick', r.sick);
+
+  const pc = plan.prodComm || {};
+  setValue('pc-wolt', pc.wolt); setValue('pc-tbis', pc.tenBis);
+  setValue('pc-cib', pc.cibus); setValue('pc-vat', pc.vat);
+
+  const ch = plan.channels || {};
+  setValue('ch-rest-pct', ch.restPct); setValue('ch-rest-fc', ch.restFc);
+  setValue('ch-wolt-pct', ch.woltPct); setValue('ch-wolt-fc', ch.woltFc); setValue('ch-wolt-comm', ch.woltComm);
+  setValue('ch-tbis-pct', ch.tbisPct); setValue('ch-tbis-fc', ch.tbisFc); setValue('ch-tbis-comm', ch.tbisComm);
+  setValue('ch-cib-pct', ch.cibPct); setValue('ch-cib-fc', ch.cibFc); setValue('ch-cib-comm', ch.cibComm);
+
+  setValue('sim-daily', plan.daily); setValue('sim-daily-n', plan.daily);
+  setValue('sim-days', plan.days); setValue('sim-days-n', plan.days);
+  setValue('sim-fc', plan.fc); setValue('sim-fc-n', plan.fc);
+  setValue('sim-comm', plan.comm); setValue('sim-comm-n', plan.comm);
+}
+
+function readPlanInputs() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  const p = client.plan;
+  p.daily = +getVal('d-daily') || 0;
+  p.days = +getVal('d-days') || 30;
+  p.fc = +getVal('d-fc') || 0;
+  p.comm = +getVal('d-comm') || 0;
+
+  p.empRates.ins = +getVal('er-ins') || 0;
+  p.empRates.pen = +getVal('er-pen') || 0;
+  p.empRates.sev = +getVal('er-sev') || 0;
+  p.empRates.vac = +getVal('er-vac') || 0;
+  p.empRates.sick = +getVal('er-sick') || 0;
+
+  p.prodComm.wolt = +getVal('pc-wolt') || 0;
+  p.prodComm.tenBis = +getVal('pc-tbis') || 0;
+  p.prodComm.cibus = +getVal('pc-cib') || 0;
+  p.prodComm.vat = +getVal('pc-vat') || 0;
+
+  p.channels.restPct = +getVal('ch-rest-pct') || 0;
+  p.channels.restFc = +getVal('ch-rest-fc') || 0;
+  p.channels.woltPct = +getVal('ch-wolt-pct') || 0;
+  p.channels.woltFc = +getVal('ch-wolt-fc') || 0;
+  p.channels.woltComm = +getVal('ch-wolt-comm') || 0;
+  p.channels.tbisPct = +getVal('ch-tbis-pct') || 0;
+  p.channels.tbisFc = +getVal('ch-tbis-fc') || 0;
+  p.channels.tbisComm = +getVal('ch-tbis-comm') || 0;
+  p.channels.cibPct = +getVal('ch-cib-pct') || 0;
+  p.channels.cibFc = +getVal('ch-cib-fc') || 0;
+  p.channels.cibComm = +getVal('ch-cib-comm') || 0;
+}
+
+// ─── Simulator sync ───────────────────────────────────────
+function syncSim() {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  client.plan.daily = +getVal('d-daily') || 0;
+  client.plan.days = +getVal('d-days') || 30;
+  client.plan.fc = +getVal('d-fc') || 0;
+  client.plan.comm = +getVal('d-comm') || 0;
+  setValue('sim-daily', client.plan.daily); setValue('sim-daily-n', client.plan.daily);
+  setValue('sim-days', client.plan.days); setValue('sim-days-n', client.plan.days);
+  setValue('sim-fc', client.plan.fc); setValue('sim-fc-n', client.plan.fc);
+  setValue('sim-comm', client.plan.comm); setValue('sim-comm-n', client.plan.comm);
+}
+
+function syncFromSim(field) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  const map = {
+    daily: ['sim-daily','sim-daily-n','d-daily'],
+    days: ['sim-days','sim-days-n','d-days'],
+    fc: ['sim-fc','sim-fc-n','d-fc'],
+    comm: ['sim-comm','sim-comm-n','d-comm']
+  };
+  const [slider, num, main] = map[field];
+  const val = +getVal(slider);
+  setValue(num, val); setValue(main, val);
+  if (field === 'daily') client.plan.daily = val;
+  if (field === 'days') client.plan.days = val;
+  if (field === 'fc') client.plan.fc = val;
+  if (field === 'comm') client.plan.comm = val;
+  document.getElementById('sim-'+field+'-lbl').textContent = field === 'daily' ? fmt(val) : (field === 'days' ? val : val+'%');
+}
+
+function syncFromSimN(field) {
+  const client = clients.find(c => c.id === currentClientId);
+  if (!client) return;
+  const map = {
+    daily: ['sim-daily','sim-daily-n','d-daily'],
+    days: ['sim-days','sim-days-n','d-days'],
+    fc: ['sim-fc','sim-fc-n','d-fc'],
+    comm: ['sim-comm','sim-comm-n','d-comm']
+  };
+  const [slider, num, main] = map[field];
+  const val = +getVal(num);
+  setValue(slider, val); setValue(main, val);
+  if (field === 'daily') client.plan.daily = val;
+  if (field === 'days') client.plan.days = val;
+  if (field === 'fc') client.plan.fc = val;
+  if (field === 'comm') client.plan.comm = val;
+  document.getElementById('sim-'+field+'-lbl').textContent = field === 'daily' ? fmt(val) : (field === 'days' ? val : val+'%');
+}
+
+// ─── Helpers ──────────────────────────────────────────────
+function fmt(n) {
+  n = +n || 0;
+  return '₪' + Math.round(n).toLocaleString('he-IL');
+}
+
+function fcColor(pct) {
+  if (pct <= 0) return 'text-gray-400';
+  if (pct < 30) return 'fc-green';
+  if (pct < 45) return 'fc-blue';
+  if (pct < 60) return 'fc-orange';
+  return 'fc-red';
+}
+
+function setValue(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== undefined && val !== null) el.value = val;
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : '';
+}
+
+function destroyChart(name) {
+  if (charts[name]) {
+    try { charts[name].destroy(); } catch(e) {}
+    delete charts[name];
   }
-  if($('costs-editor'))$('costs-editor').innerHTML=h;
-  txt('op-total',fmt(calcOp()));
-}
-function addCost(){
-  const cat=prompt('שם קטגוריה:','🔹 כללי')||'🔹 כללי';
-  const name=prompt('שם ההוצאה:');if(!name||!D)return;
-  D.costs.push({cat,name,v:0});renderCostsEditor();recalc();
-}
-function renderStaffTable(){
-  const ep=empRate();let h='';
-  (D?.staff||[]).forEach((s,i)=>{
-    const hm=(s.hd||0)*(s.dw||0)*4.33,g=hm*(s.hr||0),tot=(g+g*ep)*(s.cnt||0);
-    h+=`<tr><td><input type="text" value="${s.role}" class="live-input rtl text-sm" style="min-width:110px" oninput="if(D)D.staff[${i}].role=this.value"/></td>
-    <td><input type="number" value="${s.cnt}" min="0" class="live-input text-sm" style="width:55px" oninput="if(D)D.staff[${i}].cnt=parseInt(this.value)||0;recalc()"/></td>
-    <td><input type="number" value="${s.hd}" min="0" max="24" class="live-input text-sm" style="width:55px" oninput="if(D)D.staff[${i}].hd=parseFloat(this.value)||0;recalc()"/></td>
-    <td><input type="number" value="${s.dw}" min="0" max="7" class="live-input text-sm" style="width:55px" oninput="if(D)D.staff[${i}].dw=parseFloat(this.value)||0;recalc()"/></td>
-    <td class="text-gray-400 text-xs">${Math.round(hm)}</td>
-    <td><input type="number" value="${s.hr}" min="0" class="live-input text-sm" style="width:65px" oninput="if(D)D.staff[${i}].hr=parseFloat(this.value)||0;recalc()"/></td>
-    <td class="text-xs font-mono">${fmt(g*(s.cnt||0))}</td>
-    <td class="text-xs font-mono text-gray-400">${fmt(g*(s.cnt||0)*ep)}</td>
-    <td class="text-sm font-bold text-purple-700">${fmt(tot)}</td>
-    <td><button onclick="if(D){D.staff.splice(${i},1);renderStaffTable();recalc();}" class="text-red-300 hover:text-red-500 text-xl">×</button></td></tr>`;
-  });
-  if($('staff-body'))$('staff-body').innerHTML=h;
-  const t=calcStaff();
-  txt('sf-g',fmt(t.gross));txt('sf-e',fmt(t.emp));txt('sf-t',fmt(t.total));
-}
-function addStaff(){if(!D)return;D.staff.push({role:'תפקיד חדש',cnt:0,hd:8,dw:5,hr:35});renderStaffTable();}
-function renderSuppliersTable(){
-  let h='';
-  (D?.suppliers||[]).forEach((s,i)=>{
-    const chg=s.list&&s.buy?((s.buy-s.list)/s.list*100):null;
-    const chgH=chg===null?'—':chg>0?`<span class="text-red-600 font-bold text-xs">⬆ ${Math.abs(chg).toFixed(1)}%</span>`:chg<0?`<span class="text-green-600 font-bold text-xs">⬇ ${Math.abs(chg).toFixed(1)}%</span>`:'<span class="text-gray-400 text-xs">= 0%</span>';
-    h+=`<tr><td><input type="text" value="${s.item}" class="live-input rtl text-sm" style="min-width:90px" oninput="if(D)D.suppliers[${i}].item=this.value"/></td>
-    <td><input type="text" value="${s.sup||''}" class="live-input rtl text-sm" style="min-width:80px" oninput="if(D)D.suppliers[${i}].sup=this.value"/></td>
-    <td><input type="text" value="${s.cat||''}" class="live-input rtl text-sm" style="min-width:70px" oninput="if(D)D.suppliers[${i}].cat=this.value"/></td>
-    <td><input type="number" value="${s.list||0}" class="live-input text-sm" style="width:70px" oninput="if(D)D.suppliers[${i}].list=parseFloat(this.value)||0;renderSuppliersTable()"/></td>
-    <td><input type="number" value="${s.buy||0}" class="live-input text-sm" style="width:70px" oninput="if(D)D.suppliers[${i}].buy=parseFloat(this.value)||0;renderSuppliersTable()"/></td>
-    <td><input type="text" value="${s.date||''}" class="live-input rtl text-sm" style="width:80px" oninput="if(D)D.suppliers[${i}].date=this.value"/></td>
-    <td>${chgH}</td>
-    <td><input type="text" value="${s.notes||''}" class="live-input rtl text-sm" style="min-width:90px" oninput="if(D)D.suppliers[${i}].notes=this.value"/></td>
-    <td><button onclick="if(D){D.suppliers.splice(${i},1);renderSuppliersTable();}" class="text-red-300 hover:text-red-500 text-xl">×</button></td></tr>`;
-  });
-  if($('supp-body'))$('supp-body').innerHTML=h;
-}
-function addSupplier(){if(!D)return;D.suppliers.push({item:'פריט חדש',sup:'',cat:'',list:0,buy:0,date:'',notes:''});renderSuppliersTable();}
-function renderProducts(){
-  const vat=1+N('p-vat')/100,cw=N('p-wolt')/100,ct=N('p-10bis')/100,cc=N('p-cibus')/100;
-  const col=v=>!v||isNaN(v)?'text-gray-300':v<30?'text-green-600 font-bold':v<45?'text-blue-600':v<60?'text-orange-500 font-bold':'text-red-600 font-bold';
-  const disp=v=>(!v||isNaN(v)||v<=0)?'—':v.toFixed(1)+'%';
-  let h='';
-  (D?.products||[]).forEach((p,i)=>{
-    const raw=p.raw||0;
-    const frR=p.rest?raw/(p.rest/vat)*100:NaN;
-    const frW=p.wolt?raw/(p.wolt/vat*(1-cw))*100:NaN;
-    const frT=p.tenBis?raw/(p.tenBis/vat*(1-ct))*100:NaN;
-    const frC=p.cibus?raw/(p.cibus/vat*(1-cc))*100:NaN;
-    h+=`<tr><td><input type="text" value="${p.name}" class="live-input rtl text-sm" style="min-width:90px" oninput="if(D)D.products[${i}].name=this.value;doCharts()"/></td>
-    <td><input type="text" value="${p.cat||''}" class="live-input rtl text-sm" style="min-width:80px" oninput="if(D)D.products[${i}].cat=this.value"/></td>
-    <td><input type="number" value="${raw}" class="live-input text-sm" style="width:65px" oninput="if(D)D.products[${i}].raw=parseFloat(this.value)||0;renderProducts()"/></td>
-    <td><input type="number" value="${p.rest||0}" class="live-input text-sm" style="width:60px" oninput="if(D)D.products[${i}].rest=parseFloat(this.value)||0;renderProducts()"/></td><td class="${col(frR)}">${disp(frR)}</td>
-    <td><input type="number" value="${p.wolt||0}" class="live-input text-sm" style="width:60px" oninput="if(D)D.products[${i}].wolt=parseFloat(this.value)||0;renderProducts()"/></td><td class="${col(frW)}">${disp(frW)}</td>
-    <td><input type="number" value="${p.tenBis||0}" class="live-input text-sm" style="width:60px" oninput="if(D)D.products[${i}].tenBis=parseFloat(this.value)||0;renderProducts()"/></td><td class="${col(frT)}">${disp(frT)}</td>
-    <td><input type="number" value="${p.cibus||0}" class="live-input text-sm" style="width:60px" oninput="if(D)D.products[${i}].cibus=parseFloat(this.value)||0;renderProducts()"/></td><td class="${col(frC)}">${disp(frC)}</td>
-    <td><button onclick="if(D){D.products.splice(${i},1);renderProducts();}" class="text-red-300 hover:text-red-500 text-xl">×</button></td></tr>`;
-  });
-  if($('prod-body'))$('prod-body').innerHTML=h;
-  doCharts();
-}
-function addProduct(){if(!D)return;D.products.push({name:'מוצר חדש',cat:'',raw:0,rest:0,wolt:0,tenBis:0,cibus:0});renderProducts();}
-
-// ============================================================
-// MAIN RECALC
-// ============================================================
-function recalc(){
-  updateKPI(); updateBE(); updateAlerts();
-  updateScenarios('sc-body'); updateScenarios('sim-sc');
-  updateSimRes(); updateChContrib();
-  renderStaffTable();
-  txt('op-total',fmt(calcOp()));
-  doCharts();
-  savePlanToClient();
-}
-function onG(){
-  ss('sr-daily',N('g-daily'));ss('sn-daily',N('g-daily'));
-  ss('sr-days',N('g-days'));ss('sn-days',N('g-days'));
-  ss('sr-fc',N('g-fc'));ss('sn-fc',N('g-fc'));
-  ss('sr-comm',N('g-comm'));ss('sn-comm',N('g-comm'));
-  recalc();
 }
 
-// ============================================================
-// TABS
-// ============================================================
-function showTab(name,el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  $('tab-'+name).classList.add('active'); el.classList.add('active');
-  if(name==='costs'){renderCostsEditor();}
-  if(name==='staff'){renderStaffTable();}
-  if(name==='suppliers'){renderSuppliersTable();}
-  if(name==='products'){renderProducts();}
-  recalc();
-}
+// ─── Init ─────────────────────────────────────────────────
+loadData();
+showList();
 
-// ============================================================
-// INIT
-// ============================================================
-document.addEventListener('DOMContentLoaded',()=>{
-  loadStorage();
-  renderClientList();
+document.getElementById('modal-add').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAddModal();
 });
 </script>
 </body>
