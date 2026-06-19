@@ -1,391 +1,847 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Manager - דו"ח אבחון וייעול</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            primary: '#5e549d',
-                            secondary: '#4ab3e5',
-                            dark: '#2d2752',
-                            light: '#f4f3fb'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; }
-        .page-container {
-            min-height: 297mm; background: white; margin: 0 auto 3rem auto;
-            box-shadow: 0 0 40px rgba(0,0,0,0.1); padding: 4rem;
-            position: relative; overflow: hidden; max-width: 64rem;
-            display: flex; flex-direction: column;
-        }
-        .table-row-hover:hover { background-color: #f4f3fb; }
-        @media print {
-            .page-container { box-shadow: none; margin: 0; padding: 2rem; min-height: auto; page-break-after: always; }
-            body { background-color: white; }
-        }
-        .custom-scrollbar::-webkit-scrollbar { height: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #5e549d; border-radius: 4px; }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>דשבורד ניתוח רווחיות</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'Heebo', sans-serif; background: #f0f2f5; margin: 0; }
+
+.live-input {
+  border: 2px solid #e2e8f0; border-radius: 8px; padding: 6px 10px;
+  font-family: 'Heebo', sans-serif; font-size: 14px; width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: white; direction: ltr; text-align: left;
+}
+.live-input:focus { outline: none; border-color: #5e549d; box-shadow: 0 0 0 3px rgba(94,84,157,0.15); }
+.live-input.rtl-text { direction: rtl; text-align: right; }
+
+.kpi-strip {
+  background: linear-gradient(135deg, #2d2752 0%, #5e549d 60%, #4ab3e5 100%);
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.kpi-item { border-left: 1px solid rgba(255,255,255,0.15); padding: 12px 18px; }
+.kpi-item:first-child { border-left: none; }
+.kpi-value { font-size: 20px; font-weight: 900; line-height: 1; }
+.kpi-label { font-size: 10px; opacity: 0.7; margin-top: 3px; }
+.kpi-value.pulse { animation: kpipulse 0.3s ease; }
+@keyframes kpipulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+
+.card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.tab { cursor: pointer; padding: 9px 16px; border-radius: 10px; transition: all 0.15s; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.tab.active { background: #5e549d; color: white; }
+.tab:not(.active):hover { background: #f0edff; color: #5e549d; }
+.section { display: none; }
+.section.active { display: block; }
+
+.data-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.data-table th { background: #f8f6ff; color: #5e549d; font-weight: 700; padding: 9px 10px; text-align: right; white-space: nowrap; border-bottom: 2px solid #ede9ff; }
+.data-table td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+.data-table tr:hover td { background: #faf8ff; }
+.data-table td .live-input { padding: 4px 7px; font-size: 13px; }
+
+.badge-profit { background:#dcfce7; color:#166534; border-radius:8px; padding:3px 10px; font-weight:700; font-size:12px; }
+.badge-loss { background:#fee2e2; color:#991b1b; border-radius:8px; padding:3px 10px; font-weight:700; font-size:12px; }
+.badge-neutral { background:#fef9c3; color:#854d0e; border-radius:8px; padding:3px 10px; font-weight:700; font-size:12px; }
+
+input[type=range] { accent-color: #5e549d; width: 100%; cursor: pointer; height: 6px; }
+.progress { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+.alert { border-right: 4px solid; padding: 9px 13px; border-radius: 8px; font-size: 13px; margin-bottom: 7px; }
+.alert-info { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
+.alert-warn { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+.alert-success { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+.alert-danger { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
+
+.rrow { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f1f5f9; }
+.rrow:last-child { border-bottom:none; }
+
+.channel-card { border: 2px solid; border-radius: 12px; padding: 14px; }
+.ch-rest { border-color: #bfdbfe; } .ch-wolt { border-color: #bbf7d0; }
+.ch-10bis { border-color: #fed7aa; } .ch-cibus { border-color: #fbcfe8; }
+
+@media (max-width:768px) { .kpi-value{font-size:15px;} .kpi-item{padding:8px 10px;} .hide-sm{display:none;} }
+</style>
 </head>
-<body class="py-12 px-4">
-<div class="max-w-5xl mx-auto space-y-12">
+<body>
 
-    <!-- PAGE 1: COVER -->
-    <div class="page-container bg-brand-dark border-b-8 border-brand-secondary justify-center text-center text-white relative">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-brand-primary rounded-bl-full opacity-30"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary rounded-tr-full opacity-20"></div>
-        <div class="relative z-10 flex flex-col items-center">
-            <div class="bg-white p-8 rounded-3xl mb-16 inline-block shadow-2xl">
-                <img src="PRO MANAGER LOGO.webp" alt="Pro Manager" class="h-28 mx-auto drop-shadow-xl" onerror="this.outerHTML='<div class=&quot;text-5xl font-black text-brand-primary&quot;>PRO<span class=&quot;text-brand-secondary&quot;>MANAGER</span></div>'" />
-            </div>
-            <h4 class="text-brand-secondary font-bold tracking-widest text-xl mb-4 uppercase">Confidential Report</h4>
-            <h1 class="text-6xl font-black leading-tight mb-8">דו"ח אבחון וייעול<br/>אסטרטגי מורחב</h1>
-            <div class="w-24 h-2 bg-brand-secondary mx-auto mb-12 rounded-full"></div>
-            <div class="bg-black/30 p-8 rounded-2xl backdrop-blur-md border border-brand-primary/50 max-w-lg w-full shadow-2xl">
-                <div class="grid grid-cols-2 gap-8 text-right">
-                    <div>
-                        <p class="text-brand-secondary text-sm mb-1 uppercase tracking-wider">הוכן עבור חברת</p>
-                        <p class="text-white text-2xl font-bold">חסוי בע"מ</p>
-                    </div>
-                    <div>
-                        <p class="text-brand-secondary text-sm mb-1 uppercase tracking-wider">תאריך הפקה</p>
-                        <p class="text-white text-2xl font-bold">10 מאי, 2026</p>
-                    </div>
-                    <div class="col-span-2 pt-4 border-t border-white/10">
-                        <p class="text-brand-secondary text-sm mb-1 uppercase tracking-wider">הוכן על ידי</p>
-                        <p class="text-white text-xl font-medium">מנהל שיווק ראשי - Pro Manager</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="flex items-center overflow-x-auto">
+    <div class="kpi-item text-white flex-shrink-0">
+      <div class="kpi-label">עלויות קבועות/חודש</div>
+      <div class="kpi-value" id="kpi-fixed">₪0</div>
     </div>
-
-    <!-- PAGE 2: EXECUTIVE SUMMARY -->
-    <div class="page-container">
-        <div class="flex items-center border-b-4 border-brand-primary pb-4 mb-8">
-            <div class="bg-brand-light p-3 rounded-xl ml-4"><i data-lucide="target" class="text-brand-primary w-8 h-8"></i></div>
-            <h2 class="text-3xl font-bold text-slate-900">תקציר מנהלים - מפת ביצועים</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
-            <div>
-                <h3 class="text-2xl font-bold text-brand-primary mb-4">תמונת מצב נוכחית</h3>
-                <p class="text-slate-600 text-lg leading-relaxed mb-6">מערך השיווק של החברה מייצר תנועה ולידים בצורה סבירה, אך <strong class="text-red-500 bg-red-50 px-1">קיים נתק מוחלט בינו לבין מחלקת המכירות</strong>. אנשי המכירות לא משתמשים כראוי במערכת ה-CRM, תהליך הפולואפ לוקה בחסר, ויש פער עצום בין ההבטחות של הקמפיינים לבין שיחת המכירה בפועל. מצב זה מוביל לשחיקת רווחיות משמעותית (ROI) ואיבוד עסקאות חמות.</p>
-                <div class="bg-brand-light border-r-4 border-brand-primary p-6 rounded-l-lg">
-                    <h4 class="font-bold text-brand-dark mb-2 text-xl">ציון משוקלל: 2.4 / 5.0</h4>
-                    <p class="text-brand-primary font-medium">המערכת פועלת בניצולת של 48% מהפוטנציאל שלה. תיקון הנתק בין המחלקות יכול להכפיל את שורת הרווח ללא הגדלת תקציב השיווק.</p>
-                </div>
-            </div>
-            <div class="relative h-80"><canvas id="radarChart"></canvas></div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-auto">
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
-                <h3 class="text-lg font-semibold text-slate-500 mb-2">אסטרטגיה</h3>
-                <div class="text-brand-primary text-5xl font-black">2.8<span class="text-xl text-slate-300">/5</span></div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
-                <h3 class="text-lg font-semibold text-slate-500 mb-2">קמפיינים</h3>
-                <div class="text-brand-secondary text-5xl font-black">3.1<span class="text-xl text-slate-300">/5</span></div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
-                <h3 class="text-lg font-semibold text-slate-500 mb-2">CRM</h3>
-                <div class="text-red-500 text-5xl font-black">2.3<span class="text-xl text-slate-300">/5</span></div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center shadow-md hover:shadow-lg transition">
-                <h3 class="text-lg font-semibold text-slate-500 mb-2">סנכרון</h3>
-                <div class="text-red-500 text-5xl font-black">1.6<span class="text-xl text-slate-300">/5</span></div>
-            </div>
-        </div>
+    <div class="kpi-item text-white flex-shrink-0">
+      <div class="kpi-label">מחזור יומי יעד</div>
+      <div class="kpi-value text-blue-300" id="kpi-daily">₪0</div>
     </div>
-
-    <!-- PAGE 3: FUNNEL -->
-    <div class="page-container">
-        <div class="flex items-center border-b-4 border-brand-primary pb-4 mb-8">
-            <div class="bg-brand-light p-3 rounded-xl ml-4"><i data-lucide="refresh-cw" class="text-brand-primary w-8 h-8"></i></div>
-            <h2 class="text-3xl font-bold text-slate-900">צוואר הבקבוק המרכזי: CRM ומשפך מכירות</h2>
-        </div>
-        <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
-            <div class="bg-red-50 text-red-600 p-5 rounded-full mb-6 shadow-inner"><i data-lucide="alert-octagon" class="w-12 h-12"></i></div>
-            <h3 class="text-3xl font-black text-brand-dark mb-4">הנתק בין השיווק לשטח</h3>
-            <p class="text-xl text-slate-600">ה-CRM קיים טכנית, אך השימוש בו על ידי המכירות חלקי מאוד. אין מעבר של נתוני UTM, אין אוטומציות פולואפ, וזמני התגובה ארוכים מדי. המשמעות: כסף שנשפך בקמפיינים לא מומר למכירות.</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div class="bg-white border-t-4 border-t-orange-500 rounded-xl p-6 shadow-lg">
-                <div class="text-orange-500 font-bold text-4xl mb-2">3 שעות</div>
-                <h4 class="font-bold text-slate-800 mb-2">זמן תגובה ממוצע (SLA)</h4>
-                <p class="text-slate-600 text-sm">לידים מתקררים. חובה להוריד את זמן התגובה לאל מתחת ל-15 דקות מרגע ההשארה.</p>
-            </div>
-            <div class="bg-white border-t-4 border-t-red-500 rounded-xl p-6 shadow-lg">
-                <div class="text-red-500 font-bold text-4xl mb-2">0%</div>
-                <h4 class="font-bold text-slate-800 mb-2">אוטומציות פולואפ למתלבטים</h4>
-                <p class="text-slate-600 text-sm">לקוח שלא עונה מקבל התעלמות. חובה להקים מסע לקוח בוואטסאפ ללידים מתקררים.</p>
-            </div>
-            <div class="bg-white border-t-4 border-t-red-700 rounded-xl p-6 shadow-lg">
-                <div class="text-red-700 font-bold text-4xl mb-2">חסר</div>
-                <h4 class="font-bold text-slate-800 mb-2">שיוך ליד לקמפיין (UTM)</h4>
-                <p class="text-slate-600 text-sm">מנהל השיווק עיוור. הוא לא יודע איזו מודעה הביאה את המכירה. חובה לתקן אינטגרציה.</p>
-            </div>
-        </div>
-        <h3 class="text-2xl font-bold text-slate-900 mb-8 text-center mt-8">ניתוח דליפות במשפך המכירה (Funnel Drop-off)</h3>
-        <div class="relative w-full mb-8" style="height: 300px;"><canvas id="areaChart"></canvas></div>
+    <div class="kpi-item text-white flex-shrink-0">
+      <div class="kpi-label">נקודת איזון יומית</div>
+      <div class="kpi-value text-yellow-300" id="kpi-be">₪0</div>
     </div>
-
-    <!-- PAGE 4: PLAN -->
-    <div class="page-container">
-        <div class="flex items-center border-b-4 border-brand-primary pb-4 mb-8">
-            <div class="bg-brand-light p-3 rounded-xl ml-4"><i data-lucide="briefcase" class="text-brand-primary w-8 h-8"></i></div>
-            <h2 class="text-3xl font-bold text-slate-900">סנכרון ותוכנית פעולה - 90 ימים</h2>
-        </div>
-        <div class="bg-brand-dark text-white rounded-2xl p-8 mb-12 shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-32 h-32 bg-brand-primary rounded-br-full opacity-50"></div>
-            <h3 class="text-2xl font-black text-brand-secondary mb-6 relative z-10">מסקנת העל - Pro Manager</h3>
-            <p class="text-xl leading-relaxed relative z-10">שיווק שלא נמדד בשורת הרווח של המכירות - הוא רק רעש רקע. כדי לתקן את המצב, אנו עוצרים את המרדף אחרי "כמות לידים", ועוברים למודל עבודה של <strong class="text-brand-secondary">"הכנסה מבוססת יעדים" (RevOps)</strong>.</p>
-        </div>
-        <h3 class="text-2xl font-bold text-brand-primary mb-6 border-b border-brand-light pb-2">תכנית אופרטיבית מיידית (שלב 1):</h3>
-        <div class="space-y-6">
-            <div class="flex bg-white border border-slate-100 hover:border-brand-primary transition rounded-xl p-6 shadow-sm">
-                <div class="bg-brand-primary text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-full ml-6 shrink-0 shadow-md">1</div>
-                <div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-2">מיסוד ישיבת סנכרון (Feedback Loop)</h4>
-                    <p class="text-slate-600">קביעת ישיבת חובה שבועית (15 דק') בין מנהל השיווק לנציגי המכירות. חובה להעביר התנגדויות מהשטח חזרה לסוכנות כדי לשנות את הקופירייטינג במודעות בזמן אמת.</p>
-                </div>
-            </div>
-            <div class="flex bg-white border border-slate-100 hover:border-brand-primary transition rounded-xl p-6 shadow-sm">
-                <div class="bg-brand-primary text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-full ml-6 shrink-0 shadow-md">2</div>
-                <div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-2">תיקון כשל ה-CRM ונתוני המקור (UTM)</h4>
-                    <p class="text-slate-600">הטמעה טכנית דחופה להעברת נתוני קמפיין ישירות ל-Pipedrive. מנהל השיווק יתחיל למדוד החזר השקעה (ROI) לפי קמפיין ספציפי, ויסגור ברזים למודעות שמביאות לידים זולים שלא נסגרים.</p>
-                </div>
-            </div>
-            <div class="flex bg-white border border-slate-100 hover:border-brand-primary transition rounded-xl p-6 shadow-sm">
-                <div class="bg-brand-primary text-white font-bold text-2xl w-12 h-12 flex items-center justify-center rounded-full ml-6 shrink-0 shadow-md">3</div>
-                <div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-2">בניית מערך פולואפ ו-Playbook מכירות</h4>
-                    <p class="text-slate-600">כתיבת ספר מכירות ארגוני הכולל תסריט אבחון, בנק טיפול בהתנגדויות, והקמת אוטומציה של 4 הודעות וואטסאפ ללקוחות מתלבטים לטובת חימום הדרגתי.</p>
-                </div>
-            </div>
-        </div>
+    <div class="kpi-item text-white flex-shrink-0 hide-sm">
+      <div class="kpi-label">הכנסה חודשית</div>
+      <div class="kpi-value text-cyan-300" id="kpi-rev">₪0</div>
     </div>
-
-    <!-- PAGE 5 -->
-    <div class="page-container bg-slate-50">
-        <div class="text-center mb-10">
-            <h2 class="text-4xl font-black text-brand-dark mb-4 uppercase tracking-tight">נספח מקצועי מורחב</h2>
-            <div class="w-16 h-2 bg-brand-secondary mx-auto mb-4 rounded-full"></div>
-            <p class="text-xl text-slate-600 font-bold">אבחון עומק של 99 פרמטרים במערך השיווק והמכירות</p>
-            <p class="text-sm text-slate-500 mt-2">סולם ציונים: 1 (קריטי/חסר) עד 5 (מצוין/תקין)</p>
-        </div>
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="users" class="ml-2"></i> 1. אסטרטגיה שיווקית ומסרים (1-13)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">1</td><td class="p-3 font-medium text-slate-700">קיום הגדרה מדויקת ומתועדת של קהל היעד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז MQL רלוונטי</td><td class="p-3 text-slate-600">הקהל מוגדר כללית מדי, יש לפרק למיקרו-סגמנטים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">2</td><td class="p-3 font-medium text-slate-700">הגדרת הצעת ערך מרכזית ברורה ומוחשית.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">שיעור המרה בדף בית</td><td class="p-3 text-slate-600">ברורה מבחינה טכנית, אך חסר תרגום ל-ROI ללקוח.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">3</td><td class="p-3 font-medium text-slate-700">קיום בידול תחרותי אמיתי (מעבר לסיסמאות).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Win Rate מול מתחרים</td><td class="p-3 text-slate-600">נשענים על "שירות ויחס", נדרש בידול מבוסס תוצאה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">4</td><td class="p-3 font-medium text-slate-700">בהירות המסרים המרכזיים בקמפיינים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">CTR מודעות</td><td class="p-3 text-slate-600">מסרים טכניים, חסרה פניה לרגש ולתועלת הסופית.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">5</td><td class="p-3 font-medium text-slate-700">התייחסות ישירה לכאבי הלקוח בשיווק.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">זמן שהייה בדף הנחיתה</td><td class="p-3 text-slate-600">מדברים בעיקר על עצמנו ("אנחנו") במקום על הבעיה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">6</td><td class="p-3 font-medium text-slate-700">הגדרת פרסונות ממוקדות לטובת דיוק קמפיינים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">CPL פר סגמנט</td><td class="p-3 text-slate-600">מודעה גנרית אחת רצה לכל סוגי הקהלים יחד.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">7</td><td class="p-3 font-medium text-slate-700">מיפוי שוטף של מתחרים והבנת מיצוב החברה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">דוח מתחרים רבעוני</td><td class="p-3 text-slate-600">לא קיים. החברה פועלת בוואקום מוחלט משיווק המתחרים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">8</td><td class="p-3 font-medium text-slate-700">קיום אסטרטגיה וטקטיקה שיווקית שיטתית וברורה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">עמידה ביעדי חודש (Pacing)</td><td class="p-3 text-slate-600">השיווק ריאקטיבי, פועל לפי גחמות ללא גאנט סדור.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">9</td><td class="p-3 font-medium text-slate-700">וידוא שהקמפיינים עובדים לפי האסטרטגיה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">QA שיווקי חודשי</td><td class="p-3 text-slate-600">סטייה בין רצון ההנהלה למה שהסוכנות מעלה בפועל.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">10</td><td class="p-3 font-medium text-slate-700">התאמה מלאה בין המסרים לקהל היעד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז לידים פסולים</td><td class="p-3 text-slate-600">מושכים הרבה קהל לא רלוונטי בגלל הבטחות יתר.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">11</td><td class="p-3 font-medium text-slate-700">העדר פער ציפיות בין השיווק לשיחת המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">אחוז Drop-off בשיחה</td><td class="p-3 text-slate-600">פער קריטי. מודעה מבטיחה זול, מכירות מסבירים פרימיום.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">12</td><td class="p-3 font-medium text-slate-700">קיום נכסים (ברושורים/PDF) תומכי מכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">שימוש בחומרי עזר ע"י צוות</td><td class="p-3 text-slate-600">קיים חומר ישן לא מעודכן. חסר One Pager דיגיטלי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">13</td><td class="p-3 font-medium text-slate-700">שילוב הוכחות חברתיות ואמון בנכסים השיווקיים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">צפיות בעדויות באתר</td><td class="p-3 text-slate-600">נקודת חוזקה. יש המלצות וידאו מצוינות שמשולבות נהדר.</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="zap" class="ml-2"></i> 2. ניהול קמפיינים ומדידת ביצועים (14-28)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">14</td><td class="p-3 font-medium text-slate-700">זיהוי ומדידה של מקורות התנועה המרכזיים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">דוח מקורות מ-GA4</td><td class="p-3 text-slate-600">יש הבנה טובה של הטראפיק שמגיע מגוגל ופייסבוק.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">15</td><td class="p-3 font-medium text-slate-700">מעקב רציף אחר עלות לליד (CPL) בכל קמפיין.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">CPL יומי/שבועי</td><td class="p-3 text-slate-600">מנוהל היטב בצד של סוכנות הפרסום.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">16</td><td class="p-3 font-medium text-slate-700">מעקב שוטף אחר יחסי המרה (Conversion Rate).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">CR% מדף נחיתה</td><td class="p-3 text-slate-600">אין A/B Testing מוסדר. משאירים את הקיים ללא שיפור.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">17</td><td class="p-3 font-medium text-slate-700">סיווג נתוני הלידים לפי איכות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">SQL Rate</td><td class="p-3 text-slate-600">ליד הוא ליד. אין תעדוף ללידים "חמים" או "איכותיים".</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">18</td><td class="p-3 font-medium text-slate-700">ניתוח ביצועים של דפי הנחיתה המובילים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">Bounce Rate</td><td class="p-3 text-slate-600">שולחים חלק מהתנועה הממומנת לדף הבית - טעות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">19</td><td class="p-3 font-medium text-slate-700">זיהוי ברור של הקמפיינים שמייצרים הכנסה בפועל.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">ROI / ROAS קמפיין</td><td class="p-3 text-slate-600">השיווק מודד רק כמות פניות, לא כסף בקופה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">20</td><td class="p-3 font-medium text-slate-700">זיהוי קמפיינים שמייצרים "רעש" אך לא מכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Cost Per Order (CPO)</td><td class="p-3 text-slate-600">קמפיין פייסבוק מביא לידים ב-40 ש"ח אך אחוז הסגירה אפסי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">21</td><td class="p-3 font-medium text-slate-700">בקרה על תקציבים מבוזבזים ואיתור צווארי בקבוק.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">ניצול תקציב (Burn Rate)</td><td class="p-3 text-slate-600">נדרשת הסתה מהירה של תקציבים מהרשת החברתית לגוגל.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">22</td><td class="p-3 font-medium text-slate-700">קבלת החלטות מבוססות נתונים על עצירת קמפיינים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">תדירות שינויים בקמפיין</td><td class="p-3 text-slate-600">ההחלטות מתקבלות פעם בחודש, לאט מדי לעולם הדיגיטל.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">23</td><td class="p-3 font-medium text-slate-700">הגדלת תקציבים בערוצים המציגים ROI חיובי.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">אחוז Scale שבועי</td><td class="p-3 text-slate-600">מבוצע בצורה טובה ברשת החיפוש לאחר זיהוי מילים ממירות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">24</td><td class="p-3 font-medium text-slate-700">תקינות חיבורי המדידה (GA4 ופיקסלים).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">Event Tracking</td><td class="p-3 text-slate-600">כל אירועי ההמרה מוגדרים ותקינים טכנית.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">25</td><td class="p-3 font-medium text-slate-700">מדידת נפח ואיכות לידים מערוצים אורגניים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">אחוז לידים אורגניים</td><td class="p-3 text-slate-600">אין הפרדה ב-CRM בין ליד ממומן לאורגני.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">26</td><td class="p-3 font-medium text-slate-700">ניתוח הכנסות משיתופי פעולה (Partners).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">כמות עסקאות שותפים</td><td class="p-3 text-slate-600">לא קיים מערך תגמול לשיתופי פעולה עסקיים. פספוס ענק.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">27</td><td class="p-3 font-medium text-slate-700">הגדרת יעדים (KPI) למדידת הצלחה של כנסים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">CPL מכנסים</td><td class="p-3 text-slate-600">הולכים לכנסים אבל לא מודדים כמה עסקאות נסגרו כתוצאה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">28</td><td class="p-3 font-medium text-slate-700">הכנת חומר שיווקי התומך בפעילות כנסים ושטח.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">כמות סריקות קוד QR</td><td class="p-3 text-slate-600">יש רול-אפים, חסר קטלוג דיגיטלי מתקדם לסריקה.</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="kpi-item text-white flex-shrink-0">
+      <div class="kpi-label">רווח/הפסד חודשי</div>
+      <div class="kpi-value" id="kpi-profit">₪0</div>
     </div>
-
-    <!-- PAGE 6 -->
-    <div class="page-container bg-slate-50">
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="refresh-cw" class="ml-2"></i> 3. ניהול CRM ואוטומציות (29-43)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">29</td><td class="p-3 font-medium text-slate-700">קיום מערכת CRM פעילה המרכזת את כלל הפעילות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">% לידים מוזנים למערכת</td><td class="p-3 text-slate-600">המערכת קיימת ומתפקדת טכנית בצורה מלאה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">30</td><td class="p-3 font-medium text-slate-700">רמת השימוש השוטפת של אנשי המכירות במערכת.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">פעולות עדכון ליום</td><td class="p-3 text-slate-600">שימוש חלקי כפנקס. חסר עדכון סטטוסים בזמן אמת.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">31</td><td class="p-3 font-medium text-slate-700">קיום סטטוסים ברורים התואמים משפך מכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">זמן ממוצע בסטטוס</td><td class="p-3 text-slate-600">הסטטוסים כלליים ("בטיפול"). חסר פירוק לתת-שלבים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">32</td><td class="p-3 font-medium text-slate-700">תיעוד אוטומטי ואמין של מקור הליד (UTM).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז לידים מזוהי UTM</td><td class="p-3 text-slate-600">כשל חמור: אין מעבר נתונים. לא יודעים מאיזו מודעה בא הלקוח.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">33</td><td class="p-3 font-medium text-slate-700">הקפדה על תיעוד סיכומי שיחות בכרטיס לקוח.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תווים בכרטיס לקוח</td><td class="p-3 text-slate-600">כרטיסים נשארים ריקים. פוגע ביכולת לבצע פולואפ.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">34</td><td class="p-3 font-medium text-slate-700">ניהול שיטתי של משימות פולואפ לכל ליד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">משימות פתוחות באחור</td><td class="p-3 text-slate-600">נציגים מסתמכים על זיכרון. לידים מתקררים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">35</td><td class="p-3 font-medium text-slate-700">זיהוי שלבי ניהול שבהם לידים "נופלים בין הכיסאות".</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Drop-off Rate בין שלבים</td><td class="p-3 text-slate-600">נפילה חדה בין "הצעה נשלחה" לסגירה ללא פולואפ נכון.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">36</td><td class="p-3 font-medium text-slate-700">קיום דוחות שוטפים למעקב אחרי פעילות ה-CRM.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">כניסות מנהלים ל-Dashboard</td><td class="p-3 text-slate-600">יש דוחות, אך ההנהלה מנתחת אותם פעם בחודש.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">37</td><td class="p-3 font-medium text-slate-700">אוטומציה לשליחת הודעת תגובה ראשונה לליד.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">זמן ל-SMS ראשון</td><td class="p-3 text-slate-600">תקין. נשלחת הודעת וואטסאפ אוטומטית מיד.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">38</td><td class="p-3 font-medium text-slate-700">סדרת פולואפ אוטומטית ללידים מתלבטים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז פתיחת פולואפ</td><td class="p-3 text-slate-600">לא קיימת. חובה להקים Nurturing Campaign.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">39</td><td class="p-3 font-medium text-slate-700">אוטומציות לתזכורות ואישורי הגעה לפגישות מכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">אחוז Show-up</td><td class="p-3 text-slate-600">עובד טוב ומונע אי-הגעות ברגע האחרון.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">40</td><td class="p-3 font-medium text-slate-700">תקינות חיבור הוואטסאפ למערכות השיווק והמכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">שיחות שתועדו ל-CRM</td><td class="p-3 text-slate-600">חלק מהנציגים משתמשים בוואטסאפ אישי, ללא גיבוי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">41</td><td class="p-3 font-medium text-slate-700">מדידה וקיצור של זמני התגובה הראשוניים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Time to First Call</td><td class="p-3 text-slate-600">ממוצע של 3 שעות הוא קטסטרופלי ליחסי המרה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">42</td><td class="p-3 font-medium text-slate-700">תהליך אוטומטי מוגדר להמשך טיפול לאחר סיום שיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">שימוש בתבניות מוכנות</td><td class="p-3 text-slate-600">הנציג מקליד כל הודעת סיכום ידנית, מבזבז זמן עבודה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">43</td><td class="p-3 font-medium text-slate-700">זיהוי וטיפול בנקודות נטישה באוטומציה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז Unsubscribe</td><td class="p-3 text-slate-600">אין מעקב אחרי מי שחוסם את הוואטסאפ או הדיוור.</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="arrow-down-right" class="ml-2"></i> 4. אסטרטגיית מכירה ותהליכי עבודה (44-55)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">44</td><td class="p-3 font-medium text-slate-700">הגדרת אפיון מדויק ללקוח האידיאלי בעיני צוות המכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז אישור כ-SQL</td><td class="p-3 text-slate-600">הצוות מבין תיאורטית, אך חסר מסמך סינון מחייב.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">45</td><td class="p-3 font-medium text-slate-700">קביעה אסטרטגית של סדר הצגת המוצרים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Average Order Value</td><td class="p-3 text-slate-600">מציעים ישר פרימיום, הלקוח נבהל. יש לבנות Down-sell.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">46</td><td class="p-3 font-medium text-slate-700">קיום "מוצר כניסה" להורדת חסמי רכישה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">המרות למוצר התחלתי</td><td class="p-3 text-slate-600">חסר לחלוטין. חייבים ליצור Tripwire לבניית אמון.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">47</td><td class="p-3 font-medium text-slate-700">בניית הצעה מרכזית ממוקדת וברורה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">מהירות סגירת עסקה</td><td class="p-3 text-slate-600">מבנה מוצר הדגל ברור והלקוח מבין מה הוא מקבל.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">48</td><td class="p-3 font-medium text-slate-700">הבנה ותכנון של שלבי הבשלת הלקוח עד סגירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">זמן ממוצע לסגירה</td><td class="p-3 text-slate-600">לוחצים מדי בשיחה 1. נדרש תהליך טיפוח (Nurturing) מובנה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">49</td><td class="p-3 font-medium text-slate-700">מיפוי תהליך המכירה מרגע כניסת הליד לחתימה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">תאימות תהליך/מעשי</td><td class="p-3 text-slate-600">קיים מסמך ישן. יש לרענן ולשרטט מחדש.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">50</td><td class="p-3 font-medium text-slate-700">קביעת זמני יעד ליצירת קשר ראשוני.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז עמידה ביעד תגובה</td><td class="p-3 text-slate-600">יש יעד תיאורטי (שעה), בפועל לא אוכפים או מודדים אותו.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">51</td><td class="p-3 font-medium text-slate-700">שאלות חובה לאבחון וסינון לפני התקדמות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">כמות פגישות סרק</td><td class="p-3 text-slate-600">מעלים כל אחד לפגישה. יש להגדיר שאלות "BANT" מחייבות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">52</td><td class="p-3 font-medium text-slate-700">הגדרה ברורה באילו תנאים ולמי שולחים הצעה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">יחס המרה להצעה</td><td class="p-3 text-slate-600">שולחים כדי "להיפטר" מלקוח חופר. בזבוז זמן נציג.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">53</td><td class="p-3 font-medium text-slate-700">מיסוד תהליך קבוע לטיפול בלקוחות אבודים (Lost).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז Win-Back</td><td class="p-3 text-slate-600">שום טיפול. חובה להכניס לקמפיין דיוור רבעוני.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">54</td><td class="p-3 font-medium text-slate-700">חלוקת אחריות ברורה לכל שלב בתהליך המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">תקינות העברת טיפול</td><td class="p-3 text-slate-600">החלוקה בין SDR (מתאם) ל-Closer (סוגר) עובדת היטב.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">55</td><td class="p-3 font-medium text-slate-700">הגדרת "משימה הבאה" כשלב חובה בסיום מגע.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">לידים יתומים ב-CRM</td><td class="p-3 text-slate-600">נציגים סוגרים כרטיסים ללא תאריך המשך. מייצר חורים.</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="kpi-item text-white flex-shrink-0 hide-sm">
+      <div class="kpi-label">מרווח %</div>
+      <div class="kpi-value" id="kpi-margin">0%</div>
     </div>
-
-    <!-- PAGE 7 -->
-    <div class="page-container bg-slate-50">
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="phone-call" class="ml-2"></i> 5. פיצ' מכירה, ניהול שיחות והצעות מחיר (56-72)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">56</td><td class="p-3 font-medium text-slate-700">קיום מבנה מוגדר וחזק לפתיחת שיחת המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אורך שיחה ממוצע</td><td class="p-3 text-slate-600">נופלים לשיחת חולין ארוכה מדי. לקצר פתיח ולשלוט במסגרת.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">57</td><td class="p-3 font-medium text-slate-700">הצגה מדויקת של החברה והערך שלה בפיצ'.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">ציון האזנה (QA)</td><td class="p-3 text-slate-600">מבוצע טוב. פיצ' המעלית קצר ומעביר סמכות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">58</td><td class="p-3 font-medium text-slate-700">שימוש בשאלות אבחון לאיתור כאב הלקוח.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">כמות מידע שנאסף</td><td class="p-3 text-slate-600">שואלים שאלות טכניות במקום על השלכות הבעיה העסקית.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">59</td><td class="p-3 font-medium text-slate-700">טיפול בכאב הלקוח כחלק מובנה בשיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">התנגדות "לא רלוונטי"</td><td class="p-3 text-slate-600">מדלגים על הכאב ומציעים פתרון מהר מדי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">60</td><td class="p-3 font-medium text-slate-700">שילוב מסר בידול למניעת השוואת מחירים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">סגירות ללא הנחה</td><td class="p-3 text-slate-600">נגררים מהר לשיח הנחות. להדגיש ביטחון על פני מחיר.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">61</td><td class="p-3 font-medium text-slate-700">שימוש במשפטי סגירה ברורים המניעים לפעולה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">ניסיונות סגירה בשיחה</td><td class="p-3 text-slate-600">מהססים לבקש אשראי. לחזק ברוטינות Role-Play.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">62</td><td class="p-3 font-medium text-slate-700">שמירת שליטת הנציג בשיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">התפרצויות הלקוח</td><td class="p-3 text-slate-600">לקוחות חזקים מנווטים את השיחה. לנווט חזרה בעזרת שאלות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">63</td><td class="p-3 font-medium text-slate-700">הקשבה פעילה (לקוח מדבר יותר מנציג).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">יחס דיבור (Talk Ratio)</td><td class="p-3 text-slate-600">נציגים מדברים 70% מהזמן. חובה להפוך ליחס 30/70.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">64</td><td class="p-3 font-medium text-slate-700">בנק תשובות מובנה להתנגדויות נפוצות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">אחוז פתרון התנגדויות</td><td class="p-3 text-slate-600">לא קיים (Playbook). כל נציג ממציא תשובות על המקום.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">65</td><td class="p-3 font-medium text-slate-700">זיהוי ותיקון טעויות חוזרות בשיחות (משוב).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תדירות משוב שבועי</td><td class="p-3 text-slate-600">אין מספיק האזנות מצד המנהל. נדרשת רוטינה קבועה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">66</td><td class="p-3 font-medium text-slate-700">פתיח אישי מותאם בהצעת מחיר.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">אחוז פתיחת הצעות</td><td class="p-3 text-slate-600">מצוין. נפתח בנימה אישית וידידותית שמזכירה את הפגישה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">67</td><td class="p-3 font-medium text-slate-700">שיקוף מלא של הבנת הצורך בהצעה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">התאמה לצורך לקוח</td><td class="p-3 text-slate-600">לעיתים שולחים הצעה גנרית ולא מותאמת אישית ללקוח הספציפי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">68</td><td class="p-3 font-medium text-slate-700">הצגה ברורה של הפתרון ומה מקבלים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">שאלות הבהרה מלקוח</td><td class="p-3 text-slate-600">ההצעה מפורטת מבחינה טכנית והתוצרים (Deliverables) ברורים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">69</td><td class="p-3 font-medium text-slate-700">תרגום טכני לתועלת וערך עסקי בהצעה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">זמן לאישור הצעות</td><td class="p-3 text-slate-600">מדברים יותר מדי במונחים טכניים ופחות על התוצאה והרווח הצפוי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">70</td><td class="p-3 font-medium text-slate-700">הצגת מחיר ותנאי תשלום בצקיפות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">5</span></td><td class="p-3 text-slate-500">תלונות הבנת מחיר</td><td class="p-3 text-slate-600">מעולה, אין הפתעות במע"מ או בתנאי תשלום (שוטף+).</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">71</td><td class="p-3 font-medium text-slate-700">שילוב אלמנט דחיפות להגבלת תוקף.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">הצעות שפג תוקפן</td><td class="p-3 text-slate-600">כתוב "תקף ל-7 ימים" אך לא נאכף בפועל, לקוח חותם מתי שנוח לו.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">72</td><td class="p-3 font-medium text-slate-700">הנעה ברורה לפעולה וסיום לשלב הבא.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">חתימות דיגיטליות</td><td class="p-3 text-slate-600">יש כפתור חתימה מהירה שמקצר את התהליך.</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="kpi-item text-white flex-shrink-0">
+      <div class="kpi-label">סטטוס</div>
+      <div class="kpi-value" id="kpi-status">—</div>
     </div>
-
-    <!-- PAGE 8 -->
-    <div class="page-container bg-slate-50">
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="clock" class="ml-2"></i> 6. ניהול פולואפ ופגישות מכירה (73-83)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">73</td><td class="p-3 font-medium text-slate-700">לוחות זמנים מחייבים לביצוע פולואפ.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">פולואפים בפיגור</td><td class="p-3 text-slate-600">אין נהלים, הנציגים מתקשרים מתי שמתפנה להם זמן.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">74</td><td class="p-3 font-medium text-slate-700">הגדרת אחריות בפולואפ לדרג מנהלים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">כפילויות פנייה</td><td class="p-3 text-slate-600">מנהל לא נכנס לפולואפ עסקאות גדולות מספיק מוקדם (Manager Touch).</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">75</td><td class="p-3 font-medium text-slate-700">מדידת כמות הנגיעות (Touches) לסגירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">ממוצע פעולות לעסקה</td><td class="p-3 text-slate-600">מוותרים מהר מדי. בעסקת B2B נדרשות 7-10 נגיעות ויש רק 2-3.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">76</td><td class="p-3 font-medium text-slate-700">תסריט שיחה מובנה לשלבי פולואפ שונים.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">המרות פולואפ</td><td class="p-3 text-slate-600">שואלים רק "נו, החלטתם?" במקום לספק ערך מוסף ללקוח.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">77</td><td class="p-3 font-medium text-slate-700">תיעוד שוטף של כל נגיעת פולואפ ב-CRM.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תיעודי היסטוריה</td><td class="p-3 text-slate-600">התיעוד דל והנציג נשמע לא מעודכן מול הלקוח.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">78</td><td class="p-3 font-medium text-slate-700">התאמת הנוסח לשלב הלקוח במסע.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">שימוש בהודעות מותאמות</td><td class="p-3 text-slate-600">שולחים הודעות העתק-הדבק זהות לכל סוגי הסטטוסים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">79</td><td class="p-3 font-medium text-slate-700">נוהל סדור ללקוחות מתעלמים (רוחות רפאים).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">אחוז החייאה</td><td class="p-3 text-slate-600">יש הודעת פרידה סבירה שעובדת ומייצרת "תגובת אשמה".</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">80</td><td class="p-3 font-medium text-slate-700">סדרת פולואפ מספקת ערך והוכחות (Case Studies).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">שימוש בסיפורי לקוח</td><td class="p-3 text-slate-600">הלקוח מקבל נדנוד ללא חומר מרגיע או משכנע מגוף שלישי.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">81</td><td class="p-3 font-medium text-slate-700">מנגנון החייאה עתידית ללקוחות שהתקררו.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">עסקאות אחרי חודשיים</td><td class="p-3 text-slate-600">ליד בן שבועיים נחשב מת ומועבר לארכיון ללא דיוור.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">82</td><td class="p-3 font-medium text-slate-700">בניית פתיחת פגישה ויצירת אמון פרונטלי.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-green-100 text-green-700">4</span></td><td class="p-3 text-slate-500">יחס סגירה פגישות/טלפון</td><td class="p-3 text-slate-600">חזקים מאוד ביצירת Rapport וקרבה בפגישות פיזיות/זום.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">83</td><td class="p-3 font-medium text-slate-700">הצגת פתרון וטיפול בהתנגדויות בפגישה עצמה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">התנגדויות בפגישה</td><td class="p-3 text-slate-600">עונים טוב אך נותנים ללקוח "לחשוב על זה" במקום לסגור במקום.</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <h3 class="text-2xl font-bold text-brand-primary mb-4 flex items-center bg-white p-4 rounded-t-xl border-b-2 border-brand-secondary shadow-sm"><i data-lucide="briefcase" class="ml-2"></i> 7. סנכרון שיווק ומכירות (Feedback Loop) (84-99)</h3>
-        <div class="bg-white shadow-sm rounded-b-xl overflow-x-auto mb-10 custom-scrollbar">
-            <table class="w-full text-right border-collapse">
-                <thead><tr class="bg-brand-light text-brand-dark"><th class="p-3 w-12 font-bold border-b border-slate-200">#</th><th class="p-3 font-bold border-b border-slate-200">פרמטר נבדק</th><th class="p-3 w-20 text-center font-bold border-b border-slate-200">ציון</th><th class="p-3 w-1/4 font-bold border-b border-slate-200">KPI רלוונטי</th><th class="p-3 w-1/3 font-bold border-b border-slate-200">הערות / סטאטוס בפועל</th></tr></thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">84</td><td class="p-3 font-medium text-slate-700">שיווק מכין לקוח מבחינת ציפיות לשיחת המכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">הבנת תהליך ע"י ליד</td><td class="p-3 text-slate-600">לקוחות מגיעים ללא הבנה של טווחי מחיר או אורך תהליך.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">85</td><td class="p-3 font-medium text-slate-700">חזרתיות על מסרי הקמפיין בשיחת הפתיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">עקביות מסר</td><td class="p-3 text-slate-600">נציגים לא יודעים איזה קמפיין באוויר, המסר לא מהדהד.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">86</td><td class="p-3 font-medium text-slate-700">זיהוי מקור הליד לפני השיחה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">UTM נוכח</td><td class="p-3 text-slate-600">הנציג מגשש "מאיפה הגעת אלינו?" מראה חוסר מקצועיות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">87</td><td class="p-3 font-medium text-slate-700">זמינות תוכן תומך מכירה לפולואפ.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">שימוש בתוכן קיים</td><td class="p-3 text-slate-600">יש תוכן באתר אך הצוות לא משתמש בו לשליחה ככלי עזר.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">88</td><td class="p-3 font-medium text-slate-700">יכולת קישור בין מקור הליד לתוצאה סופית.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">Closed Won ROI</td><td class="p-3 text-slate-600">מודדים עלות לליד אך לא עוקבים איזה קמפיין הביא עסקה סגורה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">89</td><td class="p-3 font-medium text-slate-700">מנגנון פידבק ממכירות לשיווק (למידה חוזרת).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">תדירות עדכון יזומה</td><td class="p-3 text-slate-600">מחלקות עובדות בוואקום. אין העברת פידבק מסודרת לסוכנות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">90</td><td class="p-3 font-medium text-slate-700">זיהוי פערים בין הבטחת המודעה לנאמר במכירה.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">תלונות ציפיות</td><td class="p-3 text-slate-600">שיווק צועק "חינם", מכירות אומר "עולה כסף". נדרש סנכרון דחוף.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">91</td><td class="p-3 font-medium text-slate-700">מניעת פער ציפיות דף נחיתה לעומת הצעה סופית.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-orange-100 text-orange-700">3</span></td><td class="p-3 text-slate-500">נטישה בהגשת ההצעה</td><td class="p-3 text-slate-600">סביר. הלקוח לרוב מבין את המוצר אך מופתע מתוספות מחיר.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">92</td><td class="p-3 font-medium text-slate-700">ניתוח אחוז לידים רלוונטיים (Quality Rate).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">ניתוח חודשי לליד</td><td class="p-3 text-slate-600">לא מבוצע. יש לבצע חיתוך שבועי לטיוב קמפיינים.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">93</td><td class="p-3 font-medium text-slate-700">מיפוי התנגדויות לטובת שינוי מסרי השיווק.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">תכני שיווק מבוססי שטח</td><td class="p-3 text-slate-600">שיווק מנחש מה כואב ללקוח, אין שימוש בשיחות אמיתיות.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">94</td><td class="p-3 font-medium text-slate-700">זיהוי וטיפול בלידים פסולים מסינון שגוי.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">אחוז Disqualified</td><td class="p-3 text-slate-600">יש להוסיף שדה חובה "סיבת פסילה" ב-CRM להפקת דוח.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">95</td><td class="p-3 font-medium text-slate-700">דוחות רווחיות (ROI) לפי קמפיין מתוך ה-CRM.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">End-to-End ROI</td><td class="p-3 text-slate-600">ה-GA4 לא מחובר להכנסות שב-CRM. חסרה אינטגרציה.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">96</td><td class="p-3 font-medium text-slate-700">פגישת סנכרון שבועית קבועה בין שיווק למכירות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">ישיבות משותפות</td><td class="p-3 text-slate-600">מעולם לא התקיימה ישיבה משותפת. פעולה לקביעה מיידית.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">97</td><td class="p-3 font-medium text-slate-700">בניית דף מסרים אחיד המשמש את שתי המחלקות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">Playbook ארגוני</td><td class="p-3 text-slate-600">כל מחלקה מספרת סיפור אחר על החברה והמוצר.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">98</td><td class="p-3 font-medium text-slate-700">עדכון קופירייטינג על בסיס משפטים מוצלחים משיחות.</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">1</span></td><td class="p-3 text-slate-500">שינויי קופי בעקבות שטח</td><td class="p-3 text-slate-600">הסוכנות כותבת מודעות מהמשרד בלי להקשיב ללקוחות בטלפון.</td></tr>
-                    <tr class="border-b border-slate-100 table-row-hover"><td class="p-3 font-bold text-slate-400">99</td><td class="p-3 font-medium text-slate-700">הגדרת ובקרת KPI לשיפור איכות הפניות (CPO).</td><td class="p-3 text-center"><span class="px-2 py-1 rounded-md font-bold bg-red-100 text-red-700">2</span></td><td class="p-3 text-slate-500">CPL לעומת CPO</td><td class="p-3 text-slate-600">מודדים מחיר לליד במקום למדוד מחיר עלות סגירת לקוח משלם.</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="flex-1"></div>
+    <div class="flex gap-2 px-3 flex-shrink-0">
+      <button onclick="exportData()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-lg text-xs font-bold transition">💾 שמור</button>
+      <button onclick="importData()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-lg text-xs font-bold transition">📂 טען</button>
     </div>
-
+  </div>
 </div>
 
+<div class="max-w-7xl mx-auto px-4 py-5">
+
+<!-- TABS -->
+<div class="card p-3 mb-5 flex flex-wrap gap-2">
+  <div class="tab active" onclick="showTab('dashboard',this)">🏠 דשבורד</div>
+  <div class="tab" onclick="showTab('costs',this)">💰 עלויות תפעול</div>
+  <div class="tab" onclick="showTab('staff',this)">👥 כוח אדם</div>
+  <div class="tab" onclick="showTab('suppliers',this)">📦 ספקים</div>
+  <div class="tab" onclick="showTab('products',this)">🍽 מוצרים</div>
+  <div class="tab" onclick="showTab('simulator',this)">📈 סימולטור</div>
+  <div class="tab" onclick="showTab('channels',this)">🛍 ערוצי מכירה</div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="tab-dashboard" class="section active">
+  <!-- Quick inputs always on top -->
+  <div class="card p-4 mb-5">
+    <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">⚡ שנה כאן — הכל מתעדכן מיד</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div>
+        <label class="text-xs font-bold text-gray-500 block mb-1">🎯 מחזור יומי יעד (₪)</label>
+        <input type="number" id="g-daily" value="10000" min="0" step="500" class="live-input text-lg font-black text-blue-600" oninput="onGlobalChange()"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 block mb-1">📅 ימי פעילות / חודש</label>
+        <input type="number" id="g-days" value="30" min="1" max="31" class="live-input text-lg font-black text-blue-600" oninput="onGlobalChange()"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 block mb-1">🛒 F.C. ממוצע %</label>
+        <input type="number" id="g-fc" value="36.5" step="0.5" class="live-input text-lg font-black text-orange-600" oninput="onGlobalChange()"/>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-500 block mb-1">📊 עמלות פלטפורמה %</label>
+        <input type="number" id="g-comm" value="9.375" step="0.1" class="live-input text-lg font-black text-purple-600" oninput="onGlobalChange()"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+    <div class="card p-5">
+      <h2 class="text-base font-bold text-purple-700 mb-4">📍 נקודת איזון</h2>
+      <div id="be-panel"></div>
+    </div>
+    <div class="card p-5">
+      <h2 class="text-base font-bold text-purple-700 mb-4">⚠️ התראות חיות</h2>
+      <div id="alerts-panel"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+    <div class="card p-5">
+      <h2 class="text-sm font-bold text-purple-700 mb-2">💰 פירוט עלויות</h2>
+      <canvas id="ch-cost-pie"></canvas>
+    </div>
+    <div class="card p-5">
+      <h2 class="text-sm font-bold text-purple-700 mb-2">🛍 ערוצי מכירה</h2>
+      <canvas id="ch-channels"></canvas>
+    </div>
+    <div class="card p-5">
+      <h2 class="text-sm font-bold text-purple-700 mb-2">📊 הכנסה vs הוצאות</h2>
+      <canvas id="ch-rev-cost"></canvas>
+    </div>
+  </div>
+
+  <div class="card p-5">
+    <h2 class="text-base font-bold text-purple-700 mb-4">📋 תרחישי רווחיות (מסומן בסגול = יעד נוכחי)</h2>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead><tr><th>מחזור יומי</th><th>הכנסה/חודש</th><th>עלות גלם</th><th>עמלות</th><th>עלויות קבועות</th><th>רווח/הפסד</th><th>מרווח</th><th>סטטוס</th></tr></thead>
+        <tbody id="scenarios-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COSTS ===== -->
+<div id="tab-costs" class="section">
+  <div class="card p-5 mb-5">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-purple-700">💰 עלויות תפעול – הוצאות קבועות חודשיות</h2>
+      <button onclick="addCost()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    </div>
+    <div id="costs-editor"></div>
+    <div class="mt-4 p-4 bg-purple-50 rounded-xl flex justify-between items-center">
+      <span class="font-bold text-gray-600">סה"כ עלויות תפעול / חודש</span>
+      <span class="text-2xl font-black text-purple-700" id="op-total">₪0</span>
+    </div>
+  </div>
+  <div class="card p-5">
+    <h2 class="text-sm font-bold text-purple-700 mb-3">📊 לפי קטגוריה</h2>
+    <canvas id="ch-cost-cats" height="200"></canvas>
+  </div>
+</div>
+
+<!-- ===== STAFF ===== -->
+<div id="tab-staff" class="section">
+  <div class="card p-5">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-purple-700">👥 מצבת כוח אדם</h2>
+      <button onclick="addStaff()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-purple-50 rounded-xl mb-4">
+      <div><div class="text-xs text-gray-500 mb-1">ביטוח לאומי %</div><input type="number" value="3.55" step="0.01" class="live-input text-sm" id="r-ins" oninput="recalcAll()"/></div>
+      <div><div class="text-xs text-gray-500 mb-1">פנסיה מעביד %</div><input type="number" value="6.5" step="0.01" class="live-input text-sm" id="r-pen" oninput="recalcAll()"/></div>
+      <div><div class="text-xs text-gray-500 mb-1">פיצויים %</div><input type="number" value="8.33" step="0.01" class="live-input text-sm" id="r-sev" oninput="recalcAll()"/></div>
+      <div><div class="text-xs text-gray-500 mb-1">חופשה %</div><input type="number" value="4" step="0.01" class="live-input text-sm" id="r-vac" oninput="recalcAll()"/></div>
+      <div><div class="text-xs text-gray-500 mb-1">מחלה %</div><input type="number" value="1.5" step="0.01" class="live-input text-sm" id="r-sick" oninput="recalcAll()"/></div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead><tr><th>תפקיד</th><th>כמות</th><th>שעות/יום</th><th>ימים/שבוע</th><th>שעות/חודש</th><th>עלות שעה ₪</th><th>ברוטו/חודש</th><th>עלות מעביד</th><th>כולל מעביד</th><th></th></tr></thead>
+        <tbody id="staff-body"></tbody>
+        <tfoot>
+          <tr style="background:#f8f6ff;font-weight:700;color:#5e549d">
+            <td colspan="6">סה"כ</td>
+            <td id="sf-gross">₪0</td><td id="sf-emp">₪0</td><td id="sf-total">₪0</td><td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUPPLIERS ===== -->
+<div id="tab-suppliers" class="section">
+  <div class="card p-5">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-purple-700">📦 ניהול ספקים וחומרי גלם</h2>
+      <button onclick="addSupplier()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead><tr><th>פריט</th><th>ספק</th><th>קטגוריה</th><th>מחירון ₪</th><th>מחיר קניה ₪</th><th>תאריך</th><th>שינוי</th><th>הערות</th><th></th></tr></thead>
+        <tbody id="suppliers-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PRODUCTS ===== -->
+<div id="tab-products" class="section">
+  <div class="card p-5 mb-5">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-purple-700">🍽 מוצרים – ניתוח F.C. לפי ערוץ</h2>
+      <button onclick="addProduct()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-gray-50 rounded-xl mb-4">
+      <div><div class="text-xs font-bold text-green-700 mb-1">Wolt עמלה %</div><input type="number" value="26.5" step="0.1" class="live-input text-sm" id="p-wolt" oninput="renderProducts()"/></div>
+      <div><div class="text-xs font-bold text-orange-700 mb-1">10Bis עמלה %</div><input type="number" value="20" step="0.1" class="live-input text-sm" id="p-10bis" oninput="renderProducts()"/></div>
+      <div><div class="text-xs font-bold text-pink-700 mb-1">Cibus עמלה %</div><input type="number" value="15" step="0.1" class="live-input text-sm" id="p-cibus" oninput="renderProducts()"/></div>
+      <div><div class="text-xs font-bold text-gray-700 mb-1">מע"מ %</div><input type="number" value="18" step="0.1" class="live-input text-sm" id="p-vat" oninput="renderProducts()"/></div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead><tr><th>מוצר</th><th>קטגוריה</th><th>עלות גלם ₪</th><th>מחיר מסעדה</th><th>F.C. מסעדה</th><th>מחיר Wolt</th><th>F.C. Wolt</th><th>מחיר 10Bis</th><th>F.C. 10Bis</th><th>מחיר Cibus</th><th>F.C. Cibus</th><th></th></tr></thead>
+        <tbody id="products-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card p-5">
+    <h2 class="text-sm font-bold text-purple-700 mb-3">📊 F.C. לפי מוצר וערוץ</h2>
+    <canvas id="ch-product-fc" height="200"></canvas>
+  </div>
+</div>
+
+<!-- ===== SIMULATOR ===== -->
+<div id="tab-simulator" class="section">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+    <div class="card p-5">
+      <h2 class="text-xl font-bold text-purple-700 mb-5">⚙️ שנה פרמטרים — מתעדכן חי</h2>
+      <div class="mb-5">
+        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">מחזור יומי (₪)</label><span class="font-black text-blue-600 text-sm" id="sd-disp">₪10,000</span></div>
+        <input type="range" id="s-daily-r" min="1000" max="50000" step="500" value="10000" oninput="ss('s-daily-n',this.value);ss('g-daily',this.value);$('sd-disp').textContent=fmt(this.value);recalcAll()"/>
+        <input type="number" value="10000" class="live-input text-sm mt-1" id="s-daily-n" oninput="ss('s-daily-r',this.value);ss('g-daily',this.value);$('sd-disp').textContent=fmt(this.value);recalcAll()"/>
+      </div>
+      <div class="mb-5">
+        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">ימי פעילות / חודש</label><span class="font-black text-blue-600 text-sm" id="sdays-disp">30</span></div>
+        <input type="range" id="s-days-r" min="15" max="31" step="1" value="30" oninput="ss('s-days-n',this.value);ss('g-days',this.value);$('sdays-disp').textContent=this.value;recalcAll()"/>
+        <input type="number" value="30" class="live-input text-sm mt-1" id="s-days-n" oninput="ss('s-days-r',this.value);ss('g-days',this.value);$('sdays-disp').textContent=this.value;recalcAll()"/>
+      </div>
+      <div class="mb-5">
+        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">F.C. ממוצע %</label><span class="font-black text-orange-600 text-sm" id="sfc-disp">36.5%</span></div>
+        <input type="range" id="s-fc-r" min="10" max="70" step="0.5" value="36.5" oninput="ss('s-fc-n',this.value);ss('g-fc',this.value);$('sfc-disp').textContent=this.value+'%';recalcAll()"/>
+        <input type="number" value="36.5" step="0.5" class="live-input text-sm mt-1" id="s-fc-n" oninput="ss('s-fc-r',this.value);ss('g-fc',this.value);$('sfc-disp').textContent=this.value+'%';recalcAll()"/>
+      </div>
+      <div class="mb-5">
+        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">עמלות פלטפורמה %</label><span class="font-black text-purple-600 text-sm" id="scomm-disp">9.4%</span></div>
+        <input type="range" id="s-comm-r" min="0" max="35" step="0.5" value="9.375" oninput="ss('s-comm-n',this.value);ss('g-comm',this.value);$('scomm-disp').textContent=parseFloat(this.value).toFixed(1)+'%';recalcAll()"/>
+        <input type="number" value="9.375" step="0.1" class="live-input text-sm mt-1" id="s-comm-n" oninput="ss('s-comm-r',this.value);ss('g-comm',this.value);$('scomm-disp').textContent=parseFloat(this.value).toFixed(1)+'%';recalcAll()"/>
+      </div>
+    </div>
+    <div class="card p-5">
+      <h2 class="text-xl font-bold text-purple-700 mb-4">📊 תוצאות חיות</h2>
+      <div id="sim-results"></div>
+    </div>
+  </div>
+  <div class="card p-5 mb-5">
+    <h2 class="text-base font-bold text-purple-700 mb-3">📈 עקומת רווחיות</h2>
+    <canvas id="ch-curve" height="200"></canvas>
+  </div>
+  <div class="card p-5">
+    <h2 class="text-base font-bold text-purple-700 mb-4">📋 טבלת תרחישים מלאה</h2>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead><tr><th>מחזור יומי</th><th>הכנסה/חודש</th><th>עלות גלם</th><th>עמלות</th><th>קבועות</th><th>רווח/הפסד</th><th>מרווח</th><th>סטטוס</th></tr></thead>
+        <tbody id="sim-scenarios-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHANNELS ===== -->
+<div id="tab-channels" class="section">
+  <div class="card p-5 mb-5">
+    <h2 class="text-xl font-bold text-purple-700 mb-4">🛍 הגדרת ערוצי מכירה</h2>
+    <div id="ch-warn" class="alert alert-warn hidden mb-3">⚠️ סה"כ = <span id="ch-sum">0</span>% (חייב להיות 100%)</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div class="channel-card ch-rest">
+        <div class="font-bold text-blue-700 mb-3">🏠 מסעדה</div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="60" min="0" max="100" class="live-input text-sm" id="ch-rest-pct" oninput="recalcAll()"/></div>
+        <div><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="35.4" step="0.1" class="live-input text-sm" id="ch-rest-fc" oninput="recalcAll()"/></div>
+      </div>
+      <div class="channel-card ch-wolt">
+        <div class="font-bold text-green-700 mb-3">🟢 Wolt</div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="25" min="0" max="100" class="live-input text-sm" id="ch-wolt-pct" oninput="recalcAll()"/></div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="60.77" step="0.1" class="live-input text-sm" id="ch-wolt-fc" oninput="recalcAll()"/></div>
+        <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="26.5" step="0.1" class="live-input text-sm" id="ch-wolt-comm" oninput="recalcAll()"/></div>
+      </div>
+      <div class="channel-card ch-10bis">
+        <div class="font-bold text-orange-700 mb-3">🟠 10Bis</div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="10" min="0" max="100" class="live-input text-sm" id="ch-10bis-pct" oninput="recalcAll()"/></div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="0" step="0.1" class="live-input text-sm" id="ch-10bis-fc" oninput="recalcAll()"/></div>
+        <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="20" step="0.1" class="live-input text-sm" id="ch-10bis-comm" oninput="recalcAll()"/></div>
+      </div>
+      <div class="channel-card ch-cibus">
+        <div class="font-bold text-pink-700 mb-3">🟣 Cibus</div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="5" min="0" max="100" class="live-input text-sm" id="ch-cibus-pct" oninput="recalcAll()"/></div>
+        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="0" step="0.1" class="live-input text-sm" id="ch-cibus-fc" oninput="recalcAll()"/></div>
+        <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="15" step="0.1" class="live-input text-sm" id="ch-cibus-comm" oninput="recalcAll()"/></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="card p-5">
+      <h2 class="text-sm font-bold text-purple-700 mb-3">📊 התפלגות ערוצים</h2>
+      <canvas id="ch-dist" height="250"></canvas>
+    </div>
+    <div class="card p-5">
+      <h2 class="text-sm font-bold text-purple-700 mb-4">📋 תרומה לפי ערוץ</h2>
+      <div id="ch-contrib"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /max-w -->
+<input type="file" id="import-file" accept=".json" class="hidden" onchange="loadFile(event)"/>
+
 <script>
-    lucide.createIcons();
-    Chart.defaults.font.family = "'Heebo', sans-serif";
-    Chart.defaults.color = '#64748b';
-    const brandPrimary = '#5e549d';
-    const brandPrimaryLight = 'rgba(94, 84, 157, 0.4)';
-    const brandSecondary = '#4ab3e5';
-    const brandSecondaryLight = 'rgba(74, 179, 229, 0.2)';
-    const ctxRadar = document.getElementById('radarChart').getContext('2d');
-    new Chart(ctxRadar, {
-        type: 'radar',
-        data: {
-            labels: ['אסטרטגיה ומסרים', 'קמפיינים ומדידה', 'CRM ואוטומציות', 'אסטרטגיית מכירה', "פיצ' והצעות", 'פולואפ ופגישות', 'סנכרון שיווק-מכירות'],
-            datasets: [{ label: 'ציון נוכחי (מתוך 5)', data: [2.8, 3.1, 2.3, 2.4, 3.0, 2.0, 1.6], backgroundColor: brandPrimaryLight, borderColor: brandPrimary, borderWidth: 3, pointBackgroundColor: brandPrimary, pointHoverRadius: 8 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1 }, pointLabels: { font: { size: 13, weight: 'bold' }, color: '#2d2752' } } } }
+// ================================================================
+// DATA
+// ================================================================
+const D = {
+  costs: [
+    {cat:'🏠 שכירות ונכס',name:'שכירות חודשית',v:0},
+    {cat:'🏠 שכירות ונכס',name:'ארנונה',v:0},
+    {cat:'🏠 שכירות ונכס',name:'ביטוח מבנה ותכולה',v:0},
+    {cat:'🏠 שכירות ונכס',name:'ועד בית / אחזקת מבנה',v:0},
+    {cat:'⚡ חשבונות שוטפים',name:'חשמל',v:0},
+    {cat:'⚡ חשבונות שוטפים',name:'מים',v:0},
+    {cat:'⚡ חשבונות שוטפים',name:'גז (בישול)',v:0},
+    {cat:'⚡ חשבונות שוטפים',name:'אינטרנט',v:0},
+    {cat:'⚡ חשבונות שוטפים',name:'טלפון נייד',v:0},
+    {cat:'🔧 ציוד ואחזקה',name:'אחזקת ציוד מטבח',v:0},
+    {cat:'🔧 ציוד ואחזקה',name:'הדברה',v:0},
+    {cat:'🔧 ציוד ואחזקה',name:'ניקיון מקצועי',v:0},
+    {cat:'🔧 ציוד ואחזקה',name:'חומרי ניקוי וכלים חד-פעמיים',v:0},
+    {cat:'📣 שיווק ופרסום',name:'פרסום ממומן (פייסבוק/גוגל)',v:0},
+    {cat:'📣 שיווק ופרסום',name:'ניהול רשתות חברתיות',v:0},
+    {cat:'📣 שיווק ופרסום',name:'עיצוב ותפריטים',v:0},
+    {cat:'📋 ביטוחים ורישיונות',name:'רישיון עסק',v:0},
+    {cat:'📋 ביטוחים ורישיונות',name:'ביטוח אחריות',v:0},
+    {cat:'📋 ביטוחים ורישיונות',name:'תעודת כשרות',v:0},
+    {cat:'💻 טכנולוגיה',name:'קופה רושמת / POS',v:0},
+    {cat:'💻 טכנולוגיה',name:'תוכנות וניהול',v:0},
+    {cat:'💼 שירותים מקצועיים',name:'ייעוץ חשבונאי',v:0},
+    {cat:'💼 שירותים מקצועיים',name:'שכ"ט עו"ד',v:0},
+  ],
+  staff: [
+    {role:'מנהל מסעדה',cnt:1,hd:10,dw:6,hr:55},
+    {role:'אחראי משמרת',cnt:2,hd:8,dw:6,hr:45},
+    {role:'טבח',cnt:0,hd:8,dw:6,hr:40},
+    {role:'מלצר',cnt:0,hd:8,dw:5,hr:35},
+    {role:'שוטף כלים',cnt:0,hd:8,dw:5,hr:32},
+    {role:'דליברי',cnt:0,hd:8,dw:5,hr:33},
+  ],
+  suppliers: [
+    {item:'עגבניה',sup:'',cat:'ירקות',list:5.5,buy:3.5,date:'3.8.25',notes:''},
+    {item:'מלפפון',sup:'',cat:'ירקות',list:15,buy:12,date:'2.8.25',notes:''},
+    {item:'קמח לבן',sup:'',cat:'יבשים',list:8,buy:9,date:'',notes:''},
+  ],
+  products: [
+    {name:'מוצר 1',cat:'קטגוריה 1',raw:15,rest:50,wolt:60,tenBis:0,cibus:0},
+  ],
+};
+
+// ================================================================
+// UTILS
+// ================================================================
+const $ = id => document.getElementById(id);
+const N = id => parseFloat($(id)?.value)||0;
+const ss = (id,v) => { if($(id)) $(id).value=v; };
+const fmt = (n,d=0) => '₪'+Number(n||0).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct = (n,d=1) => Number(n||0).toFixed(d)+'%';
+const txt = (id,v) => { if($(id)) $(id).textContent=v; };
+
+// ================================================================
+// CALCULATIONS
+// ================================================================
+const gDaily = () => N('g-daily')||10000;
+const gDays  = () => N('g-days')||30;
+const gFC    = () => (N('g-fc')||36.5)/100;
+const gComm  = () => (N('g-comm')||9.375)/100;
+
+function empRate() {
+  return (N('r-ins')+N('r-pen')+N('r-sev')+N('r-vac')+N('r-sick'))/100;
+}
+function calcStaff() {
+  const ep=empRate(); let gross=0,emp=0,cnt=0;
+  D.staff.forEach(s=>{
+    const n=s.cnt||0; if(!n) return;
+    const hm=(s.hd||0)*(s.dw||0)*4.33;
+    const g=hm*(s.hr||0)*n;
+    gross+=g; emp+=g*ep; cnt+=n;
+  });
+  return {gross,emp,total:gross+emp,cnt};
+}
+function calcOpCosts() { return D.costs.reduce((s,c)=>s+(parseFloat(c.v)||0),0); }
+function calcFixed() { return calcOpCosts()+calcStaff().total; }
+
+function calcMonthly(daily,days) {
+  const rev=daily*days;
+  const raw=rev*gFC(), comm=rev*gComm(), fixed=calcFixed();
+  const total=raw+comm+fixed, profit=rev-total;
+  return {rev,raw,comm,fixed,total,profit,margin:rev?profit/rev*100:0};
+}
+function calcBE() {
+  const denom=Math.max(0.0001,1-gFC()-gComm());
+  const mo=calcFixed()/denom;
+  return {mo, daily:mo/Math.max(1,gDays())};
+}
+
+// ================================================================
+// CHARTS
+// ================================================================
+const CH={};
+function mk(id,cfg){ if(CH[id]){CH[id].destroy();} const c=$(id); if(c) CH[id]=new Chart(c.getContext('2d'),cfg); }
+
+function doCharts() {
+  const opTotal=calcOpCosts(), staffTotal=calcStaff().total;
+  mk('ch-cost-pie',{type:'doughnut',data:{labels:['עלויות תפעול','עלות שכר'],
+    datasets:[{data:[opTotal,staffTotal],backgroundColor:['#5e549d','#4ab3e5'],borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+
+  const pcts=[N('ch-rest-pct'),N('ch-wolt-pct'),N('ch-10bis-pct'),N('ch-cibus-pct')];
+  mk('ch-channels',{type:'doughnut',data:{labels:['מסעדה','Wolt','10Bis','Cibus'],
+    datasets:[{data:pcts,backgroundColor:['#3b82f6','#22c55e','#f97316','#ec4899'],borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+
+  const {rev,total}=calcMonthly(gDaily(),gDays());
+  mk('ch-rev-cost',{type:'bar',data:{labels:['הכנסה','הוצאות'],
+    datasets:[{data:[rev,total],backgroundColor:[rev>=total?'#22c55e':'#3b82f6','#ef4444'],borderRadius:10}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
+
+  const pts=[1000,2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000,40000,50000];
+  const days=gDays();
+  const profits=pts.map(d=>calcMonthly(d,days).profit);
+  mk('ch-curve',{type:'line',data:{labels:pts.map(p=>fmt(p)),
+    datasets:[{label:'רווח/הפסד',data:profits,borderColor:'#5e549d',
+      pointBackgroundColor:profits.map(p=>p>=0?'#22c55e':'#ef4444'),
+      fill:true,backgroundColor:'rgba(94,84,157,0.08)',tension:0.4,borderWidth:2,pointRadius:5}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}}},
+      scales:{y:{ticks:{callback:v=>fmt(v)}},x:{ticks:{maxRotation:30}}}}});
+
+  const cats={};
+  D.costs.forEach(c=>{cats[c.cat]=(cats[c.cat]||0)+(parseFloat(c.v)||0);});
+  const cl=Object.keys(cats).filter(k=>cats[k]>0);
+  if(cl.length) mk('ch-cost-cats',{type:'bar',data:{labels:cl,
+    datasets:[{label:'₪',data:cl.map(k=>cats[k]),backgroundColor:'#5e549d',borderRadius:6}]},
+    options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:v=>fmt(v)}}}}});
+
+  if(D.products.length) {
+    const vat=1+N('p-vat')/100, cw=N('p-wolt')/100;
+    const frR=D.products.map(p=>p.rest?p.raw/(p.rest/vat)*100:0);
+    const frW=D.products.map(p=>{const n=p.wolt/vat*(1-cw);return n?p.raw/n*100:0;});
+    mk('ch-product-fc',{type:'bar',data:{labels:D.products.map(p=>p.name),
+      datasets:[{label:'מסעדה',data:frR,backgroundColor:'#5e549d',borderRadius:4},
+                {label:'Wolt',data:frW,backgroundColor:'#22c55e',borderRadius:4}]},
+      options:{responsive:true,plugins:{legend:{position:'bottom'}},
+        scales:{y:{ticks:{callback:v=>v.toFixed(0)+'%'}}}}});
+  }
+
+  const fpcts=[N('ch-rest-pct'),N('ch-wolt-pct'),N('ch-10bis-pct'),N('ch-cibus-pct')];
+  const ffcs=[N('ch-rest-fc'),N('ch-wolt-fc'),N('ch-10bis-fc'),N('ch-cibus-fc')];
+  mk('ch-dist',{type:'bar',data:{labels:['מסעדה','Wolt','10Bis','Cibus'],
+    datasets:[{label:'נתח מחזור %',data:fpcts,backgroundColor:['#3b82f6','#22c55e','#f97316','#ec4899'],borderRadius:6},
+              {label:'F.C. %',data:ffcs,backgroundColor:['#93c5fd','#86efac','#fdba74','#f9a8d4'],borderRadius:6}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+}
+
+// ================================================================
+// DOM RENDERS
+// ================================================================
+function renderCostsEditor() {
+  const cats={};
+  D.costs.forEach((c,i)=>{ if(!cats[c.cat]) cats[c.cat]=[]; cats[c.cat].push({...c,i}); });
+  let h='';
+  for(const [cat,items] of Object.entries(cats)){
+    h+=`<div class="mb-4"><div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">${cat}</div>`;
+    items.forEach(it=>{
+      h+=`<div class="flex items-center gap-3 py-1 border-b border-gray-50">
+        <span class="flex-1 text-sm text-gray-700">${it.name}</span>
+        <div class="flex items-center gap-1 w-36"><span class="text-xs text-gray-400">₪</span>
+          <input type="number" value="${it.v||0}" min="0" step="100" class="live-input text-sm"
+            oninput="D.costs[${it.i}].v=parseFloat(this.value)||0;recalcAll()"/></div>
+        <button onclick="D.costs.splice(${it.i},1);renderCostsEditor();recalcAll()" class="text-red-300 hover:text-red-500 text-xl w-6 leading-none">×</button>
+      </div>`;
     });
-    const ctxArea = document.getElementById('areaChart').getContext('2d');
-    new Chart(ctxArea, {
-        type: 'line',
-        data: {
-            labels: ['חשיפות', 'קליקים', 'לידים נכנסים', 'לידים SQL', 'פגישות', 'הצעות מחיר', 'עסקאות סגורות'],
-            datasets: [{ label: 'נפח תנועה (Drop-off)', data: [100000, 4500, 320, 110, 45, 38, 8], fill: true, backgroundColor: brandSecondaryLight, borderColor: brandSecondary, borderWidth: 3, tension: 0.4, pointBackgroundColor: brandPrimary, pointRadius: 5 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: brandPrimary, titleFont: { size: 14 }, bodyFont: { size: 14, weight: 'bold' } } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-    });
+    h+='</div>';
+  }
+  $('costs-editor').innerHTML=h;
+  txt('op-total',fmt(calcOpCosts()));
+}
+function addCost(){
+  const cat=prompt('שם קטגוריה:','🔹 כללי')||'🔹 כללי';
+  const name=prompt('שם ההוצאה:'); if(!name) return;
+  D.costs.push({cat,name,v:0}); renderCostsEditor(); recalcAll();
+}
+
+function renderStaffTable() {
+  const ep=empRate(); let h='';
+  D.staff.forEach((s,i)=>{
+    const hm=(s.hd||0)*(s.dw||0)*4.33, g=hm*(s.hr||0), tot=(g+g*ep)*(s.cnt||0);
+    h+=`<tr>
+      <td><input type="text" value="${s.role}" class="live-input rtl-text text-sm" style="min-width:110px" oninput="D.staff[${i}].role=this.value"/></td>
+      <td><input type="number" value="${s.cnt}" min="0" class="live-input text-sm" style="width:55px" oninput="D.staff[${i}].cnt=parseInt(this.value)||0;recalcAll()"/></td>
+      <td><input type="number" value="${s.hd}" min="0" max="24" class="live-input text-sm" style="width:55px" oninput="D.staff[${i}].hd=parseFloat(this.value)||0;recalcAll()"/></td>
+      <td><input type="number" value="${s.dw}" min="0" max="7" class="live-input text-sm" style="width:55px" oninput="D.staff[${i}].dw=parseFloat(this.value)||0;recalcAll()"/></td>
+      <td class="text-gray-400 text-xs font-mono">${Math.round(hm)}</td>
+      <td><input type="number" value="${s.hr}" min="0" class="live-input text-sm" style="width:65px" oninput="D.staff[${i}].hr=parseFloat(this.value)||0;recalcAll()"/></td>
+      <td class="text-xs font-mono">${fmt(g*(s.cnt||0))}</td>
+      <td class="text-xs font-mono text-gray-400">${fmt(g*(s.cnt||0)*ep)}</td>
+      <td class="text-sm font-bold text-purple-700">${fmt(tot)}</td>
+      <td><button onclick="D.staff.splice(${i},1);renderStaffTable();recalcAll()" class="text-red-300 hover:text-red-500 text-xl">×</button></td>
+    </tr>`;
+  });
+  $('staff-body').innerHTML=h;
+  const t=calcStaff();
+  txt('sf-gross',fmt(t.gross)); txt('sf-emp',fmt(t.emp)); txt('sf-total',fmt(t.total));
+}
+function addStaff(){ D.staff.push({role:'תפקיד חדש',cnt:0,hd:8,dw:5,hr:35}); renderStaffTable(); }
+
+function renderSuppliersTable() {
+  let h='';
+  D.suppliers.forEach((s,i)=>{
+    const chg=s.list&&s.buy?((s.buy-s.list)/s.list*100):null;
+    const chgHtml=chg===null?'—':chg>0
+      ?`<span class="text-red-600 font-bold text-xs">⬆ ${Math.abs(chg).toFixed(1)}%</span>`
+      :chg<0?`<span class="text-green-600 font-bold text-xs">⬇ ${Math.abs(chg).toFixed(1)}%</span>`
+      :'<span class="text-gray-400 text-xs">= 0%</span>';
+    h+=`<tr>
+      <td><input type="text" value="${s.item}" class="live-input rtl-text text-sm" style="min-width:90px" oninput="D.suppliers[${i}].item=this.value"/></td>
+      <td><input type="text" value="${s.sup||''}" class="live-input rtl-text text-sm" style="min-width:80px" oninput="D.suppliers[${i}].sup=this.value"/></td>
+      <td><input type="text" value="${s.cat||''}" class="live-input rtl-text text-sm" style="min-width:70px" oninput="D.suppliers[${i}].cat=this.value"/></td>
+      <td><input type="number" value="${s.list||0}" class="live-input text-sm" style="width:70px" oninput="D.suppliers[${i}].list=parseFloat(this.value)||0;renderSuppliersTable()"/></td>
+      <td><input type="number" value="${s.buy||0}" class="live-input text-sm" style="width:70px" oninput="D.suppliers[${i}].buy=parseFloat(this.value)||0;renderSuppliersTable()"/></td>
+      <td><input type="text" value="${s.date||''}" class="live-input rtl-text text-sm" style="width:75px" oninput="D.suppliers[${i}].date=this.value"/></td>
+      <td>${chgHtml}</td>
+      <td><input type="text" value="${s.notes||''}" class="live-input rtl-text text-sm" style="min-width:90px" oninput="D.suppliers[${i}].notes=this.value"/></td>
+      <td><button onclick="D.suppliers.splice(${i},1);renderSuppliersTable()" class="text-red-300 hover:text-red-500 text-xl">×</button></td>
+    </tr>`;
+  });
+  $('suppliers-body').innerHTML=h;
+}
+function addSupplier(){ D.suppliers.push({item:'פריט חדש',sup:'',cat:'',list:0,buy:0,date:'',notes:''}); renderSuppliersTable(); }
+
+function renderProducts() {
+  const vat=1+N('p-vat')/100, cw=N('p-wolt')/100, ct=N('p-10bis')/100, cc=N('p-cibus')/100;
+  const col=v=>!v||isNaN(v)?'text-gray-300':v<30?'text-green-600 font-bold':v<45?'text-blue-600':v<60?'text-orange-500 font-bold':'text-red-600 font-bold';
+  const disp=v=>(!v||isNaN(v)||v<=0)?'—':v.toFixed(1)+'%';
+  let h='';
+  D.products.forEach((p,i)=>{
+    const raw=p.raw||0;
+    const frR=p.rest?raw/(p.rest/vat)*100:NaN;
+    const frW=p.wolt?raw/(p.wolt/vat*(1-cw))*100:NaN;
+    const frT=p.tenBis?raw/(p.tenBis/vat*(1-ct))*100:NaN;
+    const frC=p.cibus?raw/(p.cibus/vat*(1-cc))*100:NaN;
+    h+=`<tr>
+      <td><input type="text" value="${p.name}" class="live-input rtl-text text-sm" style="min-width:90px" oninput="D.products[${i}].name=this.value;doCharts()"/></td>
+      <td><input type="text" value="${p.cat||''}" class="live-input rtl-text text-sm" style="min-width:80px" oninput="D.products[${i}].cat=this.value"/></td>
+      <td><input type="number" value="${raw}" class="live-input text-sm" style="width:65px" oninput="D.products[${i}].raw=parseFloat(this.value)||0;renderProducts()"/></td>
+      <td><input type="number" value="${p.rest||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].rest=parseFloat(this.value)||0;renderProducts()"/></td>
+      <td class="${col(frR)}">${disp(frR)}</td>
+      <td><input type="number" value="${p.wolt||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].wolt=parseFloat(this.value)||0;renderProducts()"/></td>
+      <td class="${col(frW)}">${disp(frW)}</td>
+      <td><input type="number" value="${p.tenBis||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].tenBis=parseFloat(this.value)||0;renderProducts()"/></td>
+      <td class="${col(frT)}">${disp(frT)}</td>
+      <td><input type="number" value="${p.cibus||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].cibus=parseFloat(this.value)||0;renderProducts()"/></td>
+      <td class="${col(frC)}">${disp(frC)}</td>
+      <td><button onclick="D.products.splice(${i},1);renderProducts()" class="text-red-300 hover:text-red-500 text-xl">×</button></td>
+    </tr>`;
+  });
+  $('products-body').innerHTML=h;
+  doCharts();
+}
+function addProduct(){ D.products.push({name:'מוצר חדש',cat:'',raw:0,rest:0,wolt:0,tenBis:0,cibus:0}); renderProducts(); }
+
+// ================================================================
+// PANELS
+// ================================================================
+function updateKPI() {
+  const daily=gDaily(), days=gDays();
+  const {rev,profit,margin}=calcMonthly(daily,days);
+  const {daily:beDaily}=calcBE();
+  const fixed=calcFixed();
+  txt('kpi-fixed',fmt(fixed)); txt('kpi-daily',fmt(daily));
+  txt('kpi-be',fmt(beDaily)); txt('kpi-rev',fmt(rev));
+  const pe=$('kpi-profit'); pe.textContent=fmt(profit); pe.className='kpi-value '+(profit>=0?'text-green-300':'text-red-400');
+  const me=$('kpi-margin'); me.textContent=pct(margin); me.className='kpi-value '+(margin>=0?'text-green-300':'text-red-400');
+  const se=$('kpi-status');
+  if(profit>5000){se.textContent='✅ רווחי';se.className='kpi-value text-green-300';}
+  else if(profit>=0){se.textContent='〰️ איזון';se.className='kpi-value text-yellow-300';}
+  else{se.textContent='❌ הפסד';se.className='kpi-value text-red-400';}
+  // pulse
+  [pe,me,se].forEach(el=>{el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');});
+}
+
+function updateBEPanel() {
+  const {rev,raw,comm,fixed,total,profit}=calcMonthly(gDaily(),gDays());
+  const {mo,daily:bed}=calcBE();
+  const gap=gDaily()*gDays()-mo;
+  if(!$('be-panel')) return;
+  $('be-panel').innerHTML=`
+    <div class="rrow"><span class="text-sm text-gray-500">עלויות קבועות / חודש</span><span class="font-bold">${fmt(fixed)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">F.C. ממוצע</span><span class="font-bold">${pct(gFC()*100)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">עמלות ממוצעות</span><span class="font-bold">${pct(gComm()*100)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">נקודת איזון יומית</span><span class="font-bold text-orange-600 text-lg">${fmt(bed)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">נקודת איזון חודשית</span><span class="font-bold text-orange-600">${fmt(mo)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">מחזור יומי יעד</span><span class="font-bold text-blue-600 text-lg">${fmt(gDaily())}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">פער מנקודת איזון</span><span class="font-bold text-lg ${gap>=0?'text-green-600':'text-red-600'}">${fmt(gap)}</span></div>
+    <div class="rrow" style="border:none"><span class="font-black text-sm">רווח / הפסד חודשי</span><span class="font-black text-xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>
+  `;
+}
+
+function updateAlerts() {
+  if(!$('alerts-panel')) return;
+  const {profit,rev}=calcMonthly(gDaily(),gDays());
+  const {daily:bed}=calcBE();
+  const fc=gFC()*100, cm=gComm()*100, fixed=calcFixed();
+  let h='';
+  if(profit>0) h+=`<div class="alert alert-success">✅ רווחי – ${fmt(profit)} / חודש</div>`;
+  else h+=`<div class="alert alert-danger">❌ הפסד – ${fmt(profit)} / חודש</div>`;
+  if(fc>45) h+=`<div class="alert alert-warn">⚠️ F.C. גבוה (${pct(fc)}) – שקול מחירים / ספקים</div>`;
+  if(cm>15) h+=`<div class="alert alert-warn">⚠️ עמלות גבוהות (${pct(cm)}) – אופטימיזציה של ערוצים</div>`;
+  if(fixed>200000) h+=`<div class="alert alert-warn">⚠️ עלויות קבועות גבוהות – ${fmt(fixed)}</div>`;
+  h+=`<div class="alert alert-info">📍 מינימום יומי לאיזון: ${fmt(bed)}</div>`;
+  const st=calcStaff();
+  h+=`<div class="alert alert-info">👥 שכר כולל מעביד: ${fmt(st.total)} / חודש</div>`;
+  $('alerts-panel').innerHTML=h;
+}
+
+function updateScenarios(bodyId) {
+  const el=$(bodyId); if(!el) return;
+  const daily=gDaily(), days=gDays();
+  const pts=[2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000,40000];
+  let h='';
+  pts.forEach(d=>{
+    const {rev,raw,comm,fixed,profit,margin}=calcMonthly(d,days);
+    const hi=Math.abs(d-daily)<500;
+    h+=`<tr ${hi?'style="background:#f5f3ff"':''}>
+      <td class="font-bold ${hi?'text-purple-700':''}">${fmt(d)}${hi?' ← יעד':''}</td>
+      <td>${fmt(rev)}</td><td class="text-red-400">${fmt(raw)}</td>
+      <td class="text-orange-400">${fmt(comm)}</td><td class="text-gray-400">${fmt(fixed)}</td>
+      <td class="${profit>=0?'text-green-600':'text-red-600'} font-bold">${fmt(profit)}</td>
+      <td class="${margin>=0?'text-green-500':'text-red-500'}">${pct(margin)}</td>
+      <td>${profit>0?'<span class="badge-profit">✅ רווחי</span>':'<span class="badge-loss">❌ הפסד</span>'}</td>
+    </tr>`;
+  });
+  el.innerHTML=h;
+}
+
+function updateSimResults() {
+  if(!$('sim-results')) return;
+  const {rev,raw,comm,fixed,total,profit,margin}=calcMonthly(gDaily(),gDays());
+  const {daily:bed}=calcBE();
+  $('sim-results').innerHTML=`
+    <div class="rrow"><span class="text-sm text-gray-500">הכנסה חודשית</span><span class="font-bold text-blue-600 text-lg">${fmt(rev)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">עלות גלם (${pct(gFC()*100)})</span><span class="text-red-500">${fmt(raw)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">עמלות (${pct(gComm()*100)})</span><span class="text-orange-500">${fmt(comm)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">עלויות קבועות</span><span class="text-red-600">${fmt(fixed)}</span></div>
+    <div class="rrow"><span class="font-bold text-gray-700">סה"כ הוצאות</span><span class="font-bold text-red-700 text-lg">${fmt(total)}</span></div>
+    <div class="rrow"><span class="font-black text-sm">רווח / הפסד</span><span class="font-black text-2xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>
+    <div class="rrow"><span class="text-sm text-gray-500">מרווח רווח</span><span class="font-bold ${margin>=0?'text-green-600':'text-red-600'}">${pct(margin)}</span></div>
+    <div class="rrow" style="border:none"><span class="text-sm text-gray-500">פער מנקודת איזון / יום</span>
+      <span class="font-bold ${gDaily()-bed>=0?'text-green-600':'text-red-600'}">${fmt(gDaily()-bed)}</span></div>
+    <div class="mt-3 text-center">${profit>5000?'<span class="badge-profit text-sm py-2 px-4">✅ רווחי</span>':profit>=0?'<span class="badge-neutral text-sm py-2 px-4">〰️ קרוב לאיזון</span>':'<span class="badge-loss text-sm py-2 px-4">❌ הפסד</span>'}</div>
+  `;
+}
+
+function updateChannelContrib() {
+  if(!$('ch-contrib')) return;
+  const daily=gDaily(), days=gDays(), mo=daily*days;
+  const chs=[
+    {n:'🏠 מסעדה',p:N('ch-rest-pct'),fc:N('ch-rest-fc'),cm:0,cl:'text-blue-700'},
+    {n:'🟢 Wolt',p:N('ch-wolt-pct'),fc:N('ch-wolt-fc'),cm:N('ch-wolt-comm'),cl:'text-green-700'},
+    {n:'🟠 10Bis',p:N('ch-10bis-pct'),fc:N('ch-10bis-fc'),cm:N('ch-10bis-comm'),cl:'text-orange-700'},
+    {n:'🟣 Cibus',p:N('ch-cibus-pct'),fc:N('ch-cibus-fc'),cm:N('ch-cibus-comm'),cl:'text-pink-700'},
+  ];
+  const tot=chs.reduce((s,c)=>s+c.p,0);
+  txt('ch-sum',tot.toFixed(1));
+  $('ch-warn').classList.toggle('hidden',Math.abs(tot-100)<0.5);
+  let h='';
+  chs.forEach(c=>{
+    const rev=mo*c.p/100, contrib=rev-rev*c.fc/100-rev*c.cm/100;
+    h+=`<div class="mb-4">
+      <div class="flex justify-between mb-1">
+        <span class="font-bold text-sm ${c.cl}">${c.n} <span class="text-gray-400 font-normal">${c.p}%</span></span>
+        <span class="text-sm font-bold">${fmt(rev)}</span>
+      </div>
+      <div class="progress"><div class="progress-bar bg-purple-400" style="width:${Math.min(100,c.p)}%"></div></div>
+      <div class="flex justify-between text-xs text-gray-400 mt-1">
+        <span>תרומה נטו: <span class="${contrib>=0?'text-green-600':'text-red-600'} font-bold">${fmt(contrib)}</span></span>
+        <span>F.C.: ${pct(c.fc)} | עמלה: ${pct(c.cm)}</span>
+      </div>
+    </div>`;
+  });
+  $('ch-contrib').innerHTML=h;
+}
+
+// ================================================================
+// MAIN RECALC — fires on EVERY input change
+// ================================================================
+function recalcAll() {
+  updateKPI();
+  updateBEPanel();
+  updateAlerts();
+  updateScenarios('scenarios-body');
+  updateScenarios('sim-scenarios-body');
+  updateSimResults();
+  updateChannelContrib();
+  renderStaffTable();
+  txt('op-total',fmt(calcOpCosts()));
+  doCharts();
+}
+
+function onGlobalChange() {
+  // sync simulator sliders when global inputs change
+  ss('s-daily-r',N('g-daily')); ss('s-daily-n',N('g-daily'));
+  ss('s-days-r',N('g-days')); ss('s-days-n',N('g-days'));
+  ss('s-fc-r',N('g-fc')); ss('s-fc-n',N('g-fc'));
+  ss('s-comm-r',N('g-comm')); ss('s-comm-n',N('g-comm'));
+  txt('sd-disp',fmt(N('g-daily')));
+  txt('sdays-disp',N('g-days').toString());
+  txt('sfc-disp',N('g-fc').toFixed(1)+'%');
+  txt('scomm-disp',N('g-comm').toFixed(1)+'%');
+  recalcAll();
+}
+
+// ================================================================
+// TABS
+// ================================================================
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  $('tab-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='costs') renderCostsEditor();
+  if(name==='staff') renderStaffTable();
+  if(name==='suppliers') renderSuppliersTable();
+  if(name==='products') renderProducts();
+  recalcAll();
+}
+
+// ================================================================
+// SAVE / LOAD
+// ================================================================
+function exportData() {
+  const payload={D,v:{daily:N('g-daily'),days:N('g-days'),fc:N('g-fc'),comm:N('g-comm'),
+    ins:N('r-ins'),pen:N('r-pen'),sev:N('r-sev'),vac:N('r-vac'),sick:N('r-sick'),
+    restPct:N('ch-rest-pct'),restFc:N('ch-rest-fc'),
+    woltPct:N('ch-wolt-pct'),woltFc:N('ch-wolt-fc'),woltComm:N('ch-wolt-comm'),
+    tbisPct:N('ch-10bis-pct'),tbisFc:N('ch-10bis-fc'),tbisComm:N('ch-10bis-comm'),
+    cibPct:N('ch-cibus-pct'),cibFc:N('ch-cibus-fc'),cibComm:N('ch-cibus-comm'),
+    pWolt:N('p-wolt'),p10bis:N('p-10bis'),pCibus:N('p-cibus'),pVat:N('p-vat')}};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+  a.download='profitability-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+}
+function importData(){ $('import-file').click(); }
+function loadFile(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try {
+      const p=JSON.parse(ev.target.result);
+      if(p.D) Object.assign(D,p.D);
+      if(p.v){const v=p.v;
+        const pairs=[['g-daily','daily'],['g-days','days'],['g-fc','fc'],['g-comm','comm'],
+          ['r-ins','ins'],['r-pen','pen'],['r-sev','sev'],['r-vac','vac'],['r-sick','sick'],
+          ['ch-rest-pct','restPct'],['ch-rest-fc','restFc'],
+          ['ch-wolt-pct','woltPct'],['ch-wolt-fc','woltFc'],['ch-wolt-comm','woltComm'],
+          ['ch-10bis-pct','tbisPct'],['ch-10bis-fc','tbisFc'],['ch-10bis-comm','tbisComm'],
+          ['ch-cibus-pct','cibPct'],['ch-cibus-fc','cibFc'],['ch-cibus-comm','cibComm'],
+          ['p-wolt','pWolt'],['p-10bis','p10bis'],['p-cibus','pCibus'],['p-vat','pVat']];
+        pairs.forEach(([id,k])=>ss(id,v[k]));
+      }
+      renderCostsEditor(); renderStaffTable(); renderSuppliersTable(); renderProducts(); recalcAll();
+    } catch { alert('שגיאה בקריאת הקובץ'); }
+  };
+  r.readAsText(f);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  renderCostsEditor();
+  renderStaffTable();
+  renderSuppliersTable();
+  renderProducts();
+  recalcAll();
+});
 </script>
 </body>
 </html>
