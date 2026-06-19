@@ -1,846 +1,1174 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>דשבורד ניתוח רווחיות - מסעדה</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
-<style>
-* { box-sizing: border-box; }
-body { font-family: 'Heebo', sans-serif; background: #f0f2f5; margin: 0; }
-
-.live-input {
-  border: 2px solid #e2e8f0; border-radius: 8px; padding: 6px 10px;
-  font-family: 'Heebo', sans-serif; font-size: 14px; width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  background: white; direction: ltr; text-align: left;
-}
-.live-input:focus { outline: none; border-color: #5e549d; box-shadow: 0 0 0 3px rgba(94,84,157,0.15); }
-.live-input.rtl-text { direction: rtl; text-align: right; }
-
-.kpi-strip {
-  background: linear-gradient(135deg, #2d2752 0%, #5e549d 60%, #4ab3e5 100%);
-  position: sticky; top: 0; z-index: 50;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-.kpi-item { border-left: 1px solid rgba(255,255,255,0.15); padding: 12px 18px; }
-.kpi-item:first-child { border-left: none; }
-.kpi-value { font-size: 20px; font-weight: 900; line-height: 1; }
-.kpi-label { font-size: 10px; opacity: 0.7; margin-top: 3px; }
-.kpi-value.pulse { animation: kpipulse 0.3s ease; }
-@keyframes kpipulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
-
-.card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
-.tab { cursor: pointer; padding: 9px 16px; border-radius: 10px; transition: all 0.15s; font-weight: 600; font-size: 14px; white-space: nowrap; }
-.tab.active { background: #5e549d; color: white; }
-.tab:not(.active):hover { background: #f0edff; color: #5e549d; }
-.section { display: none; }
-.section.active { display: block; }
-
-.data-table { border-collapse: collapse; width: 100%; font-size: 13px; }
-.data-table th { background: #f8f6ff; color: #5e549d; font-weight: 700; padding: 9px 10px; text-align: right; white-space: nowrap; border-bottom: 2px solid #ede9ff; }
-.data-table td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-.data-table tr:hover td { background: #faf8ff; }
-.data-table td .live-input { padding: 4px 7px; font-size: 13px; }
-
-.badge-profit { background:#dcfce7; color:#166534; border-radius:8px; padding:3px 10px; font-weight:700; font-size:12px; }
-.badge-loss { background:#fee2e2; color:#991b1b; border-radius:8px; padding:3px 10px; font-weight:700; font-size:12px; }
-.badge-neutral { background:#fef9c3; color:#854d0e; border-radius:8px; padding:3px 10px; font-weight:700; font-size:12px; }
-
-input[type=range] { accent-color: #5e549d; width: 100%; cursor: pointer; height: 6px; }
-.progress { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
-.progress-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-
-.alert { border-right: 4px solid; padding: 9px 13px; border-radius: 8px; font-size: 13px; margin-bottom: 7px; }
-.alert-info { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
-.alert-warn { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
-.alert-success { border-color: #10b981; background: #ecfdf5; color: #065f46; }
-.alert-danger { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
-
-.rrow { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f1f5f9; }
-.rrow:last-child { border-bottom:none; }
-
-.channel-card { border: 2px solid; border-radius: 12px; padding: 14px; }
-.ch-rest { border-color: #bfdbfe; } .ch-wolt { border-color: #bbf7d0; }
-.ch-10bis { border-color: #fed7aa; } .ch-cibus { border-color: #fbcfe8; }
-
-@media (max-width:768px) { .kpi-value{font-size:15px;} .kpi-item{padding:8px 10px;} .hide-sm{display:none;} }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>דשבורד ניתוח רווחיות</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { primary: '#5e549d', secondary: '#4ab3e5', dark: '#2d2752', light: '#f4f3fb' }
+          },
+          fontFamily: { heebo: ['Heebo', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Heebo', sans-serif; background: #f0f2f5; }
+    .card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .kpi-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    input[type=range] { accent-color: #5e549d; }
+    input[type=number] { border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; width: 100%; text-align: left; direction: ltr; }
+    input[type=number]:focus { outline: none; border-color: #5e549d; }
+    .tab { cursor: pointer; padding: 10px 20px; border-radius: 10px; transition: all 0.2s; font-weight: 500; }
+    .tab.active { background: #5e549d; color: white; }
+    .tab:not(.active):hover { background: #f0edff; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .badge-profit { background: #dcfce7; color: #166534; border-radius: 8px; padding: 4px 12px; font-weight: 700; }
+    .badge-loss { background: #fee2e2; color: #991b1b; border-radius: 8px; padding: 4px 12px; font-weight: 700; }
+    .badge-neutral { background: #fef9c3; color: #854d0e; border-radius: 8px; padding: 4px 12px; font-weight: 700; }
+    .progress-bar { height: 10px; border-radius: 5px; background: #e2e8f0; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background: #f8f6ff; color: #5e549d; font-weight: 600; padding: 10px 14px; text-align: right; }
+    td { padding: 9px 14px; border-bottom: 1px solid #f1f5f9; text-align: right; }
+    tr:hover td { background: #faf8ff; }
+    .channel-pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .pill-rest { background: #dbeafe; color: #1e40af; }
+    .pill-wolt { background: #dcfce7; color: #166534; }
+    .pill-10bis { background: #ffedd5; color: #c2410c; }
+    .pill-cibus { background: #fce7f3; color: #9d174d; }
+    .alert-box { border-right: 4px solid; padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; }
+    .alert-info { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
+    .alert-warn { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+    .alert-success { border-color: #10b981; background: #ecfdf5; color: #065f46; }
+    .alert-danger { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
+    .sim-row { padding: 8px 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
+    .gradient-header { background: linear-gradient(135deg, #5e549d 0%, #4ab3e5 100%); }
+    @media print { .no-print { display: none; } body { background: white; } }
+  </style>
 </head>
 <body>
 
-<!-- KPI STRIP -->
-<div class="kpi-strip">
-  <div class="flex items-center overflow-x-auto">
-    <div class="kpi-item text-white flex-shrink-0">
-      <div class="kpi-label">עלויות קבועות/חודש</div>
-      <div class="kpi-value" id="kpi-fixed">₪0</div>
+<!-- Header -->
+<div class="gradient-header text-white py-5 px-6 mb-6 shadow-lg no-print">
+  <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-black">📊 דשבורד ניתוח רווחיות</h1>
+      <p class="text-blue-100 text-sm mt-1">כלי מקצועי לניהול כספי ועסקי</p>
     </div>
-    <div class="kpi-item text-white flex-shrink-0">
-      <div class="kpi-label">מחזור יומי יעד</div>
-      <div class="kpi-value text-blue-300" id="kpi-daily">₪0</div>
-    </div>
-    <div class="kpi-item text-white flex-shrink-0">
-      <div class="kpi-label">נקודת איזון יומית</div>
-      <div class="kpi-value text-yellow-300" id="kpi-be">₪0</div>
-    </div>
-    <div class="kpi-item text-white flex-shrink-0 hide-sm">
-      <div class="kpi-label">הכנסה חודשית</div>
-      <div class="kpi-value text-cyan-300" id="kpi-rev">₪0</div>
-    </div>
-    <div class="kpi-item text-white flex-shrink-0">
-      <div class="kpi-label">רווח/הפסד חודשי</div>
-      <div class="kpi-value" id="kpi-profit">₪0</div>
-    </div>
-    <div class="kpi-item text-white flex-shrink-0 hide-sm">
-      <div class="kpi-label">מרווח %</div>
-      <div class="kpi-value" id="kpi-margin">0%</div>
-    </div>
-    <div class="kpi-item text-white flex-shrink-0">
-      <div class="kpi-label">סטטוס</div>
-      <div class="kpi-value" id="kpi-status">—</div>
-    </div>
-    <div class="flex-1"></div>
-    <div class="flex gap-2 px-3 flex-shrink-0">
-      <button onclick="exportData()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-lg text-xs font-bold transition">💾 שמור</button>
-      <button onclick="importData()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-2 rounded-lg text-xs font-bold transition">📂 טען</button>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="window.print()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition">🖨 הדפסה</button>
+      <button onclick="exportData()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition">💾 שמור נתונים</button>
+      <button onclick="importData()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition">📂 טען נתונים</button>
     </div>
   </div>
 </div>
 
-<div class="max-w-7xl mx-auto px-4 py-5">
+<div class="max-w-7xl mx-auto px-4 pb-10">
 
-<!-- TABS -->
-<div class="card p-3 mb-5 flex flex-wrap gap-2">
-  <div class="tab active" onclick="showTab('dashboard',this)">🏠 דשבורד</div>
-  <div class="tab" onclick="showTab('costs',this)">💰 עלויות תפעול</div>
-  <div class="tab" onclick="showTab('staff',this)">👥 כוח אדם</div>
-  <div class="tab" onclick="showTab('suppliers',this)">📦 ספקים</div>
-  <div class="tab" onclick="showTab('products',this)">🍽 מוצרים</div>
-  <div class="tab" onclick="showTab('simulator',this)">📈 סימולטור</div>
-  <div class="tab" onclick="showTab('channels',this)">🛍 ערוצי מכירה</div>
-</div>
-
-<!-- ===== DASHBOARD ===== -->
-<div id="tab-dashboard" class="section active">
-  <!-- Quick inputs always on top -->
-  <div class="card p-4 mb-5">
-    <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">⚡ שנה כאן — הכל מתעדכן מיד</div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div>
-        <label class="text-xs font-bold text-gray-500 block mb-1">🎯 מחזור יומי יעד (₪)</label>
-        <input type="number" id="g-daily" value="10000" min="0" step="500" class="live-input text-lg font-black text-blue-600" oninput="onGlobalChange()"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 block mb-1">📅 ימי פעילות / חודש</label>
-        <input type="number" id="g-days" value="30" min="1" max="31" class="live-input text-lg font-black text-blue-600" oninput="onGlobalChange()"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 block mb-1">🛒 F.C. ממוצע %</label>
-        <input type="number" id="g-fc" value="36.5" step="0.5" class="live-input text-lg font-black text-orange-600" oninput="onGlobalChange()"/>
-      </div>
-      <div>
-        <label class="text-xs font-bold text-gray-500 block mb-1">📊 עמלות פלטפורמה %</label>
-        <input type="number" id="g-comm" value="9.375" step="0.1" class="live-input text-lg font-black text-purple-600" oninput="onGlobalChange()"/>
-      </div>
-    </div>
+  <!-- Tabs -->
+  <div class="card p-3 mb-5 flex flex-wrap gap-2 no-print">
+    <div class="tab active" onclick="showTab('dashboard')">🏠 דשבורד</div>
+    <div class="tab" onclick="showTab('costs')">💰 עלויות תפעול</div>
+    <div class="tab" onclick="showTab('staff')">👥 כוח אדם</div>
+    <div class="tab" onclick="showTab('suppliers')">📦 ספקים</div>
+    <div class="tab" onclick="showTab('products')">🍽 מוצרים וקטגוריות</div>
+    <div class="tab" onclick="showTab('simulator')">📈 סימולטור</div>
+    <div class="tab" onclick="showTab('channels')">🛍 ערוצי מכירה</div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-    <div class="card p-5">
-      <h2 class="text-base font-bold text-purple-700 mb-4">📍 נקודת איזון</h2>
-      <div id="be-panel"></div>
-    </div>
-    <div class="card p-5">
-      <h2 class="text-base font-bold text-purple-700 mb-4">⚠️ התראות חיות</h2>
-      <div id="alerts-panel"></div>
-    </div>
-  </div>
+  <!-- ===== DASHBOARD ===== -->
+  <div id="tab-dashboard" class="section active">
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-    <div class="card p-5">
-      <h2 class="text-sm font-bold text-purple-700 mb-2">💰 פירוט עלויות</h2>
-      <canvas id="ch-cost-pie"></canvas>
-    </div>
-    <div class="card p-5">
-      <h2 class="text-sm font-bold text-purple-700 mb-2">🛍 ערוצי מכירה</h2>
-      <canvas id="ch-channels"></canvas>
-    </div>
-    <div class="card p-5">
-      <h2 class="text-sm font-bold text-purple-700 mb-2">📊 הכנסה vs הוצאות</h2>
-      <canvas id="ch-rev-cost"></canvas>
-    </div>
-  </div>
-
-  <div class="card p-5">
-    <h2 class="text-base font-bold text-purple-700 mb-4">📋 תרחישי רווחיות (מסומן בסגול = יעד נוכחי)</h2>
-    <div class="overflow-x-auto">
-      <table class="data-table">
-        <thead><tr><th>מחזור יומי</th><th>הכנסה/חודש</th><th>עלות גלם</th><th>עמלות</th><th>עלויות קבועות</th><th>רווח/הפסד</th><th>מרווח</th><th>סטטוס</th></tr></thead>
-        <tbody id="scenarios-body"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ===== COSTS ===== -->
-<div id="tab-costs" class="section">
-  <div class="card p-5 mb-5">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-purple-700">💰 עלויות תפעול – הוצאות קבועות חודשיות</h2>
-      <button onclick="addCost()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
-    </div>
-    <div id="costs-editor"></div>
-    <div class="mt-4 p-4 bg-purple-50 rounded-xl flex justify-between items-center">
-      <span class="font-bold text-gray-600">סה"כ עלויות תפעול / חודש</span>
-      <span class="text-2xl font-black text-purple-700" id="op-total">₪0</span>
-    </div>
-  </div>
-  <div class="card p-5">
-    <h2 class="text-sm font-bold text-purple-700 mb-3">📊 לפי קטגוריה</h2>
-    <canvas id="ch-cost-cats" height="200"></canvas>
-  </div>
-</div>
-
-<!-- ===== STAFF ===== -->
-<div id="tab-staff" class="section">
-  <div class="card p-5">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-purple-700">👥 מצבת כוח אדם</h2>
-      <button onclick="addStaff()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
-    </div>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-purple-50 rounded-xl mb-4">
-      <div><div class="text-xs text-gray-500 mb-1">ביטוח לאומי %</div><input type="number" value="3.55" step="0.01" class="live-input text-sm" id="r-ins" oninput="recalcAll()"/></div>
-      <div><div class="text-xs text-gray-500 mb-1">פנסיה מעביד %</div><input type="number" value="6.5" step="0.01" class="live-input text-sm" id="r-pen" oninput="recalcAll()"/></div>
-      <div><div class="text-xs text-gray-500 mb-1">פיצויים %</div><input type="number" value="8.33" step="0.01" class="live-input text-sm" id="r-sev" oninput="recalcAll()"/></div>
-      <div><div class="text-xs text-gray-500 mb-1">חופשה %</div><input type="number" value="4" step="0.01" class="live-input text-sm" id="r-vac" oninput="recalcAll()"/></div>
-      <div><div class="text-xs text-gray-500 mb-1">מחלה %</div><input type="number" value="1.5" step="0.01" class="live-input text-sm" id="r-sick" oninput="recalcAll()"/></div>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="data-table">
-        <thead><tr><th>תפקיד</th><th>כמות</th><th>שעות/יום</th><th>ימים/שבוע</th><th>שעות/חודש</th><th>עלות שעה ₪</th><th>ברוטו/חודש</th><th>עלות מעביד</th><th>כולל מעביד</th><th></th></tr></thead>
-        <tbody id="staff-body"></tbody>
-        <tfoot>
-          <tr style="background:#f8f6ff;font-weight:700;color:#5e549d">
-            <td colspan="6">סה"כ</td>
-            <td id="sf-gross">₪0</td><td id="sf-emp">₪0</td><td id="sf-total">₪0</td><td></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ===== SUPPLIERS ===== -->
-<div id="tab-suppliers" class="section">
-  <div class="card p-5">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-purple-700">📦 ניהול ספקים וחומרי גלם</h2>
-      <button onclick="addSupplier()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="data-table">
-        <thead><tr><th>פריט</th><th>ספק</th><th>קטגוריה</th><th>מחירון ₪</th><th>מחיר קניה ₪</th><th>תאריך</th><th>שינוי</th><th>הערות</th><th></th></tr></thead>
-        <tbody id="suppliers-body"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ===== PRODUCTS ===== -->
-<div id="tab-products" class="section">
-  <div class="card p-5 mb-5">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-purple-700">🍽 מוצרים – ניתוח F.C. לפי ערוץ</h2>
-      <button onclick="addProduct()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-bold">+ הוסף</button>
-    </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-gray-50 rounded-xl mb-4">
-      <div><div class="text-xs font-bold text-green-700 mb-1">Wolt עמלה %</div><input type="number" value="26.5" step="0.1" class="live-input text-sm" id="p-wolt" oninput="renderProducts()"/></div>
-      <div><div class="text-xs font-bold text-orange-700 mb-1">10Bis עמלה %</div><input type="number" value="20" step="0.1" class="live-input text-sm" id="p-10bis" oninput="renderProducts()"/></div>
-      <div><div class="text-xs font-bold text-pink-700 mb-1">Cibus עמלה %</div><input type="number" value="15" step="0.1" class="live-input text-sm" id="p-cibus" oninput="renderProducts()"/></div>
-      <div><div class="text-xs font-bold text-gray-700 mb-1">מע"מ %</div><input type="number" value="18" step="0.1" class="live-input text-sm" id="p-vat" oninput="renderProducts()"/></div>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="data-table">
-        <thead><tr><th>מוצר</th><th>קטגוריה</th><th>עלות גלם ₪</th><th>מחיר מסעדה</th><th>F.C. מסעדה</th><th>מחיר Wolt</th><th>F.C. Wolt</th><th>מחיר 10Bis</th><th>F.C. 10Bis</th><th>מחיר Cibus</th><th>F.C. Cibus</th><th></th></tr></thead>
-        <tbody id="products-body"></tbody>
-      </table>
-    </div>
-  </div>
-  <div class="card p-5">
-    <h2 class="text-sm font-bold text-purple-700 mb-3">📊 F.C. לפי מוצר וערוץ</h2>
-    <canvas id="ch-product-fc" height="200"></canvas>
-  </div>
-</div>
-
-<!-- ===== SIMULATOR ===== -->
-<div id="tab-simulator" class="section">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-    <div class="card p-5">
-      <h2 class="text-xl font-bold text-purple-700 mb-5">⚙️ שנה פרמטרים — מתעדכן חי</h2>
-      <div class="mb-5">
-        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">מחזור יומי (₪)</label><span class="font-black text-blue-600 text-sm" id="sd-disp">₪10,000</span></div>
-        <input type="range" id="s-daily-r" min="1000" max="50000" step="500" value="10000" oninput="ss('s-daily-n',this.value);ss('g-daily',this.value);$('sd-disp').textContent=fmt(this.value);recalcAll()"/>
-        <input type="number" value="10000" class="live-input text-sm mt-1" id="s-daily-n" oninput="ss('s-daily-r',this.value);ss('g-daily',this.value);$('sd-disp').textContent=fmt(this.value);recalcAll()"/>
-      </div>
-      <div class="mb-5">
-        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">ימי פעילות / חודש</label><span class="font-black text-blue-600 text-sm" id="sdays-disp">30</span></div>
-        <input type="range" id="s-days-r" min="15" max="31" step="1" value="30" oninput="ss('s-days-n',this.value);ss('g-days',this.value);$('sdays-disp').textContent=this.value;recalcAll()"/>
-        <input type="number" value="30" class="live-input text-sm mt-1" id="s-days-n" oninput="ss('s-days-r',this.value);ss('g-days',this.value);$('sdays-disp').textContent=this.value;recalcAll()"/>
-      </div>
-      <div class="mb-5">
-        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">F.C. ממוצע %</label><span class="font-black text-orange-600 text-sm" id="sfc-disp">36.5%</span></div>
-        <input type="range" id="s-fc-r" min="10" max="70" step="0.5" value="36.5" oninput="ss('s-fc-n',this.value);ss('g-fc',this.value);$('sfc-disp').textContent=this.value+'%';recalcAll()"/>
-        <input type="number" value="36.5" step="0.5" class="live-input text-sm mt-1" id="s-fc-n" oninput="ss('s-fc-r',this.value);ss('g-fc',this.value);$('sfc-disp').textContent=this.value+'%';recalcAll()"/>
-      </div>
-      <div class="mb-5">
-        <div class="flex justify-between mb-1"><label class="text-sm font-bold text-gray-600">עמלות פלטפורמה %</label><span class="font-black text-purple-600 text-sm" id="scomm-disp">9.4%</span></div>
-        <input type="range" id="s-comm-r" min="0" max="35" step="0.5" value="9.375" oninput="ss('s-comm-n',this.value);ss('g-comm',this.value);$('scomm-disp').textContent=parseFloat(this.value).toFixed(1)+'%';recalcAll()"/>
-        <input type="number" value="9.375" step="0.1" class="live-input text-sm mt-1" id="s-comm-n" oninput="ss('s-comm-r',this.value);ss('g-comm',this.value);$('scomm-disp').textContent=parseFloat(this.value).toFixed(1)+'%';recalcAll()"/>
-      </div>
-    </div>
-    <div class="card p-5">
-      <h2 class="text-xl font-bold text-purple-700 mb-4">📊 תוצאות חיות</h2>
-      <div id="sim-results"></div>
-    </div>
-  </div>
-  <div class="card p-5 mb-5">
-    <h2 class="text-base font-bold text-purple-700 mb-3">📈 עקומת רווחיות</h2>
-    <canvas id="ch-curve" height="200"></canvas>
-  </div>
-  <div class="card p-5">
-    <h2 class="text-base font-bold text-purple-700 mb-4">📋 טבלת תרחישים מלאה</h2>
-    <div class="overflow-x-auto">
-      <table class="data-table">
-        <thead><tr><th>מחזור יומי</th><th>הכנסה/חודש</th><th>עלות גלם</th><th>עמלות</th><th>קבועות</th><th>רווח/הפסד</th><th>מרווח</th><th>סטטוס</th></tr></thead>
-        <tbody id="sim-scenarios-body"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ===== CHANNELS ===== -->
-<div id="tab-channels" class="section">
-  <div class="card p-5 mb-5">
-    <h2 class="text-xl font-bold text-purple-700 mb-4">🛍 הגדרת ערוצי מכירה</h2>
-    <div id="ch-warn" class="alert alert-warn hidden mb-3">⚠️ סה"כ = <span id="ch-sum">0</span>% (חייב להיות 100%)</div>
+    <!-- KPI Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-      <div class="channel-card ch-rest">
-        <div class="font-bold text-blue-700 mb-3">🏠 מסעדה</div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="60" min="0" max="100" class="live-input text-sm" id="ch-rest-pct" oninput="recalcAll()"/></div>
-        <div><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="35.4" step="0.1" class="live-input text-sm" id="ch-rest-fc" oninput="recalcAll()"/></div>
+      <div class="card p-4 kpi-card">
+        <div class="text-xs text-gray-400 mb-1">עלויות קבועות / חודש</div>
+        <div class="text-2xl font-black text-brand-primary" id="kpi-fixed-costs">₪0</div>
+        <div class="text-xs text-gray-400 mt-1">שכר + תפעול</div>
       </div>
-      <div class="channel-card ch-wolt">
-        <div class="font-bold text-green-700 mb-3">🟢 Wolt</div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="25" min="0" max="100" class="live-input text-sm" id="ch-wolt-pct" oninput="recalcAll()"/></div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="60.77" step="0.1" class="live-input text-sm" id="ch-wolt-fc" oninput="recalcAll()"/></div>
-        <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="26.5" step="0.1" class="live-input text-sm" id="ch-wolt-comm" oninput="recalcAll()"/></div>
+      <div class="card p-4 kpi-card">
+        <div class="text-xs text-gray-400 mb-1">מחזור יומי יעד</div>
+        <div class="text-2xl font-black text-blue-600" id="kpi-daily-target">₪0</div>
+        <div class="text-xs text-gray-400 mt-1">ניתן לעריכה בסימולטור</div>
       </div>
-      <div class="channel-card ch-10bis">
-        <div class="font-bold text-orange-700 mb-3">🟠 10Bis</div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="10" min="0" max="100" class="live-input text-sm" id="ch-10bis-pct" oninput="recalcAll()"/></div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="0" step="0.1" class="live-input text-sm" id="ch-10bis-fc" oninput="recalcAll()"/></div>
-        <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="20" step="0.1" class="live-input text-sm" id="ch-10bis-comm" oninput="recalcAll()"/></div>
+      <div class="card p-4 kpi-card">
+        <div class="text-xs text-gray-400 mb-1">נקודת איזון יומית</div>
+        <div class="text-2xl font-black text-orange-500" id="kpi-breakeven">₪0</div>
+        <div class="text-xs text-gray-400 mt-1">מחזור מינימלי</div>
       </div>
-      <div class="channel-card ch-cibus">
-        <div class="font-bold text-pink-700 mb-3">🟣 Cibus</div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">% מהמחזור</div><input type="number" value="5" min="0" max="100" class="live-input text-sm" id="ch-cibus-pct" oninput="recalcAll()"/></div>
-        <div class="mb-2"><div class="text-xs text-gray-400 mb-1">F.C. ממוצע %</div><input type="number" value="0" step="0.1" class="live-input text-sm" id="ch-cibus-fc" oninput="recalcAll()"/></div>
-        <div><div class="text-xs text-gray-400 mb-1">עמלה %</div><input type="number" value="15" step="0.1" class="live-input text-sm" id="ch-cibus-comm" oninput="recalcAll()"/></div>
+      <div class="card p-4 kpi-card">
+        <div class="text-xs text-gray-400 mb-1">רווח / הפסד חודשי</div>
+        <div class="text-2xl font-black" id="kpi-profit">₪0</div>
+        <div class="text-xs text-gray-400 mt-1" id="kpi-profit-status">—</div>
       </div>
     </div>
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-    <div class="card p-5">
-      <h2 class="text-sm font-bold text-purple-700 mb-3">📊 התפלגות ערוצים</h2>
-      <canvas id="ch-dist" height="250"></canvas>
-    </div>
-    <div class="card p-5">
-      <h2 class="text-sm font-bold text-purple-700 mb-4">📋 תרומה לפי ערוץ</h2>
-      <div id="ch-contrib"></div>
-    </div>
-  </div>
-</div>
 
-</div><!-- /max-w -->
-<input type="file" id="import-file" accept=".json" class="hidden" onchange="loadFile(event)"/>
+    <!-- Alerts + Break-even -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <div class="card p-5">
+        <h2 class="text-lg font-bold text-brand-primary mb-4">⚠️ התראות ומידע</h2>
+        <div id="alerts-container"></div>
+      </div>
+      <div class="card p-5">
+        <h2 class="text-lg font-bold text-brand-primary mb-4">📍 ניתוח נקודת איזון</h2>
+        <div id="breakeven-table"></div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <div class="card p-5">
+        <h2 class="text-lg font-bold text-brand-primary mb-3">💰 פירוט עלויות חודשיות</h2>
+        <canvas id="costPieChart" height="220"></canvas>
+      </div>
+      <div class="card p-5">
+        <h2 class="text-lg font-bold text-brand-primary mb-3">🛍 שקלול ערוצי מכירה</h2>
+        <canvas id="channelDonutChart" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Profitability Scenarios Table -->
+    <div class="card p-5">
+      <h2 class="text-lg font-bold text-brand-primary mb-4">📈 תרחישי רווחיות</h2>
+      <div class="overflow-x-auto">
+        <table id="scenarios-table">
+          <thead><tr>
+            <th>מחזור יומי</th>
+            <th>ימי פעילות</th>
+            <th>הכנסה חודשית</th>
+            <th>סה"כ הוצאות</th>
+            <th>רווח / הפסד</th>
+            <th>סטטוס</th>
+          </tr></thead>
+          <tbody id="scenarios-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COSTS ===== -->
+  <div id="tab-costs" class="section">
+    <div class="card p-5 mb-5">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <h2 class="text-xl font-bold text-brand-primary">💰 עלויות תפעול – הוצאות קבועות חודשיות</h2>
+        <button onclick="addCostRow()" class="bg-brand-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">+ הוסף הוצאה</button>
+      </div>
+      <div id="cost-categories"></div>
+      <div class="mt-5 p-4 bg-purple-50 rounded-xl">
+        <div class="flex justify-between text-lg font-black text-brand-primary">
+          <span>סה"כ עלויות תפעול / חודש</span>
+          <span id="total-op-costs">₪0</span>
+        </div>
+        <div class="flex justify-between text-sm text-gray-500 mt-1">
+          <span>שנתי</span>
+          <span id="total-op-costs-annual">₪0</span>
+        </div>
+      </div>
+    </div>
+    <div class="card p-5">
+      <h2 class="text-lg font-bold text-brand-primary mb-3">📊 פירוט לפי קטגוריה</h2>
+      <canvas id="costCategoryChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- ===== STAFF ===== -->
+  <div id="tab-staff" class="section">
+    <div class="card p-5 mb-5">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <h2 class="text-xl font-bold text-brand-primary">👥 מצבת כוח אדם</h2>
+        <button onclick="addStaffRow()" class="bg-brand-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">+ הוסף עובד</button>
+      </div>
+
+      <!-- Employer rates -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-purple-50 rounded-xl">
+        <div>
+          <div class="text-xs text-gray-500 mb-1">ביטוח לאומי מעביד</div>
+          <div class="flex items-center gap-1"><input type="number" id="emp-insurance" value="3.55" step="0.01" oninput="recalcStaff()" class="text-sm" /><span class="text-xs text-gray-400">%</span></div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">פנסיה מעביד</div>
+          <div class="flex items-center gap-1"><input type="number" id="emp-pension" value="6.5" step="0.01" oninput="recalcStaff()" class="text-sm" /><span class="text-xs text-gray-400">%</span></div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">פיצויים</div>
+          <div class="flex items-center gap-1"><input type="number" id="emp-severance" value="8.33" step="0.01" oninput="recalcStaff()" class="text-sm" /><span class="text-xs text-gray-400">%</span></div>
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">חופשה + מחלה</div>
+          <div class="flex items-center gap-1"><input type="number" id="emp-vacation" value="5.5" step="0.01" oninput="recalcStaff()" class="text-sm" /><span class="text-xs text-gray-400">%</span></div>
+        </div>
+      </div>
+
+      <!-- Business hours -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-blue-50 rounded-xl">
+        <div>
+          <div class="text-xs text-gray-500 mb-1">שעות ביום (א-ה)</div>
+          <input type="number" id="biz-hours-weekday" value="12" oninput="recalcStaff()" class="text-sm" />
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">שעות ביום (ו)</div>
+          <input type="number" id="biz-hours-friday" value="15" oninput="recalcStaff()" class="text-sm" />
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">ימי פעילות בשבוע</div>
+          <input type="number" id="biz-days-week" value="7" oninput="recalcStaff()" class="text-sm" />
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">סה"כ שעות / חודש</div>
+          <div class="text-lg font-bold text-brand-primary" id="total-biz-hours">377</div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table>
+          <thead><tr>
+            <th>תפקיד</th>
+            <th>כמות</th>
+            <th>שעות/יום</th>
+            <th>ימים/שבוע</th>
+            <th>שעות/חודש</th>
+            <th>עלות שעה (₪)</th>
+            <th>עלות ברוטו/חודש</th>
+            <th>עלות כוללת/חודש</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="staff-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="mt-5 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 bg-purple-50 rounded-xl">
+          <div class="text-xs text-gray-500">סה"כ עובדים</div>
+          <div class="text-xl font-black text-brand-primary" id="staff-count">0</div>
+        </div>
+        <div class="p-4 bg-purple-50 rounded-xl">
+          <div class="text-xs text-gray-500">עלות ברוטו / חודש</div>
+          <div class="text-xl font-black text-brand-primary" id="staff-gross">₪0</div>
+        </div>
+        <div class="p-4 bg-purple-50 rounded-xl">
+          <div class="text-xs text-gray-500">עלות מעביד / חודש</div>
+          <div class="text-xl font-black text-brand-primary" id="staff-employer">₪0</div>
+        </div>
+        <div class="p-4 bg-purple-50 rounded-xl">
+          <div class="text-xs text-gray-500">עלות כוללת / חודש</div>
+          <div class="text-xl font-black text-brand-primary" id="staff-total">₪0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SUPPLIERS ===== -->
+  <div id="tab-suppliers" class="section">
+    <div class="card p-5">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <h2 class="text-xl font-bold text-brand-primary">📦 ניהול ספקים וחומרי גלם</h2>
+        <button onclick="addSupplierRow()" class="bg-brand-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">+ הוסף פריט</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table>
+          <thead><tr>
+            <th>פריט</th>
+            <th>ספק</th>
+            <th>קטגוריה</th>
+            <th>מחירון (₪)</th>
+            <th>מחיר קניה (₪)</th>
+            <th>תאריך</th>
+            <th>שינוי מחיר</th>
+            <th>הערות</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="suppliers-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PRODUCTS ===== -->
+  <div id="tab-products" class="section">
+    <div class="card p-5 mb-5">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+        <h2 class="text-xl font-bold text-brand-primary">🍽 מוצרים וניתוח רווחיות לפי ערוץ</h2>
+        <button onclick="addProductRow()" class="bg-brand-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">+ הוסף מוצר</button>
+      </div>
+
+      <!-- Channel commissions -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-gray-50 rounded-xl">
+        <div>
+          <div class="text-xs text-gray-500 mb-1"><span class="channel-pill pill-wolt">Wolt</span> עמלה %</div>
+          <input type="number" id="comm-wolt" value="26.5" step="0.1" oninput="recalcProducts()" class="text-sm" />
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1"><span class="channel-pill pill-10bis">10Bis</span> עמלה %</div>
+          <input type="number" id="comm-10bis" value="20" step="0.1" oninput="recalcProducts()" class="text-sm" />
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1"><span class="channel-pill pill-cibus">Cibus</span> עמלה %</div>
+          <input type="number" id="comm-cibus" value="15" step="0.1" oninput="recalcProducts()" class="text-sm" />
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">מע"מ %</div>
+          <input type="number" id="vat-rate" value="18" step="0.1" oninput="recalcProducts()" class="text-sm" />
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table>
+          <thead><tr>
+            <th>מוצר</th>
+            <th>קטגוריה</th>
+            <th>עלות גלם (₪)</th>
+            <th>מחיר מסעדה (₪)</th>
+            <th>F.C. מסעדה %</th>
+            <th>מחיר Wolt (₪)</th>
+            <th>F.C. Wolt %</th>
+            <th>מחיר 10Bis (₪)</th>
+            <th>F.C. 10Bis %</th>
+            <th>מחיר Cibus (₪)</th>
+            <th>F.C. Cibus %</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h2 class="text-lg font-bold text-brand-primary mb-3">📊 השוואת F.C. לפי מוצר וערוץ</h2>
+      <canvas id="productFCChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- ===== SIMULATOR ===== -->
+  <div id="tab-simulator" class="section">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <div class="card p-5">
+        <h2 class="text-xl font-bold text-brand-primary mb-5">⚙️ פרמטרים לסימולציה</h2>
+
+        <div class="mb-5">
+          <label class="text-sm font-semibold text-gray-600 block mb-2">מחזור יומי יעד (₪)</label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="sim-daily" min="1000" max="50000" step="500" value="10000" oninput="runSimulator()" class="flex-1" />
+            <input type="number" id="sim-daily-num" value="10000" oninput="document.getElementById('sim-daily').value=this.value; runSimulator()" class="w-28 text-sm" />
+          </div>
+          <div class="flex justify-between text-xs text-gray-400 mt-1"><span>₪1,000</span><span>₪50,000</span></div>
+        </div>
+
+        <div class="mb-5">
+          <label class="text-sm font-semibold text-gray-600 block mb-2">ימי פעילות בחודש</label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="sim-days" min="15" max="31" step="1" value="30" oninput="runSimulator()" class="flex-1" />
+            <input type="number" id="sim-days-num" value="30" oninput="document.getElementById('sim-days').value=this.value; runSimulator()" class="w-28 text-sm" />
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="text-sm font-semibold text-gray-600 block mb-2">אחוז עלות חומרי גלם ממחזור (%)</label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="sim-fc" min="10" max="60" step="1" value="36.5" oninput="runSimulator()" class="flex-1" />
+            <input type="number" id="sim-fc-num" value="36.5" oninput="document.getElementById('sim-fc').value=this.value; runSimulator()" class="w-28 text-sm" />
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="text-sm font-semibold text-gray-600 block mb-2">הנחה / מבצע (%)</label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="sim-discount" min="0" max="30" step="1" value="0" oninput="runSimulator()" class="flex-1" />
+            <input type="number" id="sim-discount-num" value="0" oninput="document.getElementById('sim-discount').value=this.value; runSimulator()" class="w-28 text-sm" />
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="text-sm font-semibold text-gray-600 block mb-2">עמלת פלטפורמה ממוצעת (%)</label>
+          <div class="flex items-center gap-3">
+            <input type="range" id="sim-commission" min="0" max="30" step="0.5" value="9.375" oninput="runSimulator()" class="flex-1" />
+            <input type="number" id="sim-commission-num" value="9.375" oninput="document.getElementById('sim-commission').value=this.value; runSimulator()" class="w-28 text-sm" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h2 class="text-xl font-bold text-brand-primary mb-5">📊 תוצאות הסימולציה</h2>
+        <div id="sim-results"></div>
+        <div class="mt-5">
+          <canvas id="simGaugeChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <h2 class="text-lg font-bold text-brand-primary mb-3">📈 עקומת רווחיות</h2>
+      <canvas id="profitCurveChart" height="200"></canvas>
+    </div>
+
+    <div class="card p-5 mt-5">
+      <h2 class="text-lg font-bold text-brand-primary mb-4">📋 טבלת תרחישים מלאה</h2>
+      <div class="overflow-x-auto">
+        <table id="full-scenarios-table">
+          <thead><tr>
+            <th>מחזור יומי</th>
+            <th>הכנסה חודשית</th>
+            <th>עלות גלם</th>
+            <th>עמלות</th>
+            <th>עלויות קבועות</th>
+            <th>סה"כ הוצאות</th>
+            <th>רווח / הפסד</th>
+            <th>מרווח %</th>
+            <th>סטטוס</th>
+          </tr></thead>
+          <tbody id="full-scenarios-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHANNELS ===== -->
+  <div id="tab-channels" class="section">
+    <div class="card p-5 mb-5">
+      <h2 class="text-xl font-bold text-brand-primary mb-5">🛍 הגדרת ערוצי מכירה</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <div class="p-4 border-2 border-blue-200 rounded-xl">
+          <div class="font-bold text-blue-700 mb-3">🏠 מסעדה</div>
+          <div class="mb-2"><label class="text-xs text-gray-500">% מהמחזור</label><input type="number" id="ch-rest-pct" value="60" min="0" max="100" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div><label class="text-xs text-gray-500">אחוז F.C. ממוצע %</label><input type="number" id="ch-rest-fc" value="35.4" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+        </div>
+        <div class="p-4 border-2 border-green-200 rounded-xl">
+          <div class="font-bold text-green-700 mb-3">🟢 Wolt</div>
+          <div class="mb-2"><label class="text-xs text-gray-500">% מהמחזור</label><input type="number" id="ch-wolt-pct" value="25" min="0" max="100" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div class="mb-2"><label class="text-xs text-gray-500">אחוז F.C. ממוצע %</label><input type="number" id="ch-wolt-fc" value="60.77" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div><label class="text-xs text-gray-500">עמלה %</label><input type="number" id="ch-wolt-comm" value="26.5" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+        </div>
+        <div class="p-4 border-2 border-orange-200 rounded-xl">
+          <div class="font-bold text-orange-700 mb-3">🟠 10Bis</div>
+          <div class="mb-2"><label class="text-xs text-gray-500">% מהמחזור</label><input type="number" id="ch-10bis-pct" value="10" min="0" max="100" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div class="mb-2"><label class="text-xs text-gray-500">אחוז F.C. ממוצע %</label><input type="number" id="ch-10bis-fc" value="0" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div><label class="text-xs text-gray-500">עמלה %</label><input type="number" id="ch-10bis-comm" value="20" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+        </div>
+        <div class="p-4 border-2 border-pink-200 rounded-xl">
+          <div class="font-bold text-pink-700 mb-3">🟣 Cibus</div>
+          <div class="mb-2"><label class="text-xs text-gray-500">% מהמחזור</label><input type="number" id="ch-cibus-pct" value="5" min="0" max="100" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div class="mb-2"><label class="text-xs text-gray-500">אחוז F.C. ממוצע %</label><input type="number" id="ch-cibus-fc" value="0" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+          <div><label class="text-xs text-gray-500">עמלה %</label><input type="number" id="ch-cibus-comm" value="15" step="0.1" oninput="recalcChannels()" class="text-sm mt-1" /></div>
+        </div>
+      </div>
+      <div id="channel-warning" class="alert-box alert-warn hidden">סה"כ % ערוצים חייב להיות 100%</div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="card p-5">
+        <h2 class="text-lg font-bold text-brand-primary mb-3">📊 התפלגות ערוצים</h2>
+        <canvas id="channelDistChart" height="250"></canvas>
+      </div>
+      <div class="card p-5">
+        <h2 class="text-lg font-bold text-brand-primary mb-4">📋 סיכום ערוצים</h2>
+        <div id="channel-summary"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end max-w -->
+
+<input type="file" id="import-file" accept=".json" class="hidden" onchange="loadImportFile(event)" />
 
 <script>
-// ================================================================
-// DATA
-// ================================================================
-const D = {
-  costs: [
-    {cat:'🏠 שכירות ונכס',name:'שכירות חודשית',v:0},
-    {cat:'🏠 שכירות ונכס',name:'ארנונה',v:0},
-    {cat:'🏠 שכירות ונכס',name:'ביטוח מבנה ותכולה',v:0},
-    {cat:'🏠 שכירות ונכס',name:'ועד בית / אחזקת מבנה',v:0},
-    {cat:'⚡ חשבונות שוטפים',name:'חשמל',v:0},
-    {cat:'⚡ חשבונות שוטפים',name:'מים',v:0},
-    {cat:'⚡ חשבונות שוטפים',name:'גז (בישול)',v:0},
-    {cat:'⚡ חשבונות שוטפים',name:'אינטרנט',v:0},
-    {cat:'⚡ חשבונות שוטפים',name:'טלפון נייד',v:0},
-    {cat:'🔧 ציוד ואחזקה',name:'אחזקת ציוד מטבח',v:0},
-    {cat:'🔧 ציוד ואחזקה',name:'הדברה',v:0},
-    {cat:'🔧 ציוד ואחזקה',name:'ניקיון מקצועי',v:0},
-    {cat:'🔧 ציוד ואחזקה',name:'חומרי ניקוי וכלים חד-פעמיים',v:0},
-    {cat:'📣 שיווק ופרסום',name:'פרסום ממומן (פייסבוק/גוגל)',v:0},
-    {cat:'📣 שיווק ופרסום',name:'ניהול רשתות חברתיות',v:0},
-    {cat:'📣 שיווק ופרסום',name:'עיצוב ותפריטים',v:0},
-    {cat:'📋 ביטוחים ורישיונות',name:'רישיון עסק',v:0},
-    {cat:'📋 ביטוחים ורישיונות',name:'ביטוח אחריות',v:0},
-    {cat:'📋 ביטוחים ורישיונות',name:'תעודת כשרות',v:0},
-    {cat:'💻 טכנולוגיה',name:'קופה רושמת / POS',v:0},
-    {cat:'💻 טכנולוגיה',name:'תוכנות וניהול',v:0},
-    {cat:'💼 שירותים מקצועיים',name:'ייעוץ חשבונאי',v:0},
-    {cat:'💼 שירותים מקצועיים',name:'שכ"ט עו"ד',v:0},
+// ===========================
+// DATA MODEL
+// ===========================
+const state = {
+  dailyTarget: 10000,
+  activeDays: 30,
+  opCosts: [
+    { category: '🏠 שכירות ונכס', name: 'שכירות חודשית', amount: 0 },
+    { category: '🏠 שכירות ונכס', name: 'ארנונה', amount: 0 },
+    { category: '🏠 שכירות ונכס', name: 'ביטוח מבנה ותכולה', amount: 0 },
+    { category: '⚡ חשבונות שוטפים', name: 'חשמל', amount: 0 },
+    { category: '⚡ חשבונות שוטפים', name: 'מים', amount: 0 },
+    { category: '⚡ חשבונות שוטפים', name: 'גז (בישול)', amount: 0 },
+    { category: '⚡ חשבונות שוטפים', name: 'אינטרנט', amount: 0 },
+    { category: '🔧 ציוד ואחזקה', name: 'אחזקה ותיקונים', amount: 0 },
+    { category: '🔧 ציוד ואחזקה', name: 'הדברה', amount: 0 },
+    { category: '🔧 ציוד ואחזקה', name: 'ניקיון מקצועי', amount: 0 },
+    { category: '📣 שיווק ופרסום', name: 'פרסום ממומן', amount: 0 },
+    { category: '📣 שיווק ופרסום', name: 'ניהול רשתות חברתיות', amount: 0 },
+    { category: '📋 ביטוחים ורישיונות', name: 'רישיון עסק', amount: 0 },
+    { category: '📋 ביטוחים ורישיונות', name: 'ביטוח אחריות', amount: 0 },
+    { category: '💻 טכנולוגיה', name: 'קופה רושמת / POS', amount: 0 },
+    { category: '💻 טכנולוגיה', name: 'תוכנות וניהול', amount: 0 },
+    { category: '💼 מקצועיים', name: 'ייעוץ חשבונאי', amount: 0 },
   ],
   staff: [
-    {role:'מנהל מסעדה',cnt:1,hd:10,dw:6,hr:55},
-    {role:'אחראי משמרת',cnt:2,hd:8,dw:6,hr:45},
-    {role:'טבח',cnt:0,hd:8,dw:6,hr:40},
-    {role:'מלצר',cnt:0,hd:8,dw:5,hr:35},
-    {role:'שוטף כלים',cnt:0,hd:8,dw:5,hr:32},
-    {role:'דליברי',cnt:0,hd:8,dw:5,hr:33},
+    { role: 'מנהל מסעדה', count: 1, hoursDay: 10, daysWeek: 6, hourlyRate: 55 },
+    { role: 'אחראי משמרת', count: 2, hoursDay: 8, daysWeek: 6, hourlyRate: 45 },
+    { role: 'טבח', count: 0, hoursDay: 8, daysWeek: 6, hourlyRate: 40 },
+    { role: 'מלצר', count: 0, hoursDay: 8, daysWeek: 5, hourlyRate: 35 },
+    { role: 'שוטף כלים', count: 0, hoursDay: 8, daysWeek: 5, hourlyRate: 32 },
+    { role: 'דליברי', count: 0, hoursDay: 8, daysWeek: 5, hourlyRate: 33 },
   ],
   suppliers: [
-    {item:'עגבניה',sup:'',cat:'ירקות',list:5.5,buy:3.5,date:'3.8.25',notes:''},
-    {item:'מלפפון',sup:'',cat:'ירקות',list:15,buy:12,date:'2.8.25',notes:''},
-    {item:'קמח לבן',sup:'',cat:'יבשים',list:8,buy:9,date:'',notes:''},
+    { item: 'עגבניה', supplier: '', category: 'ירקות', listPrice: 5.5, buyPrice: 3.5, date: '3.8.25', notes: '' },
+    { item: 'מלפפון', supplier: '', category: 'ירקות', listPrice: 15, buyPrice: 12, date: '2.8.25', notes: '' },
+    { item: 'קמח לבן', supplier: '', category: 'יבשים', listPrice: 8, buyPrice: 9, date: '', notes: '' },
   ],
   products: [
-    {name:'מוצר 1',cat:'קטגוריה 1',raw:15,rest:50,wolt:60,tenBis:0,cibus:0},
+    { name: 'מוצר 1', category: 'קטגוריה 1', rawCost: 15, restPrice: 50, woltPrice: 60, tenBisPrice: 0, cibusPrice: 0 },
   ],
+  channels: {
+    rest: { pct: 60, fc: 35.4 },
+    wolt: { pct: 25, fc: 60.77, comm: 26.5 },
+    tenBis: { pct: 10, fc: 0, comm: 20 },
+    cibus: { pct: 5, fc: 0, comm: 15 },
+  },
+  employerRates: { insurance: 3.55, pension: 6.5, severance: 8.33, vacation: 5.5 },
+  bizHours: { weekday: 12, friday: 15, daysWeek: 7 },
 };
 
-// ================================================================
+// ===========================
 // UTILS
-// ================================================================
-const $ = id => document.getElementById(id);
-const N = id => parseFloat($(id)?.value)||0;
-const ss = (id,v) => { if($(id)) $(id).value=v; };
-const fmt = (n,d=0) => '₪'+Number(n||0).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
-const pct = (n,d=1) => Number(n||0).toFixed(d)+'%';
-const txt = (id,v) => { if($(id)) $(id).textContent=v; };
+// ===========================
+const fmt = (n, dec=0) => '₪' + Number(n).toLocaleString('he-IL', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+const pct = (n, dec=1) => Number(n).toFixed(dec) + '%';
+const num = id => parseFloat(document.getElementById(id)?.value || 0) || 0;
 
-// ================================================================
-// CALCULATIONS
-// ================================================================
-const gDaily = () => N('g-daily')||10000;
-const gDays  = () => N('g-days')||30;
-const gFC    = () => (N('g-fc')||36.5)/100;
-const gComm  = () => (N('g-comm')||9.375)/100;
-
-function empRate() {
-  return (N('r-ins')+N('r-pen')+N('r-sev')+N('r-vac')+N('r-sick'))/100;
+function totalOpCosts() {
+  return state.opCosts.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
 }
-function calcStaff() {
-  const ep=empRate(); let gross=0,emp=0,cnt=0;
-  D.staff.forEach(s=>{
-    const n=s.cnt||0; if(!n) return;
-    const hm=(s.hd||0)*(s.dw||0)*4.33;
-    const g=hm*(s.hr||0)*n;
-    gross+=g; emp+=g*ep; cnt+=n;
+
+function employerPct() {
+  return (state.employerRates.insurance + state.employerRates.pension +
+          state.employerRates.severance + state.employerRates.vacation) / 100;
+}
+
+function totalBizHoursPerMonth() {
+  const d = state.bizHours.daysWeek;
+  const wh = state.bizHours.weekday;
+  const fh = state.bizHours.friday;
+  // Simple: 5 weekdays * wh + 1 friday * fh, times 4.33 weeks
+  if (d >= 7) return Math.round((5*wh + fh + 12)*4.33);
+  return Math.round(d * wh * 4.33);
+}
+
+function staffTotals() {
+  const ep = employerPct();
+  let totalGross = 0, totalEmployer = 0, totalCount = 0;
+  state.staff.forEach(s => {
+    const count = parseInt(s.count) || 0;
+    if (count === 0) return;
+    const hoursMonth = (parseFloat(s.hoursDay)||0) * (parseFloat(s.daysWeek)||0) * 4.33;
+    const gross = hoursMonth * (parseFloat(s.hourlyRate)||0);
+    totalGross += gross * count;
+    totalEmployer += gross * count * ep;
+    totalCount += count;
   });
-  return {gross,emp,total:gross+emp,cnt};
-}
-function calcOpCosts() { return D.costs.reduce((s,c)=>s+(parseFloat(c.v)||0),0); }
-function calcFixed() { return calcOpCosts()+calcStaff().total; }
-
-function calcMonthly(daily,days) {
-  const rev=daily*days;
-  const raw=rev*gFC(), comm=rev*gComm(), fixed=calcFixed();
-  const total=raw+comm+fixed, profit=rev-total;
-  return {rev,raw,comm,fixed,total,profit,margin:rev?profit/rev*100:0};
-}
-function calcBE() {
-  const denom=Math.max(0.0001,1-gFC()-gComm());
-  const mo=calcFixed()/denom;
-  return {mo, daily:mo/Math.max(1,gDays())};
+  return { totalGross, totalEmployer, totalAll: totalGross + totalEmployer, totalCount };
 }
 
-// ================================================================
+function totalFixedCosts() {
+  return totalOpCosts() + staffTotals().totalAll;
+}
+
+function weightedFC() {
+  const r = state.channels;
+  const wfc = (r.rest.pct/100 * r.rest.fc/100) +
+               (r.wolt.pct/100 * r.wolt.fc/100) +
+               (r.tenBis.pct/100 * r.tenBis.fc/100) +
+               (r.cibus.pct/100 * r.cibus.fc/100);
+  return wfc;
+}
+
+function weightedCommission() {
+  const r = state.channels;
+  return (r.wolt.pct/100 * (r.wolt.comm||0)/100) +
+         (r.tenBis.pct/100 * (r.tenBis.comm||0)/100) +
+         (r.cibus.pct/100 * (r.cibus.comm||0)/100);
+}
+
+function calcMonthly(dailyRevenue, days) {
+  const revenue = dailyRevenue * days;
+  const rawCost = revenue * weightedFC();
+  const commissions = revenue * weightedCommission();
+  const fixed = totalFixedCosts();
+  const totalExp = rawCost + commissions + fixed;
+  const profit = revenue - totalExp;
+  return { revenue, rawCost, commissions, fixed, totalExp, profit };
+}
+
+// ===========================
 // CHARTS
-// ================================================================
-const CH={};
-function mk(id,cfg){ if(CH[id]){CH[id].destroy();} const c=$(id); if(c) CH[id]=new Chart(c.getContext('2d'),cfg); }
+// ===========================
+const charts = {};
 
-function doCharts() {
-  const opTotal=calcOpCosts(), staffTotal=calcStaff().total;
-  mk('ch-cost-pie',{type:'doughnut',data:{labels:['עלויות תפעול','עלות שכר'],
-    datasets:[{data:[opTotal,staffTotal],backgroundColor:['#5e549d','#4ab3e5'],borderWidth:0,hoverOffset:4}]},
-    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
-
-  const pcts=[N('ch-rest-pct'),N('ch-wolt-pct'),N('ch-10bis-pct'),N('ch-cibus-pct')];
-  mk('ch-channels',{type:'doughnut',data:{labels:['מסעדה','Wolt','10Bis','Cibus'],
-    datasets:[{data:pcts,backgroundColor:['#3b82f6','#22c55e','#f97316','#ec4899'],borderWidth:0,hoverOffset:4}]},
-    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
-
-  const {rev,total}=calcMonthly(gDaily(),gDays());
-  mk('ch-rev-cost',{type:'bar',data:{labels:['הכנסה','הוצאות'],
-    datasets:[{data:[rev,total],backgroundColor:[rev>=total?'#22c55e':'#3b82f6','#ef4444'],borderRadius:10}]},
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmt(v)}}}}});
-
-  const pts=[1000,2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000,40000,50000];
-  const days=gDays();
-  const profits=pts.map(d=>calcMonthly(d,days).profit);
-  mk('ch-curve',{type:'line',data:{labels:pts.map(p=>fmt(p)),
-    datasets:[{label:'רווח/הפסד',data:profits,borderColor:'#5e549d',
-      pointBackgroundColor:profits.map(p=>p>=0?'#22c55e':'#ef4444'),
-      fill:true,backgroundColor:'rgba(94,84,157,0.08)',tension:0.4,borderWidth:2,pointRadius:5}]},
-    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}}},
-      scales:{y:{ticks:{callback:v=>fmt(v)}},x:{ticks:{maxRotation:30}}}}});
-
-  const cats={};
-  D.costs.forEach(c=>{cats[c.cat]=(cats[c.cat]||0)+(parseFloat(c.v)||0);});
-  const cl=Object.keys(cats).filter(k=>cats[k]>0);
-  if(cl.length) mk('ch-cost-cats',{type:'bar',data:{labels:cl,
-    datasets:[{label:'₪',data:cl.map(k=>cats[k]),backgroundColor:'#5e549d',borderRadius:6}]},
-    options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},
-      scales:{x:{ticks:{callback:v=>fmt(v)}}}}});
-
-  if(D.products.length) {
-    const vat=1+N('p-vat')/100, cw=N('p-wolt')/100;
-    const frR=D.products.map(p=>p.rest?p.raw/(p.rest/vat)*100:0);
-    const frW=D.products.map(p=>{const n=p.wolt/vat*(1-cw);return n?p.raw/n*100:0;});
-    mk('ch-product-fc',{type:'bar',data:{labels:D.products.map(p=>p.name),
-      datasets:[{label:'מסעדה',data:frR,backgroundColor:'#5e549d',borderRadius:4},
-                {label:'Wolt',data:frW,backgroundColor:'#22c55e',borderRadius:4}]},
-      options:{responsive:true,plugins:{legend:{position:'bottom'}},
-        scales:{y:{ticks:{callback:v=>v.toFixed(0)+'%'}}}}});
-  }
-
-  const fpcts=[N('ch-rest-pct'),N('ch-wolt-pct'),N('ch-10bis-pct'),N('ch-cibus-pct')];
-  const ffcs=[N('ch-rest-fc'),N('ch-wolt-fc'),N('ch-10bis-fc'),N('ch-cibus-fc')];
-  mk('ch-dist',{type:'bar',data:{labels:['מסעדה','Wolt','10Bis','Cibus'],
-    datasets:[{label:'נתח מחזור %',data:fpcts,backgroundColor:['#3b82f6','#22c55e','#f97316','#ec4899'],borderRadius:6},
-              {label:'F.C. %',data:ffcs,backgroundColor:['#93c5fd','#86efac','#fdba74','#f9a8d4'],borderRadius:6}]},
-    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
-// ================================================================
-// DOM RENDERS
-// ================================================================
-function renderCostsEditor() {
-  const cats={};
-  D.costs.forEach((c,i)=>{ if(!cats[c.cat]) cats[c.cat]=[]; cats[c.cat].push({...c,i}); });
-  let h='';
-  for(const [cat,items] of Object.entries(cats)){
-    h+=`<div class="mb-4"><div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">${cat}</div>`;
-    items.forEach(it=>{
-      h+=`<div class="flex items-center gap-3 py-1 border-b border-gray-50">
-        <span class="flex-1 text-sm text-gray-700">${it.name}</span>
-        <div class="flex items-center gap-1 w-36"><span class="text-xs text-gray-400">₪</span>
-          <input type="number" value="${it.v||0}" min="0" step="100" class="live-input text-sm"
-            oninput="D.costs[${it.i}].v=parseFloat(this.value)||0;recalcAll()"/></div>
-        <button onclick="D.costs.splice(${it.i},1);renderCostsEditor();recalcAll()" class="text-red-300 hover:text-red-500 text-xl w-6 leading-none">×</button>
+function renderCostPieChart() {
+  destroyChart('costPie');
+  const opTotal = totalOpCosts();
+  const staffTotal = staffTotals().totalAll;
+  const ctx = document.getElementById('costPieChart').getContext('2d');
+  charts['costPie'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['עלויות תפעול', 'עלויות שכר (כולל מעביד)'],
+      datasets: [{ data: [opTotal, staffTotal],
+        backgroundColor: ['#5e549d','#4ab3e5'], borderWidth: 0 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+function renderChannelDonut() {
+  destroyChart('channelDonut');
+  const r = state.channels;
+  const ctx = document.getElementById('channelDonutChart').getContext('2d');
+  charts['channelDonut'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['מסעדה','Wolt','10Bis','Cibus'],
+      datasets: [{ data: [r.rest.pct, r.wolt.pct, r.tenBis.pct, r.cibus.pct],
+        backgroundColor: ['#3b82f6','#22c55e','#f97316','#ec4899'], borderWidth: 0 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+function renderCostCategoryChart() {
+  destroyChart('costCat');
+  const cats = {};
+  state.opCosts.forEach(c => { cats[c.category] = (cats[c.category]||0) + (parseFloat(c.amount)||0); });
+  const labels = Object.keys(cats).filter(k => cats[k] > 0);
+  const data = labels.map(k => cats[k]);
+  if (!labels.length) return;
+  const ctx = document.getElementById('costCategoryChart').getContext('2d');
+  charts['costCat'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'עלות חודשית (₪)', data, backgroundColor: '#5e549d', borderRadius: 6 }] },
+    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+}
+
+function renderProfitCurve() {
+  destroyChart('profitCurve');
+  const points = [1000,2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000,40000,50000];
+  const days = parseInt(document.getElementById('sim-days')?.value || 30) || 30;
+  const profits = points.map(d => calcMonthly(d, days).profit);
+  const ctx = document.getElementById('profitCurveChart').getContext('2d');
+  charts['profitCurve'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: points.map(p => fmt(p)),
+      datasets: [{
+        label: 'רווח / הפסד (₪)',
+        data: profits,
+        borderColor: '#5e549d',
+        backgroundColor: profits.map(p => p >= 0 ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'),
+        fill: true, tension: 0.4, borderWidth: 2, pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmt(c.parsed.y) } } },
+      scales: {
+        y: { ticks: { callback: v => fmt(v) } },
+        x: { ticks: { maxRotation: 30 } }
+      }
+    }
+  });
+}
+
+function renderChannelDistChart() {
+  destroyChart('channelDist');
+  const r = state.channels;
+  const ctx = document.getElementById('channelDistChart').getContext('2d');
+  charts['channelDist'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['מסעדה','Wolt','10Bis','Cibus'],
+      datasets: [
+        { label: 'נתח מחזור %', data: [r.rest.pct, r.wolt.pct, r.tenBis.pct, r.cibus.pct],
+          backgroundColor: ['#3b82f6','#22c55e','#f97316','#ec4899'], borderRadius: 6, yAxisID: 'y' },
+        { label: 'F.C. %', data: [r.rest.fc, r.wolt.fc, r.tenBis.fc, r.cibus.fc],
+          backgroundColor: ['#93c5fd','#86efac','#fdba74','#f9a8d4'], borderRadius: 6, yAxisID: 'y' }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } },
+      scales: { y: { ticks: { callback: v => v + '%' } } } }
+  });
+}
+
+function renderProductFCChart() {
+  destroyChart('productFC');
+  if (!state.products.length) return;
+  const ctx = document.getElementById('productFCChart').getContext('2d');
+  const vat = 1 + num('vat-rate')/100;
+  const labels = state.products.map(p => p.name);
+  const fcRest = state.products.map(p => p.restPrice ? ((parseFloat(p.rawCost)||0) / (parseFloat(p.restPrice)/vat) * 100) : 0);
+  const fcWolt = state.products.map(p => {
+    if (!p.woltPrice) return 0;
+    const net = parseFloat(p.woltPrice)/vat * (1 - num('comm-wolt')/100);
+    return net ? (parseFloat(p.rawCost)||0) / net * 100 : 0;
+  });
+  charts['productFC'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'F.C. מסעדה %', data: fcRest, backgroundColor: '#5e549d', borderRadius: 4 },
+        { label: 'F.C. Wolt %', data: fcWolt, backgroundColor: '#22c55e', borderRadius: 4 },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } },
+      scales: { y: { ticks: { callback: v => v.toFixed(1) + '%' } } } }
+  });
+}
+
+// ===========================
+// RENDER FUNCTIONS
+// ===========================
+
+function renderOpCosts() {
+  const cats = {};
+  state.opCosts.forEach((c, i) => {
+    if (!cats[c.category]) cats[c.category] = [];
+    cats[c.category].push({ ...c, idx: i });
+  });
+
+  let html = '';
+  for (const [cat, items] of Object.entries(cats)) {
+    html += `<div class="mb-4">
+      <div class="text-sm font-bold text-gray-500 mb-2">${cat}</div>
+      <div class="space-y-1">`;
+    items.forEach(item => {
+      html += `<div class="flex items-center gap-3 py-1">
+        <span class="text-sm text-gray-700 flex-1">${item.name}</span>
+        <div class="flex items-center gap-1 w-40">
+          <span class="text-xs text-gray-400">₪</span>
+          <input type="number" value="${item.amount||0}" min="0" step="100"
+            oninput="state.opCosts[${item.idx}].amount=parseFloat(this.value)||0; recalcAll()"
+            class="text-sm text-left" style="direction:ltr" />
+        </div>
+        <button onclick="removeOpCost(${item.idx})" class="text-red-300 hover:text-red-500 text-lg leading-none">×</button>
       </div>`;
     });
-    h+='</div>';
+    html += `</div></div>`;
   }
-  $('costs-editor').innerHTML=h;
-  txt('op-total',fmt(calcOpCosts()));
-}
-function addCost(){
-  const cat=prompt('שם קטגוריה:','🔹 כללי')||'🔹 כללי';
-  const name=prompt('שם ההוצאה:'); if(!name) return;
-  D.costs.push({cat,name,v:0}); renderCostsEditor(); recalcAll();
+  document.getElementById('cost-categories').innerHTML = html;
+  updateOpCostTotals();
 }
 
-function renderStaffTable() {
-  const ep=empRate(); let h='';
-  D.staff.forEach((s,i)=>{
-    const hm=(s.hd||0)*(s.dw||0)*4.33, g=hm*(s.hr||0), tot=(g+g*ep)*(s.cnt||0);
-    h+=`<tr>
-      <td><input type="text" value="${s.role}" class="live-input rtl-text text-sm" style="min-width:110px" oninput="D.staff[${i}].role=this.value"/></td>
-      <td><input type="number" value="${s.cnt}" min="0" class="live-input text-sm" style="width:55px" oninput="D.staff[${i}].cnt=parseInt(this.value)||0;recalcAll()"/></td>
-      <td><input type="number" value="${s.hd}" min="0" max="24" class="live-input text-sm" style="width:55px" oninput="D.staff[${i}].hd=parseFloat(this.value)||0;recalcAll()"/></td>
-      <td><input type="number" value="${s.dw}" min="0" max="7" class="live-input text-sm" style="width:55px" oninput="D.staff[${i}].dw=parseFloat(this.value)||0;recalcAll()"/></td>
-      <td class="text-gray-400 text-xs font-mono">${Math.round(hm)}</td>
-      <td><input type="number" value="${s.hr}" min="0" class="live-input text-sm" style="width:65px" oninput="D.staff[${i}].hr=parseFloat(this.value)||0;recalcAll()"/></td>
-      <td class="text-xs font-mono">${fmt(g*(s.cnt||0))}</td>
-      <td class="text-xs font-mono text-gray-400">${fmt(g*(s.cnt||0)*ep)}</td>
-      <td class="text-sm font-bold text-purple-700">${fmt(tot)}</td>
-      <td><button onclick="D.staff.splice(${i},1);renderStaffTable();recalcAll()" class="text-red-300 hover:text-red-500 text-xl">×</button></td>
-    </tr>`;
-  });
-  $('staff-body').innerHTML=h;
-  const t=calcStaff();
-  txt('sf-gross',fmt(t.gross)); txt('sf-emp',fmt(t.emp)); txt('sf-total',fmt(t.total));
+function updateOpCostTotals() {
+  const total = totalOpCosts();
+  document.getElementById('total-op-costs').textContent = fmt(total);
+  document.getElementById('total-op-costs-annual').textContent = fmt(total * 12);
 }
-function addStaff(){ D.staff.push({role:'תפקיד חדש',cnt:0,hd:8,dw:5,hr:35}); renderStaffTable(); }
 
-function renderSuppliersTable() {
-  let h='';
-  D.suppliers.forEach((s,i)=>{
-    const chg=s.list&&s.buy?((s.buy-s.list)/s.list*100):null;
-    const chgHtml=chg===null?'—':chg>0
-      ?`<span class="text-red-600 font-bold text-xs">⬆ ${Math.abs(chg).toFixed(1)}%</span>`
-      :chg<0?`<span class="text-green-600 font-bold text-xs">⬇ ${Math.abs(chg).toFixed(1)}%</span>`
-      :'<span class="text-gray-400 text-xs">= 0%</span>';
-    h+=`<tr>
-      <td><input type="text" value="${s.item}" class="live-input rtl-text text-sm" style="min-width:90px" oninput="D.suppliers[${i}].item=this.value"/></td>
-      <td><input type="text" value="${s.sup||''}" class="live-input rtl-text text-sm" style="min-width:80px" oninput="D.suppliers[${i}].sup=this.value"/></td>
-      <td><input type="text" value="${s.cat||''}" class="live-input rtl-text text-sm" style="min-width:70px" oninput="D.suppliers[${i}].cat=this.value"/></td>
-      <td><input type="number" value="${s.list||0}" class="live-input text-sm" style="width:70px" oninput="D.suppliers[${i}].list=parseFloat(this.value)||0;renderSuppliersTable()"/></td>
-      <td><input type="number" value="${s.buy||0}" class="live-input text-sm" style="width:70px" oninput="D.suppliers[${i}].buy=parseFloat(this.value)||0;renderSuppliersTable()"/></td>
-      <td><input type="text" value="${s.date||''}" class="live-input rtl-text text-sm" style="width:75px" oninput="D.suppliers[${i}].date=this.value"/></td>
-      <td>${chgHtml}</td>
-      <td><input type="text" value="${s.notes||''}" class="live-input rtl-text text-sm" style="min-width:90px" oninput="D.suppliers[${i}].notes=this.value"/></td>
-      <td><button onclick="D.suppliers.splice(${i},1);renderSuppliersTable()" class="text-red-300 hover:text-red-500 text-xl">×</button></td>
+function addCostRow() {
+  const cat = prompt('שם קטגוריה:', '🔹 כללי') || '🔹 כללי';
+  const name = prompt('שם ההוצאה:');
+  if (!name) return;
+  state.opCosts.push({ category: cat, name, amount: 0 });
+  renderOpCosts();
+}
+
+function removeOpCost(idx) {
+  state.opCosts.splice(idx, 1);
+  renderOpCosts();
+  recalcAll();
+}
+
+function renderStaff() {
+  const ep = employerPct();
+  let html = '';
+  state.staff.forEach((s, i) => {
+    const count = parseInt(s.count) || 0;
+    const hoursMonth = (parseFloat(s.hoursDay)||0) * (parseFloat(s.daysWeek)||0) * 4.33;
+    const gross = hoursMonth * (parseFloat(s.hourlyRate)||0);
+    const total = (gross + gross * ep) * count;
+    html += `<tr>
+      <td><input type="text" value="${s.role}" oninput="state.staff[${i}].role=this.value" class="text-sm w-28" style="border:none;background:transparent" /></td>
+      <td><input type="number" value="${s.count}" min="0" oninput="state.staff[${i}].count=parseInt(this.value)||0;recalcStaff()" class="text-sm w-14" /></td>
+      <td><input type="number" value="${s.hoursDay}" min="0" max="24" oninput="state.staff[${i}].hoursDay=parseFloat(this.value)||0;recalcStaff()" class="text-sm w-14" /></td>
+      <td><input type="number" value="${s.daysWeek}" min="0" max="7" oninput="state.staff[${i}].daysWeek=parseFloat(this.value)||0;recalcStaff()" class="text-sm w-14" /></td>
+      <td class="text-gray-500 text-sm">${Math.round(hoursMonth)}</td>
+      <td><input type="number" value="${s.hourlyRate}" min="0" oninput="state.staff[${i}].hourlyRate=parseFloat(this.value)||0;recalcStaff()" class="text-sm w-20" /></td>
+      <td class="text-sm">${fmt(gross * count)}</td>
+      <td class="text-sm font-semibold text-brand-primary">${fmt(total)}</td>
+      <td><button onclick="removeStaff(${i})" class="text-red-300 hover:text-red-500 text-lg">×</button></td>
     </tr>`;
   });
-  $('suppliers-body').innerHTML=h;
+  document.getElementById('staff-tbody').innerHTML = html;
+  updateStaffTotals();
 }
-function addSupplier(){ D.suppliers.push({item:'פריט חדש',sup:'',cat:'',list:0,buy:0,date:'',notes:''}); renderSuppliersTable(); }
+
+function updateStaffTotals() {
+  const t = staffTotals();
+  document.getElementById('staff-count').textContent = t.totalCount;
+  document.getElementById('staff-gross').textContent = fmt(t.totalGross);
+  document.getElementById('staff-employer').textContent = fmt(t.totalEmployer);
+  document.getElementById('staff-total').textContent = fmt(t.totalAll);
+  const bh = totalBizHoursPerMonth();
+  document.getElementById('total-biz-hours').textContent = bh;
+}
+
+function addStaffRow() {
+  state.staff.push({ role: 'תפקיד חדש', count: 0, hoursDay: 8, daysWeek: 5, hourlyRate: 35 });
+  renderStaff();
+}
+
+function removeStaff(idx) {
+  state.staff.splice(idx, 1);
+  renderStaff();
+  recalcAll();
+}
+
+function recalcStaff() {
+  state.employerRates.insurance = num('emp-insurance');
+  state.employerRates.pension = num('emp-pension');
+  state.employerRates.severance = num('emp-severance');
+  state.employerRates.vacation = num('emp-vacation');
+  state.bizHours.weekday = num('biz-hours-weekday');
+  state.bizHours.friday = num('biz-hours-friday');
+  state.bizHours.daysWeek = num('biz-days-week');
+  updateStaffTotals();
+  recalcAll();
+}
+
+function renderSuppliers() {
+  let html = '';
+  state.suppliers.forEach((s, i) => {
+    const change = s.listPrice && s.buyPrice ?
+      ((s.buyPrice - s.listPrice) / s.listPrice * 100).toFixed(1) : null;
+    const changeHtml = change === null ? '—' :
+      parseFloat(change) > 0 ? `<span class="text-red-600">⬆ ${change}%</span>` :
+      parseFloat(change) < 0 ? `<span class="text-green-600">⬇ ${Math.abs(change)}%</span>` :
+      '<span class="text-gray-400">= 0%</span>';
+    html += `<tr>
+      <td><input type="text" value="${s.item}" oninput="state.suppliers[${i}].item=this.value" class="text-sm" style="border:none;background:transparent" /></td>
+      <td><input type="text" value="${s.supplier||''}" oninput="state.suppliers[${i}].supplier=this.value" class="text-sm w-24" style="border:none;background:transparent" /></td>
+      <td><input type="text" value="${s.category||''}" oninput="state.suppliers[${i}].category=this.value" class="text-sm w-20" style="border:none;background:transparent" /></td>
+      <td><input type="number" value="${s.listPrice||0}" oninput="state.suppliers[${i}].listPrice=parseFloat(this.value)||0;renderSuppliers()" class="text-sm w-20" /></td>
+      <td><input type="number" value="${s.buyPrice||0}" oninput="state.suppliers[${i}].buyPrice=parseFloat(this.value)||0;renderSuppliers()" class="text-sm w-20" /></td>
+      <td><input type="text" value="${s.date||''}" oninput="state.suppliers[${i}].date=this.value" class="text-sm w-24" style="border:none;background:transparent" /></td>
+      <td>${changeHtml}</td>
+      <td><input type="text" value="${s.notes||''}" oninput="state.suppliers[${i}].notes=this.value" class="text-sm w-32" style="border:none;background:transparent" /></td>
+      <td><button onclick="removeSupplier(${i})" class="text-red-300 hover:text-red-500 text-lg">×</button></td>
+    </tr>`;
+  });
+  document.getElementById('suppliers-tbody').innerHTML = html;
+}
+
+function addSupplierRow() {
+  state.suppliers.push({ item: 'פריט חדש', supplier: '', category: '', listPrice: 0, buyPrice: 0, date: '', notes: '' });
+  renderSuppliers();
+}
+
+function removeSupplier(idx) {
+  state.suppliers.splice(idx, 1);
+  renderSuppliers();
+}
 
 function renderProducts() {
-  const vat=1+N('p-vat')/100, cw=N('p-wolt')/100, ct=N('p-10bis')/100, cc=N('p-cibus')/100;
-  const col=v=>!v||isNaN(v)?'text-gray-300':v<30?'text-green-600 font-bold':v<45?'text-blue-600':v<60?'text-orange-500 font-bold':'text-red-600 font-bold';
-  const disp=v=>(!v||isNaN(v)||v<=0)?'—':v.toFixed(1)+'%';
-  let h='';
-  D.products.forEach((p,i)=>{
-    const raw=p.raw||0;
-    const frR=p.rest?raw/(p.rest/vat)*100:NaN;
-    const frW=p.wolt?raw/(p.wolt/vat*(1-cw))*100:NaN;
-    const frT=p.tenBis?raw/(p.tenBis/vat*(1-ct))*100:NaN;
-    const frC=p.cibus?raw/(p.cibus/vat*(1-cc))*100:NaN;
-    h+=`<tr>
-      <td><input type="text" value="${p.name}" class="live-input rtl-text text-sm" style="min-width:90px" oninput="D.products[${i}].name=this.value;doCharts()"/></td>
-      <td><input type="text" value="${p.cat||''}" class="live-input rtl-text text-sm" style="min-width:80px" oninput="D.products[${i}].cat=this.value"/></td>
-      <td><input type="number" value="${raw}" class="live-input text-sm" style="width:65px" oninput="D.products[${i}].raw=parseFloat(this.value)||0;renderProducts()"/></td>
-      <td><input type="number" value="${p.rest||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].rest=parseFloat(this.value)||0;renderProducts()"/></td>
-      <td class="${col(frR)}">${disp(frR)}</td>
-      <td><input type="number" value="${p.wolt||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].wolt=parseFloat(this.value)||0;renderProducts()"/></td>
-      <td class="${col(frW)}">${disp(frW)}</td>
-      <td><input type="number" value="${p.tenBis||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].tenBis=parseFloat(this.value)||0;renderProducts()"/></td>
-      <td class="${col(frT)}">${disp(frT)}</td>
-      <td><input type="number" value="${p.cibus||0}" class="live-input text-sm" style="width:60px" oninput="D.products[${i}].cibus=parseFloat(this.value)||0;renderProducts()"/></td>
-      <td class="${col(frC)}">${disp(frC)}</td>
-      <td><button onclick="D.products.splice(${i},1);renderProducts()" class="text-red-300 hover:text-red-500 text-xl">×</button></td>
+  const vat = 1 + num('vat-rate')/100;
+  const commWolt = num('comm-wolt')/100;
+  const comm10bis = num('comm-10bis')/100;
+  const commCibus = num('comm-cibus')/100;
+
+  let html = '';
+  state.products.forEach((p, i) => {
+    const raw = parseFloat(p.rawCost)||0;
+    const restNet = (parseFloat(p.restPrice)||0) / vat;
+    const woltNet = (parseFloat(p.woltPrice)||0) / vat * (1 - commWolt);
+    const tenbisNet = (parseFloat(p.tenBisPrice)||0) / vat * (1 - comm10bis);
+    const cibusNet = (parseFloat(p.cibusPrice)||0) / vat * (1 - commCibus);
+    const fcRest = restNet ? (raw/restNet*100).toFixed(1) : '—';
+    const fcWolt = woltNet ? (raw/woltNet*100).toFixed(1) : '—';
+    const fc10bis = tenbisNet ? (raw/tenbisNet*100).toFixed(1) : '—';
+    const fcCibus = cibusNet ? (raw/cibusNet*100).toFixed(1) : '—';
+    const fcColor = v => !isNaN(v) && parseFloat(v) < 35 ? 'text-green-600 font-bold' : parseFloat(v) > 55 ? 'text-red-600 font-bold' : 'text-orange-600';
+
+    html += `<tr>
+      <td><input type="text" value="${p.name}" oninput="state.products[${i}].name=this.value;renderProductFCChart()" class="text-sm w-24" style="border:none;background:transparent" /></td>
+      <td><input type="text" value="${p.category||''}" oninput="state.products[${i}].category=this.value" class="text-sm w-24" style="border:none;background:transparent" /></td>
+      <td><input type="number" value="${p.rawCost||0}" oninput="state.products[${i}].rawCost=parseFloat(this.value)||0;renderProducts()" class="text-sm w-16" /></td>
+      <td><input type="number" value="${p.restPrice||0}" oninput="state.products[${i}].restPrice=parseFloat(this.value)||0;renderProducts()" class="text-sm w-16" /></td>
+      <td class="${fcColor(fcRest)}">${fcRest}%</td>
+      <td><input type="number" value="${p.woltPrice||0}" oninput="state.products[${i}].woltPrice=parseFloat(this.value)||0;renderProducts()" class="text-sm w-16" /></td>
+      <td class="${fcColor(fcWolt)}">${fcWolt}%</td>
+      <td><input type="number" value="${p.tenBisPrice||0}" oninput="state.products[${i}].tenBisPrice=parseFloat(this.value)||0;renderProducts()" class="text-sm w-16" /></td>
+      <td class="${fcColor(fc10bis)}">${fc10bis}%</td>
+      <td><input type="number" value="${p.cibusPrice||0}" oninput="state.products[${i}].cibusPrice=parseFloat(this.value)||0;renderProducts()" class="text-sm w-16" /></td>
+      <td class="${fcColor(fcCibus)}">${fcCibus}%</td>
+      <td><button onclick="removeProduct(${i})" class="text-red-300 hover:text-red-500 text-lg">×</button></td>
     </tr>`;
   });
-  $('products-body').innerHTML=h;
-  doCharts();
-}
-function addProduct(){ D.products.push({name:'מוצר חדש',cat:'',raw:0,rest:0,wolt:0,tenBis:0,cibus:0}); renderProducts(); }
-
-// ================================================================
-// PANELS
-// ================================================================
-function updateKPI() {
-  const daily=gDaily(), days=gDays();
-  const {rev,profit,margin}=calcMonthly(daily,days);
-  const {daily:beDaily}=calcBE();
-  const fixed=calcFixed();
-  txt('kpi-fixed',fmt(fixed)); txt('kpi-daily',fmt(daily));
-  txt('kpi-be',fmt(beDaily)); txt('kpi-rev',fmt(rev));
-  const pe=$('kpi-profit'); pe.textContent=fmt(profit); pe.className='kpi-value '+(profit>=0?'text-green-300':'text-red-400');
-  const me=$('kpi-margin'); me.textContent=pct(margin); me.className='kpi-value '+(margin>=0?'text-green-300':'text-red-400');
-  const se=$('kpi-status');
-  if(profit>5000){se.textContent='✅ רווחי';se.className='kpi-value text-green-300';}
-  else if(profit>=0){se.textContent='〰️ איזון';se.className='kpi-value text-yellow-300';}
-  else{se.textContent='❌ הפסד';se.className='kpi-value text-red-400';}
-  // pulse
-  [pe,me,se].forEach(el=>{el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');});
+  document.getElementById('products-tbody').innerHTML = html;
+  renderProductFCChart();
 }
 
-function updateBEPanel() {
-  const {rev,raw,comm,fixed,total,profit}=calcMonthly(gDaily(),gDays());
-  const {mo,daily:bed}=calcBE();
-  const gap=gDaily()*gDays()-mo;
-  if(!$('be-panel')) return;
-  $('be-panel').innerHTML=`
-    <div class="rrow"><span class="text-sm text-gray-500">עלויות קבועות / חודש</span><span class="font-bold">${fmt(fixed)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">F.C. ממוצע</span><span class="font-bold">${pct(gFC()*100)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">עמלות ממוצעות</span><span class="font-bold">${pct(gComm()*100)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">נקודת איזון יומית</span><span class="font-bold text-orange-600 text-lg">${fmt(bed)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">נקודת איזון חודשית</span><span class="font-bold text-orange-600">${fmt(mo)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">מחזור יומי יעד</span><span class="font-bold text-blue-600 text-lg">${fmt(gDaily())}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">פער מנקודת איזון</span><span class="font-bold text-lg ${gap>=0?'text-green-600':'text-red-600'}">${fmt(gap)}</span></div>
-    <div class="rrow" style="border:none"><span class="font-black text-sm">רווח / הפסד חודשי</span><span class="font-black text-xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>
-  `;
+function addProductRow() {
+  state.products.push({ name: 'מוצר חדש', category: 'קטגוריה 1', rawCost: 0, restPrice: 0, woltPrice: 0, tenBisPrice: 0, cibusPrice: 0 });
+  renderProducts();
 }
 
-function updateAlerts() {
-  if(!$('alerts-panel')) return;
-  const {profit,rev}=calcMonthly(gDaily(),gDays());
-  const {daily:bed}=calcBE();
-  const fc=gFC()*100, cm=gComm()*100, fixed=calcFixed();
-  let h='';
-  if(profit>0) h+=`<div class="alert alert-success">✅ רווחי – ${fmt(profit)} / חודש</div>`;
-  else h+=`<div class="alert alert-danger">❌ הפסד – ${fmt(profit)} / חודש</div>`;
-  if(fc>45) h+=`<div class="alert alert-warn">⚠️ F.C. גבוה (${pct(fc)}) – שקול מחירים / ספקים</div>`;
-  if(cm>15) h+=`<div class="alert alert-warn">⚠️ עמלות גבוהות (${pct(cm)}) – אופטימיזציה של ערוצים</div>`;
-  if(fixed>200000) h+=`<div class="alert alert-warn">⚠️ עלויות קבועות גבוהות – ${fmt(fixed)}</div>`;
-  h+=`<div class="alert alert-info">📍 מינימום יומי לאיזון: ${fmt(bed)}</div>`;
-  const st=calcStaff();
-  h+=`<div class="alert alert-info">👥 שכר כולל מעביד: ${fmt(st.total)} / חודש</div>`;
-  $('alerts-panel').innerHTML=h;
+function removeProduct(idx) {
+  state.products.splice(idx, 1);
+  renderProducts();
 }
 
-function updateScenarios(bodyId) {
-  const el=$(bodyId); if(!el) return;
-  const daily=gDaily(), days=gDays();
-  const pts=[2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000,40000];
-  let h='';
-  pts.forEach(d=>{
-    const {rev,raw,comm,fixed,profit,margin}=calcMonthly(d,days);
-    const hi=Math.abs(d-daily)<500;
-    h+=`<tr ${hi?'style="background:#f5f3ff"':''}>
-      <td class="font-bold ${hi?'text-purple-700':''}">${fmt(d)}${hi?' ← יעד':''}</td>
-      <td>${fmt(rev)}</td><td class="text-red-400">${fmt(raw)}</td>
-      <td class="text-orange-400">${fmt(comm)}</td><td class="text-gray-400">${fmt(fixed)}</td>
-      <td class="${profit>=0?'text-green-600':'text-red-600'} font-bold">${fmt(profit)}</td>
-      <td class="${margin>=0?'text-green-500':'text-red-500'}">${pct(margin)}</td>
-      <td>${profit>0?'<span class="badge-profit">✅ רווחי</span>':'<span class="badge-loss">❌ הפסד</span>'}</td>
-    </tr>`;
-  });
-  el.innerHTML=h;
+function recalcProducts() {
+  renderProducts();
 }
 
-function updateSimResults() {
-  if(!$('sim-results')) return;
-  const {rev,raw,comm,fixed,total,profit,margin}=calcMonthly(gDaily(),gDays());
-  const {daily:bed}=calcBE();
-  $('sim-results').innerHTML=`
-    <div class="rrow"><span class="text-sm text-gray-500">הכנסה חודשית</span><span class="font-bold text-blue-600 text-lg">${fmt(rev)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">עלות גלם (${pct(gFC()*100)})</span><span class="text-red-500">${fmt(raw)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">עמלות (${pct(gComm()*100)})</span><span class="text-orange-500">${fmt(comm)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">עלויות קבועות</span><span class="text-red-600">${fmt(fixed)}</span></div>
-    <div class="rrow"><span class="font-bold text-gray-700">סה"כ הוצאות</span><span class="font-bold text-red-700 text-lg">${fmt(total)}</span></div>
-    <div class="rrow"><span class="font-black text-sm">רווח / הפסד</span><span class="font-black text-2xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>
-    <div class="rrow"><span class="text-sm text-gray-500">מרווח רווח</span><span class="font-bold ${margin>=0?'text-green-600':'text-red-600'}">${pct(margin)}</span></div>
-    <div class="rrow" style="border:none"><span class="text-sm text-gray-500">פער מנקודת איזון / יום</span>
-      <span class="font-bold ${gDaily()-bed>=0?'text-green-600':'text-red-600'}">${fmt(gDaily()-bed)}</span></div>
-    <div class="mt-3 text-center">${profit>5000?'<span class="badge-profit text-sm py-2 px-4">✅ רווחי</span>':profit>=0?'<span class="badge-neutral text-sm py-2 px-4">〰️ קרוב לאיזון</span>':'<span class="badge-loss text-sm py-2 px-4">❌ הפסד</span>'}</div>
-  `;
+function recalcChannels() {
+  state.channels.rest.pct = num('ch-rest-pct');
+  state.channels.rest.fc = num('ch-rest-fc');
+  state.channels.wolt.pct = num('ch-wolt-pct');
+  state.channels.wolt.fc = num('ch-wolt-fc');
+  state.channels.wolt.comm = num('ch-wolt-comm');
+  state.channels.tenBis.pct = num('ch-10bis-pct');
+  state.channels.tenBis.fc = num('ch-10bis-fc');
+  state.channels.tenBis.comm = num('ch-10bis-comm');
+  state.channels.cibus.pct = num('ch-cibus-pct');
+  state.channels.cibus.fc = num('ch-cibus-fc');
+  state.channels.cibus.comm = num('ch-cibus-comm');
+
+  const total = state.channels.rest.pct + state.channels.wolt.pct + state.channels.tenBis.pct + state.channels.cibus.pct;
+  document.getElementById('channel-warning').classList.toggle('hidden', Math.abs(total - 100) < 0.1);
+
+  renderChannelSummary();
+  renderChannelDistChart();
+  renderChannelDonut();
+  recalcAll();
 }
 
-function updateChannelContrib() {
-  if(!$('ch-contrib')) return;
-  const daily=gDaily(), days=gDays(), mo=daily*days;
-  const chs=[
-    {n:'🏠 מסעדה',p:N('ch-rest-pct'),fc:N('ch-rest-fc'),cm:0,cl:'text-blue-700'},
-    {n:'🟢 Wolt',p:N('ch-wolt-pct'),fc:N('ch-wolt-fc'),cm:N('ch-wolt-comm'),cl:'text-green-700'},
-    {n:'🟠 10Bis',p:N('ch-10bis-pct'),fc:N('ch-10bis-fc'),cm:N('ch-10bis-comm'),cl:'text-orange-700'},
-    {n:'🟣 Cibus',p:N('ch-cibus-pct'),fc:N('ch-cibus-fc'),cm:N('ch-cibus-comm'),cl:'text-pink-700'},
+function renderChannelSummary() {
+  const ch = state.channels;
+  const daily = state.dailyTarget;
+  const monthly = daily * state.activeDays;
+  const channels = [
+    { name: 'מסעדה', pct: ch.rest.pct, fc: ch.rest.fc, comm: 0, color: 'blue' },
+    { name: 'Wolt', pct: ch.wolt.pct, fc: ch.wolt.fc, comm: ch.wolt.comm, color: 'green' },
+    { name: '10Bis', pct: ch.tenBis.pct, fc: ch.tenBis.fc, comm: ch.tenBis.comm, color: 'orange' },
+    { name: 'Cibus', pct: ch.cibus.pct, fc: ch.cibus.fc, comm: ch.cibus.comm, color: 'pink' },
   ];
-  const tot=chs.reduce((s,c)=>s+c.p,0);
-  txt('ch-sum',tot.toFixed(1));
-  $('ch-warn').classList.toggle('hidden',Math.abs(tot-100)<0.5);
-  let h='';
-  chs.forEach(c=>{
-    const rev=mo*c.p/100, contrib=rev-rev*c.fc/100-rev*c.cm/100;
-    h+=`<div class="mb-4">
-      <div class="flex justify-between mb-1">
-        <span class="font-bold text-sm ${c.cl}">${c.n} <span class="text-gray-400 font-normal">${c.p}%</span></span>
-        <span class="text-sm font-bold">${fmt(rev)}</span>
-      </div>
-      <div class="progress"><div class="progress-bar bg-purple-400" style="width:${Math.min(100,c.p)}%"></div></div>
-      <div class="flex justify-between text-xs text-gray-400 mt-1">
-        <span>תרומה נטו: <span class="${contrib>=0?'text-green-600':'text-red-600'} font-bold">${fmt(contrib)}</span></span>
-        <span>F.C.: ${pct(c.fc)} | עמלה: ${pct(c.cm)}</span>
+  let html = '';
+  channels.forEach(c => {
+    const rev = monthly * c.pct / 100;
+    const fcCost = rev * c.fc / 100;
+    const commCost = rev * c.comm / 100;
+    const contribution = rev - fcCost - commCost;
+    html += `<div class="sim-row">
+      <div class="font-semibold text-sm">${c.name} <span class="text-gray-400 font-normal">(${c.pct}%)</span></div>
+      <div class="text-left">
+        <div class="text-sm">${fmt(rev)} / חודש</div>
+        <div class="text-xs text-gray-400">תרומה: ${fmt(contribution)}</div>
       </div>
     </div>`;
   });
-  $('ch-contrib').innerHTML=h;
+  document.getElementById('channel-summary').innerHTML = html;
 }
 
-// ================================================================
-// MAIN RECALC — fires on EVERY input change
-// ================================================================
+function runSimulator() {
+  const daily = parseFloat(document.getElementById('sim-daily')?.value) || 10000;
+  const days = parseInt(document.getElementById('sim-days')?.value) || 30;
+  document.getElementById('sim-daily-num').value = daily;
+  document.getElementById('sim-days-num').value = days;
+  state.dailyTarget = daily;
+  state.activeDays = days;
+
+  const { revenue, rawCost, commissions, fixed, totalExp, profit } = calcMonthly(daily, days);
+
+  const margin = revenue ? (profit / revenue * 100) : 0;
+  const be = totalFixedCosts() / Math.max(0.001, 1 - weightedFC() - weightedCommission());
+  const beDaily = be / days;
+  const gap = revenue - be;
+
+  let statusHtml = '';
+  if (profit > 0) statusHtml = `<div class="badge-profit text-lg">✅ רווחי</div>`;
+  else if (profit > -10000) statusHtml = `<div class="badge-neutral text-lg">⚠️ קרוב לאיזון</div>`;
+  else statusHtml = `<div class="badge-loss text-lg">❌ הפסד</div>`;
+
+  document.getElementById('sim-results').innerHTML = `
+    <div class="sim-row"><span class="text-sm text-gray-500">הכנסה חודשית</span><span class="font-bold">${fmt(revenue)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">עלות חומרי גלם</span><span class="text-red-500">${fmt(rawCost)} (${pct(weightedFC()*100)})</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">עמלות פלטפורמות</span><span class="text-red-400">${fmt(commissions)} (${pct(weightedCommission()*100)})</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">עלויות קבועות</span><span class="text-red-500">${fmt(fixed)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">סה"כ הוצאות</span><span class="font-bold text-red-600">${fmt(totalExp)}</span></div>
+    <div class="sim-row"><span class="text-sm font-bold">רווח / הפסד</span><span class="font-black text-xl ${profit>=0?'text-green-600':'text-red-600'}">${fmt(profit)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">מרווח רווח</span><span class="${margin>=0?'text-green-600':'text-red-600'} font-bold">${pct(margin)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">נקודת איזון יומית</span><span class="text-orange-600 font-bold">${fmt(beDaily)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">פער מנקודת איזון</span><span class="${gap>=0?'text-green-600':'text-red-600'} font-bold">${fmt(gap)}</span></div>
+    <div class="mt-3 text-center">${statusHtml}</div>
+  `;
+
+  renderProfitCurve();
+  renderFullScenariosTable();
+  renderDashboard();
+}
+
+function renderFullScenariosTable() {
+  const days = parseInt(document.getElementById('sim-days')?.value || 30) || 30;
+  const scenarios = [1000,2000,3000,5000,8000,10000,12000,15000,18000,22000,25000,30000];
+  let html = '';
+  scenarios.forEach(d => {
+    const { revenue, rawCost, commissions, fixed, totalExp, profit } = calcMonthly(d, days);
+    const margin = revenue ? (profit/revenue*100) : 0;
+    const status = profit > 0 ? '<span class="badge-profit">✅ רווחי</span>' : '<span class="badge-loss">❌ הפסד</span>';
+    html += `<tr>
+      <td class="font-bold">${fmt(d)}</td>
+      <td>${fmt(revenue)}</td>
+      <td class="text-red-400">${fmt(rawCost)}</td>
+      <td class="text-orange-400">${fmt(commissions)}</td>
+      <td class="text-red-500">${fmt(fixed)}</td>
+      <td class="text-red-600 font-bold">${fmt(totalExp)}</td>
+      <td class="${profit>=0?'text-green-600':'text-red-600'} font-bold">${fmt(profit)}</td>
+      <td class="${margin>=0?'text-green-600':'text-red-600'}">${pct(margin)}</td>
+      <td>${status}</td>
+    </tr>`;
+  });
+  document.getElementById('full-scenarios-tbody').innerHTML = html;
+}
+
+function renderDashboard() {
+  const fixed = totalFixedCosts();
+  const be = fixed / Math.max(0.001, 1 - weightedFC() - weightedCommission());
+  const beDaily = be / (state.activeDays || 30);
+  const { profit } = calcMonthly(state.dailyTarget, state.activeDays);
+
+  document.getElementById('kpi-fixed-costs').textContent = fmt(fixed);
+  document.getElementById('kpi-daily-target').textContent = fmt(state.dailyTarget);
+  document.getElementById('kpi-breakeven').textContent = fmt(beDaily);
+  document.getElementById('kpi-profit').textContent = fmt(profit);
+  document.getElementById('kpi-profit').className = 'text-2xl font-black ' + (profit >= 0 ? 'text-green-600' : 'text-red-600');
+  document.getElementById('kpi-profit-status').textContent = profit >= 0 ? '✅ רווחי' : '❌ הפסד';
+
+  // Alerts
+  let alerts = '';
+  const empPct = employerPct() * 100;
+  alerts += `<div class="alert-box alert-info">👥 עלות מעביד: ${pct(empPct)} תוספת על ברוטו</div>`;
+  alerts += `<div class="alert-box alert-info">⏰ שעות עסק: ${totalBizHoursPerMonth()} שעות/חודש</div>`;
+  alerts += `<div class="alert-box alert-${profit>=0?'success':'danger'}">${profit>=0?'✅ רווחי':'❌ הפסד'} – ${fmt(profit)} / חודש</div>`;
+  const fcPct = weightedFC() * 100;
+  if (fcPct > 40) alerts += `<div class="alert-box alert-warn">⚠️ F.C. משוקלל גבוה: ${pct(fcPct)}</div>`;
+  document.getElementById('alerts-container').innerHTML = alerts;
+
+  // Breakeven table
+  const monthly = state.dailyTarget * state.activeDays;
+  document.getElementById('breakeven-table').innerHTML = `
+    <div class="sim-row"><span class="text-sm text-gray-500">סה"כ עלויות קבועות / חודש</span><span class="font-bold">${fmt(fixed)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">F.C. משוקלל</span><span class="font-bold">${pct(fcPct)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">עמלות משוקללות</span><span class="font-bold">${pct(weightedCommission()*100)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">מחזור חודשי לנק. איזון</span><span class="text-orange-600 font-bold">${fmt(be)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">מחזור יומי לנק. איזון</span><span class="text-orange-600 font-bold">${fmt(beDaily)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">מחזור יומי יעד</span><span class="text-blue-600 font-bold">${fmt(state.dailyTarget)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">מחזור חודשי צפוי</span><span class="text-blue-600 font-bold">${fmt(monthly)}</span></div>
+    <div class="sim-row"><span class="text-sm text-gray-500">רווח / הפסד חודשי</span><span class="${profit>=0?'text-green-600':'text-red-600'} font-bold text-lg">${fmt(profit)}</span></div>
+  `;
+
+  // Scenarios table
+  const scenarios = [3000,5000,8000,12000,15000,18000,22000,25000,30000];
+  let html = '';
+  scenarios.forEach(d => {
+    const { revenue, totalExp, profit: p } = calcMonthly(d, state.activeDays);
+    const status = p > 0 ? '<span class="badge-profit">✅</span>' : '<span class="badge-loss">❌</span>';
+    html += `<tr>
+      <td class="font-bold">${fmt(d)}</td>
+      <td>${state.activeDays}</td>
+      <td>${fmt(revenue)}</td>
+      <td class="text-red-500">${fmt(totalExp)}</td>
+      <td class="${p>=0?'text-green-600':'text-red-600'} font-bold">${fmt(p)}</td>
+      <td>${status}</td>
+    </tr>`;
+  });
+  document.getElementById('scenarios-tbody').innerHTML = html;
+
+  renderCostPieChart();
+  renderChannelDonut();
+}
+
+// ===========================
+// FULL RECALC
+// ===========================
 function recalcAll() {
-  updateKPI();
-  updateBEPanel();
-  updateAlerts();
-  updateScenarios('scenarios-body');
-  updateScenarios('sim-scenarios-body');
-  updateSimResults();
-  updateChannelContrib();
-  renderStaffTable();
-  txt('op-total',fmt(calcOpCosts()));
-  doCharts();
+  renderDashboard();
+  renderChannelSummary();
+  updateOpCostTotals();
+  if (charts['profitCurve']) renderProfitCurve();
+  if (charts['costCat']) renderCostCategoryChart();
 }
 
-function onGlobalChange() {
-  // sync simulator sliders when global inputs change
-  ss('s-daily-r',N('g-daily')); ss('s-daily-n',N('g-daily'));
-  ss('s-days-r',N('g-days')); ss('s-days-n',N('g-days'));
-  ss('s-fc-r',N('g-fc')); ss('s-fc-n',N('g-fc'));
-  ss('s-comm-r',N('g-comm')); ss('s-comm-n',N('g-comm'));
-  txt('sd-disp',fmt(N('g-daily')));
-  txt('sdays-disp',N('g-days').toString());
-  txt('sfc-disp',N('g-fc').toFixed(1)+'%');
-  txt('scomm-disp',N('g-comm').toFixed(1)+'%');
-  recalcAll();
-}
-
-// ================================================================
+// ===========================
 // TABS
-// ================================================================
-function showTab(name, el) {
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  $('tab-'+name).classList.add('active');
-  el.classList.add('active');
-  if(name==='costs') renderCostsEditor();
-  if(name==='staff') renderStaffTable();
-  if(name==='suppliers') renderSuppliersTable();
-  if(name==='products') renderProducts();
-  recalcAll();
+// ===========================
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+
+  if (name === 'costs') { renderOpCosts(); renderCostCategoryChart(); }
+  if (name === 'staff') { renderStaff(); }
+  if (name === 'suppliers') { renderSuppliers(); }
+  if (name === 'products') { renderProducts(); }
+  if (name === 'simulator') { runSimulator(); }
+  if (name === 'channels') { recalcChannels(); }
+  if (name === 'dashboard') { renderDashboard(); }
 }
 
-// ================================================================
+// ===========================
 // SAVE / LOAD
-// ================================================================
+// ===========================
 function exportData() {
-  const payload={D,v:{daily:N('g-daily'),days:N('g-days'),fc:N('g-fc'),comm:N('g-comm'),
-    ins:N('r-ins'),pen:N('r-pen'),sev:N('r-sev'),vac:N('r-vac'),sick:N('r-sick'),
-    restPct:N('ch-rest-pct'),restFc:N('ch-rest-fc'),
-    woltPct:N('ch-wolt-pct'),woltFc:N('ch-wolt-fc'),woltComm:N('ch-wolt-comm'),
-    tbisPct:N('ch-10bis-pct'),tbisFc:N('ch-10bis-fc'),tbisComm:N('ch-10bis-comm'),
-    cibPct:N('ch-cibus-pct'),cibFc:N('ch-cibus-fc'),cibComm:N('ch-cibus-comm'),
-    pWolt:N('p-wolt'),p10bis:N('p-10bis'),pCibus:N('p-cibus'),pVat:N('p-vat')}};
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
-  a.download='profitability-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
-}
-function importData(){ $('import-file').click(); }
-function loadFile(e){
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    try {
-      const p=JSON.parse(ev.target.result);
-      if(p.D) Object.assign(D,p.D);
-      if(p.v){const v=p.v;
-        const pairs=[['g-daily','daily'],['g-days','days'],['g-fc','fc'],['g-comm','comm'],
-          ['r-ins','ins'],['r-pen','pen'],['r-sev','sev'],['r-vac','vac'],['r-sick','sick'],
-          ['ch-rest-pct','restPct'],['ch-rest-fc','restFc'],
-          ['ch-wolt-pct','woltPct'],['ch-wolt-fc','woltFc'],['ch-wolt-comm','woltComm'],
-          ['ch-10bis-pct','tbisPct'],['ch-10bis-fc','tbisFc'],['ch-10bis-comm','tbisComm'],
-          ['ch-cibus-pct','cibPct'],['ch-cibus-fc','cibFc'],['ch-cibus-comm','cibComm'],
-          ['p-wolt','pWolt'],['p-10bis','p10bis'],['p-cibus','pCibus'],['p-vat','pVat']];
-        pairs.forEach(([id,k])=>ss(id,v[k]));
-      }
-      renderCostsEditor(); renderStaffTable(); renderSuppliersTable(); renderProducts(); recalcAll();
-    } catch { alert('שגיאה בקריאת הקובץ'); }
-  };
-  r.readAsText(f);
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'profitability-data.json';
+  a.click();
 }
 
-// ================================================================
+function importData() {
+  document.getElementById('import-file').click();
+}
+
+function loadImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      Object.assign(state, data);
+      recalcAll();
+      renderOpCosts();
+      renderStaff();
+      renderSuppliers();
+      renderProducts();
+      alert('נתונים נטענו בהצלחה!');
+    } catch {
+      alert('שגיאה בקריאת הקובץ');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ===========================
 // INIT
-// ================================================================
-document.addEventListener('DOMContentLoaded',()=>{
-  renderCostsEditor();
-  renderStaffTable();
-  renderSuppliersTable();
-  renderProducts();
-  recalcAll();
+// ===========================
+document.addEventListener('DOMContentLoaded', () => {
+  renderDashboard();
+  renderOpCosts();
+  renderStaff();
+  renderChannelSummary();
 });
 </script>
 </body>
