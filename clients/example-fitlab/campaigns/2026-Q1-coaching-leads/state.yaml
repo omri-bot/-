@@ -1,0 +1,22 @@
+campaign_slug: 2026-Q1-coaching-leads
+status: draft
+
+platforms:
+  meta:
+    campaign_id: ""
+    adset_ids: []
+    ad_ids: []
+    uploaded_at: ""
+    approved_by: ""
+  tiktok:
+    campaign_id: ""
+    uploaded_at: ""
+    approved_by: ""
+  linkedin:
+    campaign_id: ""
+    uploaded_at: ""
+    approved_by: ""
+  google_ads:
+    campaign_id: ""
+    uploaded_at: ""
+    approved_by: ""

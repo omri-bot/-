@@ -1,11 +1,35 @@
-<div align="center">
+# מערכת ניהול קמפיינים עם צוות סוכני AI
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+ניהול קמפיינים ב-**Meta, TikTok, LinkedIn ו-Google Ads** עבור כמה לקוחות במקביל,
+מופעל ע"י צוות סוכנים: מנכ"ל, כותב תוכן, מעצב, מנהל קמפיינים ואנליסט.
 
-  <h1>Built with AI Studio</h2>
+## מפת הפרויקט
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+| תיקייה | מה יש בה |
+|---|---|
+| `.claude/agents/` | הסוכנים. סוכן = קובץ אחד. |
+| `policies/` | חוקים שחלים על הכל: סגנון, בטיחות, ציות למדיניות הרשתות, אישורים. |
+| `clients/` | עולם סגור לכל לקוח: מיתוג, הצעות (מוצרים ושירותים), קמפיינים. |
+| `tools/` | קוד פייתון שמבצע פעולות אמיתיות מול הרשתות ומול מודלי AI. |
+| `data/` | לוג ביקורת ו-cache. לא נכנס ל-git. |
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## מצב נוכחי: קריאה + טיוטות
 
-</div>
+המערכת **לא מפעילה קמפיינים חיים**. היא מושכת נתוני ביצועים בחופשיות, ומייצרת
+קמפיינים כטיוטות (`PAUSED`) בלבד. אדם מאשר ומפעיל. ראה `policies/approvals.md`.
+
+## התחלה
+
+```bash
+pip install -e .
+cp .env.example .env      # מלא את המפתחות
+python -m tools.cli --help
+python -m tools.cli due   # לאילו קמפיינים מגיע סבב אופטימיזציה
+```
+
+## פתיחת לקוח חדש
+
+```bash
+cp -r clients/_template clients/<client-slug>
+```
+ואז מלא את `client.yaml` ואת `brand/`. אל תשים טוקנים ב-`clients/` — הם ב-`.env` בלבד.
