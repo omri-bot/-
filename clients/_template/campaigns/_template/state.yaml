@@ -1,0 +1,25 @@
+# מזהי הישויות האמיתיות ברשתות — נכתב רק אחרי אישור אדם והעלאה בפועל.
+# כל עוד הקובץ ריק, הקמפיין קיים רק כטיוטה. ראה policies/approvals.md
+
+campaign_slug: campaign-slug
+status: draft            # draft | live | paused | ended
+
+platforms:
+  meta:
+    campaign_id: ""
+    adset_ids: []
+    ad_ids: []
+    uploaded_at: ""
+    approved_by: ""
+  tiktok:
+    campaign_id: ""
+    uploaded_at: ""
+    approved_by: ""
+  linkedin:
+    campaign_id: ""
+    uploaded_at: ""
+    approved_by: ""
+  google_ads:
+    campaign_id: ""
+    uploaded_at: ""
+    approved_by: ""

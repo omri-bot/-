@@ -1,0 +1,36 @@
+# לקוח דוגמה. קיים כדי להראות את המבנה על תוכן אמיתי — לא לקוח פעיל.
+
+slug: example-fitlab
+name: פיטלאב
+status: active
+market: IL
+currency: ILS
+language: he
+timezone: Asia/Jerusalem
+
+contacts:
+  primary: "רון (דוגמה) — ron@example.com"
+
+accounts:
+  meta:
+    business_id: "000000000000000"
+    ad_account_id: "act_000000000000000"
+    page_id: "000000000000000"
+    pixel_id: "000000000000000"
+  tiktok:
+    advertiser_id: "0000000000000000000"
+  linkedin:
+    account_id: ""
+    organization_id: ""
+  google_ads:
+    customer_id: "000-000-0000"
+
+optimization:
+  cadence: every_3_days
+  day_of_week: sunday
+  min_spend_since_last: 800
+  min_days_since_last: 3
+
+# תחום כושר ובריאות — טעון. ראה brand/compliance-notes.md
+restricted_categories:
+  - health_fitness

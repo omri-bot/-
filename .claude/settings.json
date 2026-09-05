@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m tools.cli check:*)",
+      "Bash(python -m tools.cli due:*)",
+      "Bash(python -m tools.cli clients:*)",
+      "Bash(python -m tools.cli insights:*)",
+      "Bash(python -m pytest:*)",
+      "Read(//home/user/-/**)"
+    ],
+    "ask": [
+      "Bash(python -m tools.cli apply:*)",
+      "Write(//home/user/-/policies/**)",
+      "Write(//home/user/-/clients/*/client.yaml)"
+    ],
+    "deny": [
+      "Read(//home/user/-/.env)"
+    ]
+  }
+}

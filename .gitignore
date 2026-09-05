@@ -1,1 +1,13 @@
-.claude/
+.env
+.claude/settings.local.json
+.claude/worktrees/
+data/runs/*
+!data/runs/.gitkeep
+data/cache/*
+!data/cache/.gitkeep
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store

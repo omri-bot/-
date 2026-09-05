@@ -1,0 +1,38 @@
+# תבנית לקוח. העתק את התיקייה כולה: cp -r clients/_template clients/<slug>
+# אין לשים כאן טוקנים או סודות — הם ב-.env בלבד.
+
+slug: client-slug
+name: שם הלקוח
+status: active            # active | paused | offboarded
+market: IL
+currency: ILS
+language: he
+timezone: Asia/Jerusalem
+
+contacts:
+  primary: "שם — email@example.com"
+
+accounts:                 # מזהי חשבונות פרסום. ריק = לא פעילים ברשת הזו.
+  meta:
+    business_id: ""
+    ad_account_id: ""     # act_XXXXXXXXX
+    page_id: ""
+    pixel_id: ""
+  tiktok:
+    advertiser_id: ""
+  linkedin:
+    account_id: ""
+    organization_id: ""
+  google_ads:
+    customer_id: ""       # XXX-XXX-XXXX
+
+# לולאת האופטימיזציה — ראה policies/optimization-loop.md
+optimization:
+  cadence: weekly              # daily | every_3_days | weekly | biweekly | monthly
+  day_of_week: sunday          # רלוונטי ל-weekly ומעלה
+  min_spend_since_last: 500    # אל תריץ סבב לפני שנצבר מספיק דאטה
+  min_days_since_last: 3       # רצפת זמן, גם אם התקציב נשרף מהר
+
+# קטגוריות מוגבלות שחלות על הלקוח הזה. ריק = אין.
+# ראה policies/compliance.md ו-brand/compliance-notes.md
+restricted_categories: []

@@ -1,0 +1,134 @@
+# הגרסה שהמכונה קוראת של policies/compliance.md ו-safety.md.
+# tools/core/compliance.py טוען את הקובץ הזה. שינוי כאן משנה את האכיפה בפועל.
+#
+# severity: block = הטיוטה לא נכתבת. warn = נכתבת עם דגל, אדם מכריע.
+# platforms: all או רשימה מתוך [meta, tiktok, linkedin, google_ads]
+
+rules:
+  - id: guaranteed_results
+    severity: block
+    platforms: all
+    reference: compliance.md#טענות-ותוכן
+    message: הבטחת תוצאה או החזר השקעה
+    patterns:
+      - "מובטח"
+      - "אנחנו מבטיחים"
+      - "מבטיח(ים)? (לך )?(תוצאות|הצלחה|הכנסה|רווח)"
+      - "100% (הצלחה|הצלחות|מוצלח)"
+      - "החזר השקעה מובטח"
+
+  - id: medical_claims
+    severity: block
+    platforms: all
+    reference: compliance.md#טענות-ותוכן
+    message: טענה רפואית — ריפוי, מניעה או טיפול במחלה
+    patterns:
+      - "מרפא(ת|ים)?\\s"
+      - "ריפוי מלא"
+      - "מחסל את ה(כאב|מחלה|דלקת)"
+      - "מונע (מחלות|סרטן|התקף)"
+      - "ללא תופעות לוואי"
+
+  - id: personal_attribution
+    severity: block
+    platforms: all
+    reference: compliance.md#פנייה-למשתמש
+    message: ייחוס מאפיין אישי למשתמש — הסיבה הנפוצה ביותר לחסימת חשבון
+    patterns:
+      - "(אתה|את) סובל(ת)? מ"
+      - "סובלים מ(כאב|השמנה|חרדה|דיכאון|נשירה)"
+      - "בגלל ה(גיל|משקל|מצב הכלכלי) שלך"
+      - "(אתה|את) (גרוש|גרושה|מובטל|מובטלת|חולה)"
+      - "יש לך בעיה של"
+
+  - id: before_after
+    severity: block
+    platforms: all
+    reference: compliance.md#טענות-ותוכן
+    message: תוכן לפני/אחרי של גוף, עור, שיער או משקל
+    patterns:
+      - "לפני ואחרי"
+      - "before\\s*/?\\s*after"
+      - "התוצאה אחרי \\d+ (ימים|שבועות|חודשים)"
+
+  - id: false_urgency
+    severity: warn
+    platforms: all
+    reference: compliance.md#פנייה-למשתמש
+    message: דחיפות — ודא שהיא נכונה עובדתית, אחרת זו הטעיה
+    patterns:
+      - "נותרו \\d+ (מקומות|יחידות)"
+      - "רק היום"
+      - "אחרון(ה)? להירשם"
+      - "המבצע נגמר בעוד"
+
+  - id: unbacked_superlative
+    severity: warn
+    platforms: all
+    reference: compliance.md#טענות-ותוכן
+    message: טענת עליונות — דורשת מקור מצוטט ובר-אימות
+    patterns:
+      - "הכי טוב ב"
+      - "מספר 1 ב"
+      - "הטוב(ה)? בעולם"
+      - "המוביל(ה)? בישראל"
+
+  - id: fear_and_shame
+    severity: block
+    platforms: all
+    reference: safety.md#אסור-בתוכן-פרסומי
+    message: הפחדה או בושה גופנית
+    patterns:
+      - "לפני שיהיה מאוחר מדי"
+      - "תפסיק להתבייש"
+      - "אל תישאר(י)? מאחור"
+
+  - id: restricted_category
+    severity: warn
+    platforms: all
+    reference: compliance.md#קטגוריות-מוגבלות
+    message: קטגוריה מוגבלת — דורשת בדיקת platforms/ ו-compliance-notes.md ואישור אדם
+    patterns:
+      - "הלוואה"
+      - "אשראי"
+      - "משכנתא"
+      - "דירה למכירה"
+      - "דרושים|משרה פנויה"
+      - "הימור|קזינו"
+      - "אלכוהול|וויסקי"
+      - "קריפטו|ביטקוין"
+
+  - id: linkedin_job_targeting_language
+    severity: block
+    platforms: [linkedin]
+    reference: platforms/linkedin.md#גיוס-ותעסוקה
+    message: מודעת גיוס לא מציינת גיל, מגדר או מצב משפחתי
+    patterns:
+      - "עד גיל \\d+"
+      - "צעיר(ים|ות)? בלבד"
+      - "(בחורים|בחורות) בלבד"
+
+  - id: google_ads_punctuation
+    severity: warn
+    platforms: [google_ads]
+    reference: platforms/google-ads.md#עריכה-וסגנון
+    message: גוגל דוחה כותרות עם סימני קריאה חוזרים או ALL CAPS
+    patterns:
+      - "!!"
+      - "\\?\\?"
+
+# מגבלות אורך לפי שדה. compliance.py בודק אותן על payload מובנה.
+limits:
+  meta:
+    primary_text: 500
+    headline: 40
+    description: 30
+  tiktok:
+    ad_text: 100
+  linkedin:
+    intro_text: 600
+    headline: 70
+  google_ads:
+    headline: 30
+    description: 90
+    path: 15
